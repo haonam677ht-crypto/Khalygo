@@ -31,7 +31,7 @@
         .nav-btn { background: #eee; padding: 10px 2px; border-radius: 8px; font-size: 11px; font-weight: bold; border:none; }
         .nav-btn.active { background: var(--primary); color: white; }
         .call-link { text-decoration: none; color: #28a745; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; }
-        .time-tag { font-size: 11px; color: #888; display: block; margin-bottom: 5px; }
+        .support-box { margin-top: 25px; padding: 15px; background: #e8f5e9; border-radius: 12px; text-align: center; border: 1px solid #28a745; }
     </style>
 </head>
 <body onload="kiemTraPhien()">
@@ -50,10 +50,6 @@
                     <button style="flex:1; font-size:11px;" onclick="dangKy('admin')">ĐĂNG KÝ TÀI XẾ</button>
                 </div>
             </div>
-            <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
-            <a href="tel:0789454369" class="btn-success" style="text-decoration:none; display:flex; align-items:center; justify-content:center; gap:10px;">
-                <i class="fa fa-phone"></i> HỖ TRỢ SẾP TỔNG: 0789.454.369
-            </a>
         </div>
     </div>
 
@@ -68,9 +64,9 @@
                     <div class="xe-item" onclick="setXe('Xe 1 chiều', this)"><img src="https://cdn-icons-png.flaticon.com/512/744/744465.png"><br>1 chiều</div>
                 </div>
                 <div id="sub-baoxe" class="sub-xe-grid hidden">
-                    <button class="sub-xe-btn" onclick="setXe('Bao xe 4 chỗ', this)">XE 4 CHỖ</button>
-                    <button class="sub-xe-btn" onclick="setXe('Bao xe 7 chỗ', this)">XE 7 CHỖ</button>
-                    <button class="sub-xe-btn" onclick="setXe('Bao xe 16 chỗ', this)">XE 16 CHỖ</button>
+                    <button class="sub-xe-btn" onclick="setXe('Bao xe 4 chỗ', this)">4 CHỖ</button>
+                    <button class="sub-xe-btn" onclick="setXe('Bao xe 7 chỗ', this)">7 CHỖ</button>
+                    <button class="sub-xe-btn" onclick="setXe('Bao xe 16 chỗ', this)">16 CHỖ</button>
                 </div>
                 <input type="text" id="u-tu" placeholder="📍 Điểm đón">
                 <input type="text" id="u-den" placeholder="🏁 Điểm đến">
@@ -85,6 +81,15 @@
                 <p style="font-weight:bold; color:var(--primary);">ĐƠN HÀNG ĐÃ DUYỆT GIÁ:</p>
                 <div id="list-don-tx"></div>
             </div>
+
+            <div class="support-box">
+                <p style="margin:0 0 10px 0; font-weight:bold; color:#2e7d32; font-size:13px;">SẾP TỔNG HỖ TRỢ 24/7</p>
+                <div style="display:flex; gap:10px;">
+                    <a href="https://zalo.me/0789454369" target="_blank" style="flex:1; background:#0068ff; color:white; padding:10px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:bold;"><i class="fa-solid fa-comments"></i> ZALO</a>
+                    <a href="tel:0789454369" style="flex:1; background:#28a745; color:white; padding:10px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:bold;"><i class="fa fa-phone"></i> GỌI ĐIỆN</a>
+                </div>
+            </div>
+
             <button onclick="dangXuat()" style="margin-top:20px; background:#666; color:white;">ĐĂNG XUẤT</button>
         </div>
     </div>
@@ -96,7 +101,7 @@
                 <button class="nav-btn" id="t-don" onclick="loadAd('don')">ĐƠN</button>
                 <button class="nav-btn" id="t-khach" onclick="loadAd('khach')">KHÁCH</button>
                 <button class="nav-btn" id="t-tx" onclick="loadAd('tx')">TÀI XẾ</button>
-                <button class="nav-btn" id="t-gopy" onclick="loadAd('gopy')">HỖ TRỢ</button>
+                <button class="nav-btn" id="t-history" onclick="loadAd('history')">LỊCH SỬ</button>
             </div>
             <div id="admin-content"></div>
             <button onclick="dangXuat()" style="margin-top:20px; background:#666; color:white;">THOÁT ADMIN</button>
@@ -116,11 +121,11 @@
         if (d) { 
             curSdt = JSON.parse(d).sdt;
             if(curSdt === SO_SEP) { vaoAdmin(); return; }
-            db.ref('users/' + curSdt).once('value', s => { if(s.val()) hienThi(s.val().vaiTro, s.val().daDuyet); });
+            db.ref('users/' + curSdt).once('value', s => { if(s.val()) hienThi(s.val().vaiTro); });
         }
     }
 
-    function hienThi(role, daDuyet) {
+    function hienThi(role) {
         document.getElementById('scr-login').classList.add('hidden');
         document.getElementById('scr-main').classList.remove('hidden');
         if(role === 'admin') { document.getElementById('view-tx-don').classList.remove('hidden'); loadDonChoTX(); }
@@ -134,19 +139,18 @@
             const d = s.val();
             if(d && d.matKhau === mk) {
                 localStorage.setItem('khaly_user', JSON.stringify({sdt: sdt}));
-                hienThi(d.vaiTro, d.daDuyet);
-            } else alert("Sai mật khẩu rồi sếp!");
+                hienThi(d.vaiTro);
+            } else alert("Thông tin sai sếp ơi!");
         });
     }
 
     function vaoAdmin() { document.getElementById('scr-login').classList.add('hidden'); document.getElementById('scr-admin').classList.remove('hidden'); loadAd('don'); }
 
-    // --- TÍNH NĂNG CHỌN XE ---
     function hienSubXe(el) {
         document.querySelectorAll('.xe-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
         document.getElementById('sub-baoxe').classList.remove('hidden');
-        curXe = ""; // Chờ chọn loại xe bao cụ thể
+        curXe = ""; 
     }
 
     function setXe(l, el) {
@@ -164,10 +168,9 @@
     function guiDon() {
         const tu = document.getElementById('u-tu').value;
         const tg = document.getElementById('u-ngay').value + " " + document.getElementById('u-gio').value;
-        if(!tu || !curXe) return alert("Sếp chọn loại xe và nhập điểm đón nhen!");
-        db.ref('don_cho_duyet').push({
-            khach: curSdt, loai: curXe, tu: tu, den: document.getElementById('u-den').value, tg: tg
-        }).then(() => alert("Đã gửi yêu cầu! Sếp tổng sẽ báo giá ngay."));
+        if(!tu || !curXe) return alert("Sếp nhập đủ tin đặt xe nhen!");
+        db.ref('don_cho_duyet').push({ khach: curSdt, loai: curXe, tu: tu, den: document.getElementById('u-den').value, tg: tg })
+        .then(() => alert("Đã gửi! Đợi sếp chốt giá nhen."));
     }
 
     function loadAd(t) {
@@ -181,40 +184,27 @@
                 s.forEach(c => {
                     const d = c.val();
                     h += `<div class="card">
-                        <span class="time-tag"><i class="fa fa-clock"></i> ${d.tg}</span>
+                        <span style="font-size:11px; color:#888;">${d.tg}</span><br>
                         <b>${d.loai}</b><br>
                         <a href="tel:${d.khach}" class="call-link">📞 Khách: ${d.khach}</a><br>
                         📍 ${d.tu} ➔ ${d.den}<br>
-                        <input type="text" id="gia-${c.key}" placeholder="Nhập giá chốt...">
+                        <input type="text" id="gia-${c.key}" placeholder="Giá sếp chốt (VD: 500k)">
                         <button class="btn-success" onclick="duyetDon('${c.key}')" style="margin-top:10px;">DUYỆT & ĐẨY ĐƠN</button>
                     </div>`;
                 });
-                view.innerHTML = h || "Chưa có đơn mới.";
+                view.innerHTML = h || "Hết đơn mới rồi sếp!";
             });
-        } else if(t === 'gopy') {
-            view.innerHTML = `
-                <div style="text-align:center; padding:20px;">
-                    <p style="font-weight:bold;">LIÊN HỆ & GÓP Ý</p>
-                    <a href="https://zalo.me/0789454369" target="_blank" class="btn-success" style="text-decoration:none; display:block; margin-bottom:10px; background:#0068ff;">
-                        <i class="fa fa-comments"></i> CHÁT ZALO VỚI SẾP TỔNG
-                    </a>
-                    <a href="tel:0789454369" class="btn-main" style="text-decoration:none; display:block;">
-                        <i class="fa fa-phone"></i> GỌI HỖ TRỢ: 0789.454.369
-                    </a>
-                </div>`;
         } else if(t === 'tx') {
             db.ref('users').orderByChild('vaiTro').equalTo('admin').once('value', s => {
-                let h = ""; s.forEach(c => { 
-                    if(c.key !== SO_SEP) h += `<div class="card"><a href="tel:${c.key}" class="call-link">📞 TX: ${c.key}</a> <button class="btn-danger" onclick="db.ref('users/${c.key}').remove()">XÓA</button></div>`; 
-                });
+                let h = ""; s.forEach(c => { if(c.key !== SO_SEP) h += `<div class="card"><a href="tel:${c.key}" class="call-link">📞 TX: ${c.key}</a> <button class="btn-danger" onclick="db.ref('users/${c.key}').remove()">XÓA</button></div>`; });
                 view.innerHTML = h || "Trống";
             });
-        } else {
+        } else if(t === 'khach') {
             db.ref('users').orderByChild('vaiTro').equalTo('khach').once('value', s => {
                 let h = ""; s.forEach(c => { h += `<div class="card"><a href="tel:${c.key}" class="call-link">📞 Khách: ${c.key}</a> <button class="btn-danger" onclick="db.ref('users/${c.key}').remove()">XÓA</button></div>`; });
                 view.innerHTML = h || "Trống";
             });
-        }
+        } else { view.innerHTML = "Mục lịch sử đơn hoàn thành đang cập nhật."; }
     }
 
     function duyetDon(id) {
@@ -222,7 +212,7 @@
         if(!gia) return alert("Nhập giá sếp ơi!");
         db.ref('don_cho_duyet/' + id).once('value', s => {
             const data = s.val(); data.gia = gia;
-            db.ref('don_da_duyet').push(data).then(() => { db.ref('don_cho_duyet/' + id).remove(); alert("Đã chốt giá!"); });
+            db.ref('don_da_duyet').push(data).then(() => { db.ref('don_cho_duyet/' + id).remove(); alert("Xong! Đơn đã tới máy TX."); });
         });
     }
 
@@ -233,21 +223,20 @@
                 const d = c.val();
                 h += `<div class="card" style="border-left-color:green">
                     <b style="color:green; font-size:16px;">GIÁ CHỐT: ${d.gia}</b><br>
-                    <b>Xe: ${d.loai}</b> | <span style="font-size:11px;">${d.tg}</span><br>
-                    <a href="tel:${d.khach}" class="call-link">📞 Gọi khách: ${d.khach}</a><br>
+                    <b>Xe: ${d.loai}</b><br>
+                    <a href="tel:${d.khach}" class="call-link">📞 Khách: ${d.khach}</a><br>
                     📍 ${d.tu} ➔ ${d.den}
                 </div>`;
             });
-            document.getElementById('list-don-tx').innerHTML = h || "Đang chờ sếp duyệt đơn...";
+            document.getElementById('list-don-tx').innerHTML = h || "Đang chờ đơn sếp duyệt...";
         });
     }
 
     function dangKy(role) {
         const sdt = document.getElementById('login-sdt').value, mk = document.getElementById('login-pass').value;
-        db.ref('users/' + sdt).set({ matKhau: mk, vaiTro: role, daDuyet: (role === 'khach') }).then(() => { alert("Đăng ký thành công!"); location.reload(); });
+        db.ref('users/' + sdt).set({ matKhau: mk, vaiTro: role }).then(() => { alert("Đăng ký thành công!"); location.reload(); });
     }
     function dangXuat() { localStorage.removeItem('khaly_user'); location.reload(); }
-    function vaoAdmin() { document.getElementById('scr-login').classList.add('hidden'); document.getElementById('scr-admin').classList.remove('hidden'); loadAd('don'); }
     function openReg() { document.getElementById('reg-box').classList.toggle('hidden'); }
 </script>
 </body>
