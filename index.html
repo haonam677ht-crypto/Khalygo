@@ -3,144 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KhaLy GO - Bảo Mật</title>
+    <title>KhaLy GO - Uy Tín Trên Từng Cây Số</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #d32f2f; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; }
-        .container { width: 100%; max-width: 450px; margin: auto; min-height: 100vh; background: white; }
-        .header-admin { background: var(--primary); color: white; padding: 40px 20px; text-align: center; border-radius: 0 0 40px 40px; margin-bottom: 20px; }
-        .content { padding: 15px; }
-        .admin-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
-        .nav-btn { background: #eee; padding: 10px 5px; border-radius: 8px; font-weight: bold; border:none; font-size: 12px; cursor: pointer; }
-        .nav-btn.active { background: var(--primary); color: white; }
-        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 12px; border-left: 8px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; }
-        .btn-duyet { background: #28a745; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; }
+        :root { --primary: #d32f2f; --secondary: #28a745; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 450px; min-height: 100vh; background: white; box-shadow: 0 0 15px rgba(0,0,0,0.1); position: relative; }
+        .header { background: var(--primary); color: white; padding: 25px 20px; text-align: center; border-radius: 0 0 20px 20px; }
+        .content { padding: 20px; }
+        input, textarea, select { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; font-size: 15px; outline: none; }
+        button { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        .btn-main { background: var(--primary); color: white; }
+        .btn-success { background: var(--secondary); color: white; }
+        .btn-danger { background: #dc3545; color: white; padding: 5px 10px; border-radius: 8px; font-size: 11px; width: auto; }
+        .btn-view { background: #007bff; color: white; padding: 5px 8px; border-radius: 5px; font-size: 10px; text-decoration: none; margin-right: 5px; }
         .hidden { display: none !important; }
+        .slogan { text-align: center; font-size: 13px; color: #d32f2f; margin-top: 15px; font-weight: bold; font-style: italic; }
+        .xe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 15px 0; }
+        .xe-item { border: 2px solid #eee; border-radius: 15px; padding: 10px; text-align: center; cursor: pointer; background: #fff; }
+        .xe-item img { width: 45px; height: 45px; margin-bottom: 5px; }
+        .xe-item.active { border-color: var(--primary); background: #fff5f5; }
+        #box-chon-xe-bao { background: #fdf2f2; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--primary); }
+        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 5px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .admin-nav { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px; margin-bottom: 15px; }
+        .nav-btn { background: #eee; padding: 10px 2px; border-radius: 8px; font-size: 11px; font-weight: bold; border:none; }
+        .nav-btn.active { background: var(--primary); color: white; }
+        .btn-logout { background: #666; color: white; margin-top: 25px; font-size: 12px; padding: 10px; width:100%; }
+        
+        /* Style mới cho Link gọi điện */
+        .call-link { text-decoration: none; color: #333; display: flex; align-items: center; font-weight: bold; }
+        .call-link i { color: #28a745; margin-right: 8px; font-size: 16px; }
     </style>
 </head>
 <body onload="kiemTraPhien()">
 
 <div class="container">
     <div id="scr-login">
-        <div class="header-admin"><h1>KhaLy GO</h1><p>Đăng nhập để tiếp tục</p></div>
+        <div class="header"><h1>KhaLy GO</h1><p>Vận tải Cần Thơ - Hậu Giang</p></div>
         <div class="content">
-            <input type="number" id="login-sdt" placeholder="Số điện thoại">
+            <input type="number" id="login-sdt" placeholder="Số điện thoại (đúng 10 số)">
             <input type="password" id="login-pass" placeholder="Mật khẩu">
-            <button class="btn-main" onclick="xuLyDangNhap()">ĐĂNG NHẬP</button>
+            <button id="btn-submit" class="btn-main" onclick="xuLyDangNhap()">ĐĂNG NHẬP</button>
+            <div id="link-reg" style="text-align:center; margin-top:15px; font-size:14px; text-decoration:underline; cursor:pointer;" onclick="openReg()">Chưa có tài khoản? Đăng ký ngay</div>
+            <div id="reg-box" class="hidden">
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button style="flex:1; font-size:11px; padding:10px; background:#f0f2f5; border-radius:8px;" onclick="dangKy('khach')">ĐĂNG KÝ KHÁCH</button>
+                    <button style="flex:1; font-size:11px; padding:10px; background:#f0f2f5; border-radius:8px;" onclick="dangKy('admin')">ĐĂNG KÝ TÀI XẾ</button>
+                </div>
+            </div>
+            <div class="slogan">KhaLy GO - Uy tín trên từng cây số</div>
+        </div>
+    </div>
+
+    <div id="scr-tx-cho" class="hidden">
+        <div class="header"><h3>HỒ SƠ TÀI XẾ</h3></div>
+        <div class="content">
+            <div style="background:#fff3cd; padding:15px; border-radius:10px; border:1px solid #ffeeba; color:#856404; font-size:14px;">
+                <b>Sếp Tổng thông báo:</b><br>Tài xế phải cập nhật đủ link hình ảnh giấy tờ (Bằng lái, Cà vẹt, Ảnh xe) thì mới thấy được đơn hàng nhen!
+            </div>
+            <input type="text" id="p-banglai" placeholder="Dán link ảnh Bằng lái">
+            <input type="text" id="p-cavet" placeholder="Dán link ảnh Cà vẹt">
+            <input type="text" id="p-anhxe" placeholder="Dán link ảnh Xe">
+            <button class="btn-success" onclick="guiHoSo()">GỬI HỒ SƠ ĐỂ DUYỆT</button>
+            <button class="btn-logout" onclick="dangXuat()">THOÁT</button>
+        </div>
+    </div>
+
+    <div id="scr-main" class="hidden">
+        <div class="header"><h3 id="u-welcome">Chào mừng sếp!</h3></div>
+        <div class="content">
+            <div id="view-khach" class="hidden">
+                <div class="xe-grid">
+                    <div class="xe-item" onclick="setXe('Xe ôm', this)"><img src="https://cdn-icons-png.flaticon.com/512/713/713437.png"><br><b>Xe ôm</b></div>
+                    <div class="xe-item" onclick="toggleBaoXe(this)"><img src="https://cdn-icons-png.flaticon.com/512/3202/3202926.png"><br><b>Bao xe</b></div>
+                    <div class="xe-item" onclick="setXe('Tiện chuyến', this)"><img src="https://cdn-icons-png.flaticon.com/512/1048/1048315.png"><br><b>Tiện chuyến</b></div>
+                    <div class="xe-item" onclick="setXe('Xe 1 chiều', this)"><img src="https://cdn-icons-png.flaticon.com/512/744/744465.png"><br><b>Xe 1 chiều</b></div>
+                </div>
+                <div id="box-chon-xe-bao" class="hidden">
+                    <select id="select-loai-bao" onchange="chonLoaiBao(this.value)">
+                        <option value="">-- Chọn loại xe bao --</option>
+                        <option value="Bao xe 7 chỗ">Bao xe 7 chỗ</option>
+                        <option value="Bao xe 16 chỗ">Bao xe 16 chỗ</option>
+                    </select>
+                </div>
+                <input type="text" id="u-tu" placeholder="📍 Điểm đón">
+                <input type="text" id="u-den" placeholder="🏁 Điểm đến">
+                <textarea id="u-ghi" placeholder="Ghi chú thêm..."></textarea>
+                <button class="btn-success" onclick="guiDon()">GỬI YÊU CẦU ĐẶT XE</button>
+            </div>
+            
+            <div id="view-tx-don" class="hidden">
+                <p style="font-weight:bold; color:var(--primary);">DANH SÁCH KHÁCH ĐẶT XE:</p>
+                <div id="list-don-tx"></div>
+            </div>
+
+            <button class="btn-logout" onclick="dangXuat()">ĐĂNG XUẤT</button>
         </div>
     </div>
 
     <div id="scr-admin" class="hidden">
-        <div class="header-admin"><h2>QUẢN TRỊ KHALY GO</h2></div>
+        <div class="header"><h3>QUẢN TRỊ KHALY GO</h3></div>
         <div class="content">
             <div class="admin-nav">
-                <button class="nav-btn active" id="tab-don" onclick="showTab('don')">ĐƠN</button>
-                <button class="nav-btn" id="tab-khach" onclick="showTab('khach')">KHÁCH</button>
-                <button class="nav-btn" id="tab-tx" onclick="showTab('tx')">TÀI XẾ</button>
-                <button class="nav-btn" id="tab-gopy" onclick="showTab('gopy')">GÓP Ý</button>
+                <button class="nav-btn" id="t-don" onclick="loadAd('don')">ĐƠN</button>
+                <button class="nav-btn" id="t-khach" onclick="loadAd('khach')">KHÁCH</button>
+                <button class="nav-btn" id="t-tx" onclick="loadAd('tx')">TÀI XẾ</button>
+                <button class="nav-btn" id="t-gopy" onclick="loadAd('gopy')">GÓP Ý</button>
             </div>
-            <div id="main-view"></div>
-            <button onclick="dangXuat()" style="width:100%; padding:15px; background:#666; color:white; border:none; border-radius:12px; margin-top:20px;">THOÁT ADMIN</button>
-        </div>
-    </div>
-
-    <div id="scr-user" class="hidden">
-        <div class="header-admin"><h3>KhaLy GO - Xin chào!</h3></div>
-        <div class="content">
-            <p id="user-info" style="text-align:center; font-weight:bold;"></p>
-            <p style="text-align:center;">Bạn không có quyền truy cập Quản trị.</p>
-            <button onclick="dangXuat()" style="width:100%; padding:15px; background:#666; color:white; border:none; border-radius:12px;">ĐĂNG XUẤT</button>
+            <div id="admin-content"></div>
+            <button class="btn-logout" onclick="dangXuat()">THOÁT ADMIN</button>
         </div>
     </div>
 </div>
 
 <script>
+    // --- CẤU HÌNH FIREBASE CỦA SẾP ---
     const firebaseConfig = { databaseURL: "https://khaly-go-23798-default-rtdb.asia-southeast1.firebasedatabase.app" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const SO_SEP = "0789454369"; // CHỈ SỐ NÀY MỚI VÀO ĐƯỢC ADMIN
+    const SO_SEP = "0789454369";
+    let curSdt = "", curRole = "", curXe = "";
 
     function kiemTraPhien() {
         const d = localStorage.getItem('khaly_user');
-        if (d) {
-            const u = JSON.parse(d);
-            if (u.sdt === SO_SEP) vaoAdmin();
-            else vaoUser(u.sdt);
+        if (d) { 
+            const u = JSON.parse(d); curSdt = u.sdt;
+            db.ref('users/' + curSdt).once('value', s => {
+                const data = s.val();
+                hienThi(data.vaiTro, data.daDuyet);
+            });
         }
     }
+
+    function hienThi(v, daDuyet) {
+        document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
+        if(curSdt === SO_SEP) { document.getElementById('scr-admin').classList.remove('hidden'); loadAd('don'); return; }
+        
+        if(v === 'admin') {
+            if(daDuyet) { 
+                document.getElementById('scr-main').classList.remove('hidden'); 
+                document.getElementById('view-tx-don').classList.remove('hidden');
+                loadDonChoTX();
+            } else { document.getElementById('scr-tx-cho').classList.remove('hidden'); }
+        } else { 
+            document.getElementById('scr-main').classList.remove('hidden'); 
+            document.getElementById('view-khach').classList.remove('hidden');
+        }
+    }
+
+    function validatePhone(sdt) { return sdt.length === 10 && sdt.startsWith("0"); }
 
     function xuLyDangNhap() {
-        const sdt = document.getElementById('login-sdt').value;
-        const mk = document.getElementById('login-pass').value;
-        
+        const sdt = document.getElementById('login-sdt').value, mk = document.getElementById('login-pass').value;
+        if(!validatePhone(sdt) && sdt !== SO_SEP) return alert("Sếp nhập đúng 10 số điện thoại nhen!");
         db.ref('users/' + sdt).once('value', s => {
             const d = s.val();
-            if (d && d.matKhau === mk) {
-                localStorage.setItem('khaly_user', JSON.stringify({sdt: sdt}));
-                if (sdt === SO_SEP) vaoAdmin();
-                else vaoUser(sdt);
-            } else alert("Sai số điện thoại hoặc mật khẩu!");
+            if(d && d.matKhau === mk) {
+                curSdt = sdt;
+                localStorage.setItem('khaly_user', JSON.stringify({sdt: sdt, vaiTro: d.vaiTro}));
+                hienThi(d.vaiTro, d.daDuyet);
+            } else alert("Thông tin sai rồi sếp!");
         });
     }
 
-    function vaoAdmin() {
-        document.getElementById('scr-login').classList.add('hidden');
-        document.getElementById('scr-admin').classList.remove('hidden');
-        showTab('don');
+    function dangKy(role) {
+        const sdt = document.getElementById('login-sdt').value, mk = document.getElementById('login-pass').value;
+        if(!validatePhone(sdt)) return alert("Sếp nhập đúng 10 số nhen!");
+        db.ref('users/' + sdt).set({ matKhau: mk, vaiTro: role, daDuyet: (role === 'khach') }).then(() => { alert("Đăng ký thành công!"); location.reload(); });
     }
 
-    function vaoUser(sdt) {
-        document.getElementById('scr-login').classList.add('hidden');
-        document.getElementById('scr-user').classList.remove('hidden');
-        document.getElementById('user-info').innerText = "SĐT: " + sdt;
+    function guiHoSo() {
+        const bl = document.getElementById('p-banglai').value, cv = document.getElementById('p-cavet').value, ax = document.getElementById('p-anhxe').value;
+        if(!bl || !cv || !ax) return alert("Sếp dặn rồi, phải cập nhật đủ link ảnh giấy tờ sếp mới thấy đơn nha!");
+        db.ref('users/' + curSdt).update({ bangLai: bl, caVet: cv, anhXe: ax, choDuyet: true }).then(() => alert("Đã gửi hồ sơ! Đợi sếp duyệt là thấy đơn ngay."));
     }
 
-    function showTab(tab) {
+    // --- Cập nhật: Tài xế nhấn số khách để gọi ---
+    function loadDonChoTX() {
+        db.ref('cho_duyet').on('value', s => {
+            let h = "";
+            s.forEach(c => { 
+                const d = c.val(); 
+                h += `
+                <div class="card" style="display:block; border-left: 5px solid #28a745;">
+                    <b>${d.loai}</b><br>
+                    <a href="tel:${d.khach}" class="call-link"><i class="fa-solid fa-phone"></i> Khách: ${d.khach}</a>
+                    📍 Từ: ${d.tu}<br>
+                    🏁 Đến: ${d.den}
+                </div>`; 
+            });
+            document.getElementById('list-don-tx').innerHTML = h || "Đang chờ khách đặt đơn...";
+        });
+    }
+
+    function xoaTaiKhoan(sdt, loai) {
+        if(sdt === SO_SEP) return alert("Không thể xoá Sếp!");
+        if(confirm("Xoá tài khoản này?")) db.ref('users/' + sdt).remove().then(() => loadAd(loai));
+    }
+
+    function duyetTX(sdt) { db.ref('users/' + sdt).update({ daDuyet: true, choDuyet: false }).then(() => loadAd('tx')); }
+    
+    function setXe(l, el) { curXe = l; document.querySelectorAll('.xe-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); document.getElementById('box-chon-xe-bao').classList.add('hidden'); }
+    function toggleBaoXe(el) { document.querySelectorAll('.xe-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); document.getElementById('box-chon-xe-bao').classList.remove('hidden'); curXe = ""; }
+    function chonLoaiBao(val) { curXe = val; }
+    function guiDon() { if(!curXe || !document.getElementById('u-tu').value) return alert("Nhập đủ thông tin đặt xe sếp ơi!"); db.ref('cho_duyet').push({ khach: curSdt, loai: curXe, tu: document.getElementById('u-tu').value, den: document.getElementById('u-den').value, tg: new Date().toLocaleString() }).then(() => alert("Đã gửi yêu cầu!")); }
+
+    // --- QUẢN TRỊ ADMIN (THÊM TÍNH NĂNG GỌI & GÓP Ý) ---
+    function loadAd(t) {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-' + tab).classList.add('active');
-        const view = document.getElementById('main-view');
+        if(document.getElementById('t-'+t)) document.getElementById('t-'+t).classList.add('active');
+        const view = document.getElementById('admin-content'); view.innerHTML = "Đang tải...";
         
-        if(tab === 'don') {
-            db.ref('don_cho_duyet').on('value', s => {
+        if(t === 'tx') {
+            db.ref('users').orderByChild('vaiTro').equalTo('admin').once('value', s => {
                 let h = "";
                 s.forEach(c => {
-                    const d = c.val();
-                    h += `<div class="card">
-                        <b>${d.loai || 'Bao xe'}</b><br>
-                        <span style="color:green; font-weight:bold;">📞 ${d.khach}</span><br>
-                        <span>📍 ${d.tu} ➔ ${d.den}</span><br>
-                        <input type="text" id="gia-${c.key}" placeholder="Nhập giá chốt...">
-                        <button class="btn-duyet" onclick="duyetDon('${c.key}')">DUYỆT ĐƠN</button>
+                    const d = c.val(); if(c.key === SO_SEP) return;
+                    let info = (d.bangLai && d.caVet) ? `<a href="${d.bangLai}" target="_blank" class="btn-view">Ảnh HS</a>` : "<span style='color:red;'>Hồ sơ trống</span>";
+                    h += `
+                    <div class="card">
+                        <div>
+                            <a href="tel:${c.key}" class="call-link"><i class="fa-solid fa-phone"></i> ${c.key}</a>
+                            ${info}
+                        </div>
+                        <div>
+                            ${d.choDuyet ? `<button class="btn-success" style="padding:5px;font-size:10px;width:auto;" onclick="duyetTX('${c.key}')">DUYỆT</button>` : ""}
+                            <button class="btn-danger" onclick="xoaTaiKhoan('${c.key}', 'tx')">XOÁ</button>
+                        </div>
                     </div>`;
                 });
-                view.innerHTML = h || "Chưa có đơn chờ.";
+                view.innerHTML = h || "Chưa có tài xế";
             });
-        } else {
-            view.innerHTML = "<p style='text-align:center'>Đang tải dữ liệu...</p>";
+        } else if(t === 'khach') {
+            db.ref('users').orderByChild('vaiTro').equalTo('khach').once('value', s => {
+                let h = "";
+                s.forEach(c => { 
+                    h += `
+                    <div class="card">
+                        <a href="tel:${c.key}" class="call-link"><i class="fa-solid fa-phone"></i> ${c.key}</a>
+                        <button class="btn-danger" onclick="xoaTaiKhoan('${c.key}', 'khach')">XOÁ</button>
+                    </div>`; 
+                });
+                view.innerHTML = h || "Trống";
+            });
+        } else if(t === 'don') {
+            db.ref('cho_duyet').on('value', s => {
+                let h = "";
+                s.forEach(c => { 
+                    const d = c.val(); 
+                    h += `
+                    <div class="card" style="display:block;">
+                        <b>${d.loai}</b><br>
+                        <a href="tel:${d.khach}" class="call-link"><i class="fa-solid fa-phone"></i> ${d.khach}</a>
+                        📍 ${d.tu} -> ${d.den}
+                    </div>`; 
+                });
+                view.innerHTML = h || "Trống";
+            });
+        } else if(t === 'gopy') {
+            // --- GIAO DIỆN HÒM THƯ GÓP Ý ---
+            view.innerHTML = `
+                <div style="background:white; padding:15px; border-radius:12px;">
+                    <p style="font-weight:bold; color:var(--primary);">GỬI GÓP Ý VỀ GMAIL SẾP:</p>
+                    <form action="https://formsubmit.co/tranvokhaly2015@gmail.com" method="POST">
+                        <input type="text" name="Tên" placeholder="Tên sếp/khách">
+                        <input type="tel" name="Số điện thoại" placeholder="Số điện thoại" required>
+                        <textarea name="Nội dung" rows="4" placeholder="Nhập nội dung góp ý..." required></textarea>
+                        <input type="hidden" name="_captcha" value="false">
+                        <button type="submit" class="btn-success">GỬI GÓP Ý NGAY</button>
+                    </form>
+                </div>
+            `;
         }
     }
 
-    function duyetDon(id) {
-        const gia = document.getElementById('gia-'+id).value;
-        if(!gia) return alert("Nhập giá đã sếp!");
-        db.ref('don_cho_duyet/' + id).once('value', s => {
-            let data = s.val(); data.gia = gia;
-            db.ref('don_da_duyet').push(data).then(() => {
-                db.ref('don_cho_duyet/' + id).remove();
-                alert("Đã đẩy đơn!");
-            });
-        });
-    }
-
-    function dangXuat() {
-        localStorage.removeItem('khaly_user');
-        location.reload();
-    }
+    function dangXuat() { localStorage.removeItem('khaly_user'); location.reload(); }
+    function openReg() { document.getElementById('reg-box').classList.toggle('hidden'); }
 </script>
 </body>
 </html>
