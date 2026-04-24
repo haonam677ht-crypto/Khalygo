@@ -8,9 +8,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #d32f2f; --secondary: #28a745; --bg: #f8f9fa; }
+        :root { --primary: #d32f2f; --secondary: #28a745; --bg: #f8f9fa; --blue: #007bff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 450px; min-height: 100vh; background: white; box-shadow: 0 0 15px rgba(0,0,0,0.1); position: relative; }
+        .container { width: 100%; max-width: 450px; min-height: 100vh; background: white; box-shadow: 0 0 15px rgba(0,0,0,0.1); position: relative; padding-bottom: 70px; }
         .header { background: var(--primary); color: white; padding: 25px 20px; text-align: center; border-radius: 0 0 20px 20px; }
         .content { padding: 20px; }
         input, textarea, select { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; font-size: 15px; outline: none; }
@@ -19,19 +19,27 @@
         .btn-success { background: var(--secondary); color: white; }
         .btn-danger { background: #dc3545; color: white; padding: 12px; border-radius: 12px; font-size: 14px; width: 100%; margin-top: 5px; }
         .hidden { display: none !important; }
+        
+        /* Giao diện Thông báo & Chi tiết */
+        .card-noti { background: #eff6ff; border-radius: 12px; padding: 15px; margin-bottom: 10px; border-left: 5px solid var(--blue); cursor: pointer; display: flex; align-items: center; gap: 15px; }
+        .card-noti i { font-size: 24px; color: var(--blue); }
+        .detail-box { background: white; border-radius: 15px; padding: 20px; border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .status-badge { background: #e2e8f0; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; color: #475569; margin-bottom: 10px; display: inline-block; }
+
+        /* Menu dưới đáy */
+        .bottom-nav { position: absolute; bottom: 0; left: 0; width: 100%; height: 65px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; }
+        .nav-item { text-align: center; color: #888; font-size: 11px; cursor: pointer; flex: 1; }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 2px; }
+        .nav-item.active { color: var(--blue); }
+
+        /* Các style cũ */
         .xe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 15px 0; }
         .xe-item { border: 2px solid #eee; border-radius: 15px; padding: 10px; text-align: center; cursor: pointer; background: #fff; }
         .xe-item img { width: 45px; height: 45px; margin-bottom: 5px; }
         .xe-item.active { border-color: var(--primary); background: #fff5f5; }
-        .sub-xe-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin: 10px 0; background: #fff5f5; padding: 10px; border-radius: 10px; border: 1px dashed var(--primary); }
-        .sub-xe-btn { padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: white; font-size: 11px; cursor: pointer; font-weight: bold; }
-        .sub-xe-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 5px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 14px; display: block; }
         .admin-nav { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px; margin-bottom: 15px; }
         .nav-btn { background: #eee; padding: 10px 2px; border-radius: 8px; font-size: 11px; font-weight: bold; border:none; }
         .nav-btn.active { background: var(--primary); color: white; }
-        .call-link { text-decoration: none; color: #28a745; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; }
-        .support-box { margin-top: 25px; padding: 15px; background: #e8f5e9; border-radius: 12px; text-align: center; border: 1px solid #28a745; }
     </style>
 </head>
 <body onload="kiemTraPhien()">
@@ -55,42 +63,42 @@
 
     <div id="scr-main" class="hidden">
         <div class="header"><h3 id="u-welcome">KhaLy GO</h3></div>
+        
         <div class="content">
             <div id="view-khach" class="hidden">
                 <div class="xe-grid">
                     <div class="xe-item" onclick="setXe('Xe ôm', this)"><img src="https://cdn-icons-png.flaticon.com/512/713/713437.png"><br>Xe ôm</div>
-                    <div class="xe-item" id="btn-baoxe" onclick="hienSubXe(this)"><img src="https://cdn-icons-png.flaticon.com/512/3202/3202926.png"><br>Bao xe</div>
+                    <div class="xe-item" onclick="hienSubXe(this)"><img src="https://cdn-icons-png.flaticon.com/512/3202/3202926.png"><br>Bao xe</div>
                     <div class="xe-item" onclick="setXe('Tiện chuyến', this)"><img src="https://cdn-icons-png.flaticon.com/512/1048/1048315.png"><br>Tiện chuyến</div>
                     <div class="xe-item" onclick="setXe('Xe 1 chiều', this)"><img src="https://cdn-icons-png.flaticon.com/512/744/744465.png"><br>1 chiều</div>
                 </div>
-                <div id="sub-baoxe" class="sub-xe-grid hidden">
-                    <button class="sub-xe-btn" onclick="setXe('Bao xe 4 chỗ', this)">4 CHỖ</button>
-                    <button class="sub-xe-btn" onclick="setXe('Bao xe 7 chỗ', this)">7 CHỖ</button>
-                    <button class="sub-xe-btn" onclick="setXe('Bao xe 16 chỗ', this)">16 CHỖ</button>
-                </div>
                 <input type="text" id="u-tu" placeholder="📍 Điểm đón">
                 <input type="text" id="u-den" placeholder="🏁 Điểm đến">
-                <div style="display:flex; gap:5px;">
-                    <input type="date" id="u-ngay">
-                    <input type="time" id="u-gio">
-                </div>
                 <button class="btn-success" onclick="guiDon()">GỬI YÊU CẦU ĐẶT XE</button>
             </div>
-            
-            <div id="view-tx-don" class="hidden">
-                <p style="font-weight:bold; color:var(--primary);">ĐƠN HÀNG ĐÃ DUYỆT GIÁ:</p>
-                <div id="list-don-tx"></div>
+
+            <div id="view-tx-noti" class="hidden">
+                <h4 style="margin-top:0;">Thông báo mới</h4>
+                <div id="list-noti-tx"></div>
             </div>
 
-            <div class="support-box">
-                <p style="margin:0 0 10px 0; font-weight:bold; color:#2e7d32; font-size:13px;">SẾP TỔNG HỖ TRỢ 24/7</p>
-                <div style="display:flex; gap:10px;">
-                    <a href="https://zalo.me/0789454369" target="_blank" style="flex:1; background:#0068ff; color:white; padding:10px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:bold;"><i class="fa-solid fa-comments"></i> ZALO</a>
-                    <a href="tel:0789454369" style="flex:1; background:#28a745; color:white; padding:10px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:bold;"><i class="fa fa-phone"></i> GỌI ĐIỆN</a>
+            <div id="view-tx-detail" class="hidden">
+                <button onclick="switchTXTab('noti')" style="width:auto; padding:5px 15px; margin-bottom:15px; background:#eee;"><i class="fa fa-arrow-left"></i> Quay lại</button>
+                <div id="detail-content-tx"></div>
+            </div>
+
+            <div id="view-tx-profile" class="hidden">
+                <div style="text-align:center; padding:40px 0;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" style="width:80px; opacity:0.5;">
+                    <p style="color:#888;">Thông tin hồ sơ đang được cập nhật...</p>
                 </div>
             </div>
+        </div>
 
-            <button onclick="dangXuat()" style="margin-top:20px; background:#666; color:white;">ĐĂNG XUẤT</button>
+        <div id="tx-menu" class="bottom-nav hidden">
+            <div class="nav-item active" id="m-noti" onclick="switchTXTab('noti')"><i class="fa fa-bell"></i>Thông báo</div>
+            <div class="nav-item" id="m-profile" onclick="switchTXTab('profile')"><i class="fa fa-user"></i>Tài khoản</div>
+            <div class="nav-item" onclick="dangXuat()"><i class="fa fa-sign-out-alt"></i>Thoát</div>
         </div>
     </div>
 
@@ -101,7 +109,6 @@
                 <button class="nav-btn" id="t-don" onclick="loadAd('don')">ĐƠN</button>
                 <button class="nav-btn" id="t-khach" onclick="loadAd('khach')">KHÁCH</button>
                 <button class="nav-btn" id="t-tx" onclick="loadAd('tx')">TÀI XẾ</button>
-                <button class="nav-btn" id="t-history" onclick="loadAd('history')">LỊCH SỬ</button>
             </div>
             <div id="admin-content"></div>
             <button onclick="dangXuat()" style="margin-top:20px; background:#666; color:white;">THOÁT ADMIN</button>
@@ -114,7 +121,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const SO_SEP = "0789454369";
-    let curSdt = "", curXe = "";
+    let curSdt = "", curRole = "";
 
     function kiemTraPhien() {
         const d = localStorage.getItem('khaly_user');
@@ -126,53 +133,87 @@
     }
 
     function hienThi(role) {
+        curRole = role;
         document.getElementById('scr-login').classList.add('hidden');
         document.getElementById('scr-main').classList.remove('hidden');
-        if(role === 'admin') { document.getElementById('view-tx-don').classList.remove('hidden'); loadDonChoTX(); }
-        else { document.getElementById('view-khach').classList.remove('hidden'); }
-    }
-
-    function xuLyDangNhap() {
-        const sdt = document.getElementById('login-sdt').value, mk = document.getElementById('login-pass').value;
-        if(sdt === SO_SEP) { localStorage.setItem('khaly_user', JSON.stringify({sdt: sdt})); vaoAdmin(); return; }
-        db.ref('users/' + sdt).once('value', s => {
-            const d = s.val();
-            if(d && d.matKhau === mk) {
-                localStorage.setItem('khaly_user', JSON.stringify({sdt: sdt}));
-                hienThi(d.vaiTro);
-            } else alert("Thông tin sai sếp ơi!");
-        });
-    }
-
-    function vaoAdmin() { document.getElementById('scr-login').classList.add('hidden'); document.getElementById('scr-admin').classList.remove('hidden'); loadAd('don'); }
-
-    function hienSubXe(el) {
-        document.querySelectorAll('.xe-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        document.getElementById('sub-baoxe').classList.remove('hidden');
-        curXe = ""; 
-    }
-
-    function setXe(l, el) {
-        curXe = l;
-        if(!l.includes('Bao xe')) {
-            document.getElementById('sub-baoxe').classList.add('hidden');
-            document.querySelectorAll('.xe-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
+        if(role === 'admin') { 
+            document.getElementById('tx-menu').classList.remove('hidden');
+            switchTXTab('noti');
         } else {
-            document.querySelectorAll('.sub-xe-btn').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
+            document.getElementById('view-khach').classList.remove('hidden');
         }
     }
 
-    function guiDon() {
-        const tu = document.getElementById('u-tu').value;
-        const tg = document.getElementById('u-ngay').value + " " + document.getElementById('u-gio').value;
-        if(!tu || !curXe) return alert("Sếp nhập đủ tin đặt xe nhen!");
-        db.ref('don_cho_duyet').push({ khach: curSdt, loai: curXe, tu: tu, den: document.getElementById('u-den').value, tg: tg })
-        .then(() => alert("Đã gửi! Đợi sếp chốt giá nhen."));
+    function switchTXTab(tab) {
+        // Ẩn tất cả view TX
+        document.getElementById('view-tx-noti').classList.add('hidden');
+        document.getElementById('view-tx-detail').classList.add('hidden');
+        document.getElementById('view-tx-profile').classList.add('hidden');
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+
+        if(tab === 'noti') {
+            document.getElementById('view-tx-noti').classList.remove('hidden');
+            document.getElementById('m-noti').classList.add('active');
+            loadNotiTX();
+        } else if(tab === 'profile') {
+            document.getElementById('view-tx-profile').classList.remove('hidden');
+            document.getElementById('m-profile').classList.add('active');
+        }
     }
 
+    // TÀI XẾ: Tải danh sách thông báo đơn mới
+    function loadNotiTX() {
+        db.ref('don_da_duyet').on('value', s => {
+            let h = "";
+            s.forEach(c => {
+                const d = c.val();
+                h += `
+                <div class="card-noti" onclick="viewDetailTX('${c.key}')">
+                    <i class="fa fa-envelope"></i>
+                    <div>
+                        <b style="color:var(--blue)">Đơn đặt xe mới</b><br>
+                        <small>${d.loai} - Giá: ${d.gia}</small>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('list-noti-tx').innerHTML = h || "<p style='color:#999'>Chưa có thông báo mới.</p>";
+        });
+    }
+
+    // TÀI XẾ: Xem chi tiết đơn khi bấm vào thông báo
+    function viewDetailTX(id) {
+        db.ref('don_da_duyet/' + id).once('value', s => {
+            const d = s.val();
+            if(!d) return;
+            document.getElementById('view-tx-noti').classList.add('hidden');
+            document.getElementById('view-tx-detail').classList.remove('hidden');
+            
+            document.getElementById('detail-content-tx').innerHTML = `
+                <div class="detail-box">
+                    <span class="status-badge">Đang chờ nhận</span>
+                    <h2 style="color:var(--secondary); margin:10px 0;">${d.gia}</h2>
+                    <p><b>Loại xe:</b> ${d.loai}</p>
+                    <p><b>Điểm đi:</b> ${d.tu}</p>
+                    <p><b>Điểm đến:</b> ${d.den}</p>
+                    <p><b>Ngày giờ:</b> ${d.tg || 'Ngay bây giờ'}</p>
+                    <hr border="0" style="border-top:1px solid #eee; margin:20px 0;">
+                    <button class="btn-success" onclick="nhanChuyen('${id}')">NHẬN CHUYẾN</button>
+                </div>
+            `;
+        });
+    }
+
+    function nhanChuyen(id) {
+        if(confirm("Xác nhận nhận chuyến này?")) {
+            // Logic: Ở bản này mình tạm thời chỉ thông báo thành công và xóa đơn khỏi danh sách chờ
+            db.ref('don_da_duyet/' + id).remove().then(() => {
+                alert("Bạn đã nhận chuyến thành công! Hãy liên hệ khách.");
+                switchTXTab('noti');
+            });
+        }
+    }
+
+    // HÀM QUẢN TRỊ (SẾP TỔNG)
     function loadAd(t) {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         if(document.getElementById('t-'+t)) document.getElementById('t-'+t).classList.add('active');
@@ -183,68 +224,56 @@
                 let h = "";
                 s.forEach(c => {
                     const d = c.val();
-                    h += `<div class="card">
-                        <span style="font-size:11px; color:#888;">${d.tg}</span><br>
-                        <b>${d.loai}</b><br>
-                        <a href="tel:${d.khach}" class="call-link">📞 Khách: ${d.khach}</a><br>
+                    h += `<div class="card" style="border-left: 5px solid red; padding:15px; margin-bottom:10px; border-radius:10px; background:#fff;">
+                        <b>${d.loai}</b> | Khách: ${d.khach}<br>
                         📍 ${d.tu} ➔ ${d.den}<br>
-                        <input type="text" id="gia-${c.key}" placeholder="Giá chốt (VD: 500k)">
-                        <button class="btn-success" onclick="duyetDon('${c.key}')">DUYỆT & ĐẨY ĐƠN</button>
-                        <button class="btn-danger" onclick="huyDon('${c.key}')">HỦY ĐƠN NÀY</button>
+                        <input type="text" id="gia-${c.key}" placeholder="Nhập giá chốt...">
+                        <button class="btn-success" onclick="duyetDon('${c.key}')" style="margin-top:10px;">DUYỆT & ĐẨY ĐƠN</button>
+                        <button onclick="huyDon('${c.key}')" style="color:red; background:none; font-size:12px; margin-top:5px; width:100%;">HỦY ĐƠN</button>
                     </div>`;
                 });
-                view.innerHTML = h || "Hết đơn mới rồi sếp!";
+                view.innerHTML = h || "Hết đơn rồi sếp!";
             });
-        } else if(t === 'tx') {
-            db.ref('users').orderByChild('vaiTro').equalTo('admin').once('value', s => {
-                let h = ""; s.forEach(c => { if(c.key !== SO_SEP) h += `<div class="card"><a href="tel:${c.key}" class="call-link">📞 TX: ${c.key}</a> <button class="btn-danger" style="width:auto; margin:0;" onclick="db.ref('users/${c.key}').remove()">XÓA</button></div>`; });
-                view.innerHTML = h || "Trống";
-            });
-        } else if(t === 'khach') {
-            db.ref('users').orderByChild('vaiTro').equalTo('khach').once('value', s => {
-                let h = ""; s.forEach(c => { h += `<div class="card"><a href="tel:${c.key}" class="call-link">📞 Khách: ${c.key}</a> <button class="btn-danger" style="width:auto; margin:0;" onclick="db.ref('users/${c.key}').remove()">XÓA</button></div>`; });
-                view.innerHTML = h || "Trống";
-            });
-        } else { view.innerHTML = "Lịch sử đơn hoàn thành đang cập nhật."; }
+        }
     }
 
     function duyetDon(id) {
         const gia = document.getElementById('gia-'+id).value;
-        if(!gia) return alert("Nhập giá sếp ơi!");
+        if(!gia) return alert("Sếp chưa nhập giá!");
         db.ref('don_cho_duyet/' + id).once('value', s => {
             const data = s.val(); data.gia = gia;
-            db.ref('don_da_duyet').push(data).then(() => { db.ref('don_cho_duyet/' + id).remove(); alert("Xong! Đã đẩy đơn."); });
-        });
-    }
-
-    function huyDon(id) {
-        if(confirm("Sếp muốn xóa đơn này đúng không?")) {
-            db.ref('don_cho_duyet/' + id).remove().then(() => alert("Đã xóa đơn!"));
-        }
-    }
-
-    function loadDonChoTX() {
-        db.ref('don_da_duyet').on('value', s => {
-            let h = "";
-            s.forEach(c => {
-                const d = c.val();
-                h += `<div class="card" style="border-left-color:green">
-                    <b style="color:green; font-size:16px;">GIÁ CHỐT: ${d.gia}</b><br>
-                    <b>Xe: ${d.loai}</b><br>
-                    <a href="tel:${d.khach}" class="call-link">📞 Khách: ${d.khach}</a><br>
-                    📍 ${d.tu} ➔ ${d.den}
-                </div>`;
+            db.ref('don_da_duyet').push(data).then(() => {
+                db.ref('don_cho_duyet/' + id).remove();
+                alert("Đã đẩy đơn sang thông báo Tài xế!");
             });
-            document.getElementById('list-don-tx').innerHTML = h || "Đang chờ đơn sếp duyệt...";
         });
     }
 
+    // CÁC HÀM PHỤ
+    function xuLyDangNhap() {
+        const sdt = document.getElementById('login-sdt').value, mk = document.getElementById('login-pass').value;
+        if(sdt === SO_SEP) { localStorage.setItem('khaly_user', JSON.stringify({sdt: sdt})); vaoAdmin(); return; }
+        db.ref('users/' + sdt).once('value', s => {
+            const d = s.val();
+            if(d && d.matKhau === mk) {
+                localStorage.setItem('khaly_user', JSON.stringify({sdt: sdt}));
+                hienThi(d.vaiTro);
+            } else alert("Sai thông tin sếp ơi!");
+        });
+    }
+    function vaoAdmin() { document.getElementById('scr-login').classList.add('hidden'); document.getElementById('scr-admin').classList.remove('hidden'); loadAd('don'); }
+    function dangXuat() { localStorage.removeItem('khaly_user'); location.reload(); }
+    function guiDon() {
+        const tu = document.getElementById('u-tu').value;
+        if(!tu) return alert("Nhập điểm đón sếp ơi!");
+        db.ref('don_cho_duyet').push({ khach: curSdt, loai: 'Xe ôm', tu: tu, den: document.getElementById('u-den').value })
+        .then(() => alert("Đã gửi đơn chờ sếp duyệt!"));
+    }
     function dangKy(role) {
         const sdt = document.getElementById('login-sdt').value, mk = document.getElementById('login-pass').value;
-        db.ref('users/' + sdt).set({ matKhau: mk, vaiTro: role }).then(() => { alert("Đăng ký thành công!"); location.reload(); });
+        db.ref('users/' + sdt).set({ matKhau: mk, vaiTro: role }).then(() => { alert("Đăng ký xong!"); location.reload(); });
     }
-    function dangXuat() { localStorage.removeItem('khaly_user'); location.reload(); }
-    function openReg() { document.getElementById('reg-box').classList.toggle('hidden'); }
+    function setXe(l, el) { curXe = l; document.querySelectorAll('.xe-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); }
 </script>
 </body>
 </html>
