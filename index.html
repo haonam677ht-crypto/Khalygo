@@ -8,171 +8,90 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #d32f2f; --dark: #1a1a1a; --blue: #1a73e8; --green: #28a745; --gray: #f4f7f6; }
-        html, body { overscroll-behavior-y: contain; overflow: hidden; height: 100%; margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--gray); }
-        .container { width: 100%; max-width: 450px; height: 100%; margin: auto; background: white; display: flex; flex-direction: column; position: relative; }
+        :root { --primary: #d32f2f; --blue: #1a73e8; --green: #28a745; --gray: #f4f7f6; }
+        html, body { overscroll-behavior-y: contain; overflow: hidden; height: 100%; margin: 0; font-family: 'Segoe UI', sans-serif; background: #fff; }
+        .container { width: 100%; max-width: 450px; height: 100%; margin: auto; display: flex; flex-direction: column; position: relative; }
         
-        /* 1. Header duy nhất - Chống chồng logo */
-        .header-top { background: var(--dark); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; font-weight: bold; font-size: 18px; z-index: 100; }
-        .logo-box { width: 35px; height: 35px; border-radius: 4px; overflow: hidden; background: #000; }
-        .sub-header { background: #2c2c2c; color: #fff; padding: 10px 20px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #444; }
+        /* BỎ PHẦN ĐEN - THAY BẰNG HEADER NHỎ GỌN HOẶC ẨN LUÔN */
+        .main-header { padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; background: #fff; border-bottom: 1px solid #eee; }
+        .logo-small { width: 40px; height: 40px; border-radius: 8px; }
 
-        /* 2. Form & UI */
         .content { padding: 15px; flex: 1; overflow-y: auto; }
-        .red-banner { background: var(--primary); padding: 30px 20px; color: white; text-align: center; border-radius: 0 0 30px 30px; margin-bottom: 20px; }
-        input, select, textarea { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; font-size: 15px; outline: none; }
+        .red-banner { background: var(--primary); padding: 40px 20px; color: white; text-align: center; border-radius: 0 0 40px 40px; margin-bottom: 25px; }
+        .red-banner h1 { margin: 0; font-size: 45px; font-weight: 800; letter-spacing: 2px; }
+
+        input, select { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; outline: none; background: var(--gray); }
+        button { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .btn-red { background: var(--primary); color: white; text-transform: uppercase; }
+        .btn-logout { background: #eee; color: #666; width: auto; padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+
+        .card { background: white; border-radius: 16px; padding: 18px; margin-bottom: 15px; border: 1px solid #eee; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .grid-services { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .service-item { background: #fff; border: 1px solid #f0f0f0; padding: 20px; border-radius: 16px; text-align: center; }
         
-        button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-red { background: var(--primary); color: white; }
-        .btn-blue { background: var(--blue); color: white; }
-        .btn-green { background: var(--green); color: white; }
-        .btn-outline { background: none; border: 1px solid #ccc; color: #666; font-size: 12px; padding: 5px 10px; width: auto; }
-
-        /* 3. Cards */
-        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 12px; border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .grid-services { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
-        .service-item { background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; }
-        .service-item i { font-size: 24px; color: var(--primary); margin-bottom: 8px; }
-
         .hidden { display: none !important; }
-        .bottom-nav { height: 70px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; }
-        .nav-item { text-align: center; color: #999; font-size: 11px; flex: 1; cursor: pointer; }
+        .bottom-nav { height: 75px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { text-align: center; color: #bbb; font-size: 11px; flex: 1; }
         .nav-item.active { color: var(--blue); }
     </style>
 </head>
 <body onload="initApp()">
 
 <div class="container">
-    <div class="header-top">
-        <span>KhaLy GO</span>
-        <div class="logo-box"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6A6B7Nn-G-T7T1N3l3o8GqX7z6r6O7X-zWg&s" width="100%"></div>
-    </div>
-
     <div id="scr-auth" class="hidden">
-        <div class="red-banner"><h1>KLG</h1><p>Hệ thống vận tải 4.0</p></div>
+        <div class="red-banner">
+            <h1>KLG</h1>
+            <p>Hệ thống vận tải 4.0</p>
+        </div>
         <div class="content">
             <div id="box-login">
-                <input type="number" id="l-sdt" placeholder="Số điện thoại (10 số)" oninput="if(this.value.length > 10) this.value = this.value.slice(0, 10)">
+                <input type="number" id="l-sdt" placeholder="Số điện thoại (10 số)">
                 <input type="password" id="l-pass" placeholder="Mật khẩu">
                 <button class="btn-red" onclick="handleLogin()">ĐĂNG NHẬP</button>
-                <p onclick="toggleAuth(true)" style="text-align:center; color:var(--blue); margin-top:20px; cursor:pointer;">Chưa có tài khoản? Đăng ký mới</p>
-            </div>
-            <div id="box-reg" class="hidden">
-                <input type="number" id="r-sdt" placeholder="SĐT đăng ký">
-                <input type="password" id="r-pass" placeholder="Mật khẩu">
-                <div style="display:flex; gap:10px; margin:10px 0;">
-                    <label><input type="radio" name="role" value="kh" checked> Khách hàng</label>
-                    <label><input type="radio" name="role" value="tx"> Tài xế</label>
-                </div>
-                <button class="btn-red" onclick="handleRegister()">TẠO TÀI KHOẢN</button>
-                <p onclick="toggleAuth(false)" style="text-align:center; margin-top:15px; cursor:pointer;">Đã có tài khoản? Đăng nhập</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="scr-kh" class="hidden" style="flex:1; display:flex; flex-direction:column;">
-        <div class="sub-header"><span>XIN CHÀO KHÁCH HÀNG</span><button class="btn-outline" onclick="logout()">ĐĂNG XUẤT</button></div>
-        <div class="content">
-            <p style="font-weight:bold;">CHỌN DỊCH VỤ:</p>
-            <div class="grid-services">
-                <div class="service-item" onclick="openOrder('Xe ôm')"><i class="fa fa-motorcycle"></i><br>Xe ôm</div>
-                <div class="service-item" onclick="openOrder('Xe bao')"><i class="fa fa-car-side"></i><br>Xe bao</div>
-                <div class="service-item" onclick="openOrder('Tiện chuyến')"><i class="fa fa-users"></i><br>Tiện chuyến</div>
-                <div class="service-item" onclick="openOrder('Xe 1 chiều')"><i class="fa fa-road"></i><br>Xe 1 chiều</div>
-                <div class="service-item" onclick="window.location.href='tel:0789454369'"><i class="fa fa-headset"></i><br>Hotline</div>
-                <div class="service-item" onclick="window.location.href='https://zalo.me/0789454369'"><i class="fab fa-whatsapp"></i><br>Zalo Admin</div>
-            </div>
-            <div id="kh-order-form" class="card hidden" style="margin-top:20px;">
-                <h3 id="order-title"></h3>
-                <input type="text" id="kh-tu" placeholder="📍 Điểm đón">
-                <input type="text" id="kh-den" placeholder="🏁 Điểm đến">
-                <div style="display:flex; gap:5px;"><input type="date" id="kh-ngay"><input type="time" id="kh-gio"></div>
-                <button class="btn-red" onclick="createOrder()">TẠO ĐƠN NGAY</button>
-            </div>
-            <hr>
-            <p style="font-weight:bold;">ĐƠN HÀNG CỦA TÔI</p>
-            <div id="kh-my-orders"></div>
-        </div>
-    </div>
-
-    <div id="scr-tx" class="hidden" style="flex:1; display:flex; flex-direction:column;">
-        <div class="sub-header"><span>ĐỐI TÁC TÀI XẾ</span><button class="btn-outline" onclick="logout()">ĐĂNG XUẤT</button></div>
-        <div class="content">
-            <div id="tx-onboarding" class="card">
-                <p style="font-weight:bold; color:red;">CẬP NHẬT HỒ SƠ LÁI XE</p>
-                <label>Ảnh Bằng lái & Cà vẹt:</label>
-                <input type="file" accept="image/*" multiple>
-                <button class="btn-blue" onclick="alert('Đã gửi hồ sơ. Chờ Admin duyệt sếp nhé!')">GỬI ADMIN DUYỆT</button>
+                <p onclick="toggleAuth(true)" style="text-align:center; color:var(--blue); margin-top:25px; cursor:pointer; font-weight:500;">Chưa có tài khoản? Đăng ký ngay</p>
             </div>
             
-            <div id="tx-main" class="hidden">
-                <div class="card" style="background:#e3f2fd;">Số dư ví: <b id="tx-wallet" style="color:var(--blue); font-size:18px;">0K</b></div>
-                <div id="tx-tab-orders">
-                    <p style="font-weight:bold;">ĐƠN HÀNG ĐANG CHỜ</p>
-                    <div id="tx-list-new"></div>
-                </div>
+            <div id="box-reg" class="hidden">
+                <p style="text-align:center; font-weight:bold; margin-bottom:15px;">ĐĂNG KÝ THÀNH VIÊN</p>
+                <input type="number" id="r-sdt" placeholder="SĐT mới">
+                <input type="password" id="r-pass" placeholder="Mật khẩu">
+                <select id="r-role">
+                    <option value="kh">Khách hàng</option>
+                    <option value="tx">Tài xế</option>
+                </select>
+                <button class="btn-red" onclick="handleRegister()">TẠO TÀI KHOẢN</button>
+                <p onclick="toggleAuth(false)" style="text-align:center; margin-top:20px; cursor:pointer;">Quay lại đăng nhập</p>
             </div>
-        </div>
-        <div class="bottom-nav">
-            <div class="nav-item active"><i class="fa fa-list"></i><br>Đơn hàng</div>
-            <div class="nav-item" onclick="window.location.href='https://zalo.me/0789454369'"><i class="fa fa-wallet"></i><br>Nạp tiền</div>
         </div>
     </div>
 
-    <div id="scr-ad" class="hidden" style="flex:1; display:flex; flex-direction:column;">
-        <div class="sub-header"><span>QUẢN TRỊ VIÊN</span><button class="btn-outline" onclick="logout()">ĐĂNG XUẤT</button></div>
-        <div class="content">
-            <div style="display:flex; gap:5px; margin-bottom:15px;">
-                <button class="btn-outline" onclick="switchAdTab('don')">Đơn hàng</button>
-                <button class="btn-outline" onclick="switchAdTab('tx')">Tài xế</button>
-                <button class="btn-outline" onclick="switchAdTab('them')">Tạo đơn hộ</button>
-            </div>
-            <div id="ad-tab-don">
-                <p style="font-weight:bold;">ĐƠN CHỜ BÁO GIÁ / DUYỆT</p>
-                <div id="ad-list-pending"></div>
-            </div>
-            <div id="ad-tab-them" class="hidden">
-                <input type="number" id="ad-sdt" placeholder="SĐT Khách">
-                <input type="text" id="ad-tu" placeholder="📍 Điểm đi">
-                <input type="text" id="ad-den" placeholder="🏁 Điểm đến">
-                <input type="number" id="ad-gia" placeholder="Giá tiền (K)">
-                <button class="btn-red" onclick="adCreateOrder()">PHÁT ĐƠN HỘ</button>
-            </div>
-        </div>
+    <div id="app-header" class="main-header hidden">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6A6B7Nn-G-T7T1N3l3o8GqX7z6r6O7X-zWg&s" class="logo-small">
+        <span id="header-title" style="font-weight:bold; color:var(--primary);">KhaLy GO</span>
+        <button class="btn-logout" onclick="logout()">Thoát</button>
     </div>
+
+    <div id="main-content" style="flex:1; display:flex; flex-direction:column;">
+        </div>
 </div>
 
 <script>
-    // Cấu hình Firebase của sếp
+    // Cấu hình Firebase
     const firebaseConfig = { databaseURL: "https://khaly-go-23798-default-rtdb.asia-southeast1.firebasedatabase.app" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let curUser = null;
 
     function initApp() {
-        const saved = localStorage.getItem('klg_session');
-        if(saved) {
-            curUser = JSON.parse(saved);
-            showInterface(curUser.role);
+        const session = localStorage.getItem('klg_session');
+        if(session) {
+            const user = JSON.parse(session);
+            document.getElementById('app-header').classList.remove('hidden');
+            // Logic hiển thị theo vai trò (Admin/Khách/TX)
         } else {
             document.getElementById('scr-auth').classList.remove('hidden');
         }
     }
 
-    function showInterface(role) {
-        document.getElementById('scr-auth').classList.add('hidden');
-        if(role === 'admin') document.getElementById('scr-ad').classList.remove('hidden');
-        else if(role === 'tx') {
-            document.getElementById('scr-tx').classList.remove('hidden');
-            loadTxData();
-        }
-        else {
-            document.getElementById('scr-kh').classList.remove('hidden');
-            loadKhData();
-        }
-    }
-
-    // AUTH LOGIC
     function handleLogin() {
         const s = document.getElementById('l-sdt').value, p = document.getElementById('l-pass').value;
         if(s === "0789454369" && p === "19861990LyVinh@") {
@@ -181,146 +100,20 @@
         db.ref('users/' + s).once('value', ss => {
             const u = ss.val();
             if(u && u.pass === p) saveSession(s, u.role);
-            else alert("Sai thông tin sếp ơi!");
+            else alert("Sai thông tin đăng nhập!");
         });
     }
 
     function saveSession(s, r) {
-        const data = { sdt: s, role: r };
-        localStorage.setItem('klg_session', JSON.stringify(data));
+        localStorage.setItem('klg_session', JSON.stringify({sdt:s, role:r}));
         location.reload();
     }
 
     function logout() { localStorage.clear(); location.reload(); }
-
-    function handleRegister() {
-        const s = document.getElementById('r-sdt').value, p = document.getElementById('r-pass').value, 
-              r = document.querySelector('input[name="role"]:checked').value;
-        if(s.length !== 10) return alert("SĐT phải đúng 10 số!");
-        db.ref('users/' + s).set({ pass: p, role: r, soDu: 0, status: 'new' }).then(() => {
-            alert("Đăng ký xong! Mời sếp đăng nhập."); location.reload();
-        });
-    }
-
+    
     function toggleAuth(isReg) {
         document.getElementById('box-login').classList.toggle('hidden', isReg);
         document.getElementById('box-reg').classList.toggle('hidden', !isReg);
-    }
-
-    // CUSTOMER LOGIC
-    let selectedService = "";
-    function openOrder(sv) {
-        selectedService = sv;
-        document.getElementById('order-title').innerText = "Đặt xe: " + sv;
-        document.getElementById('kh-order-form').classList.remove('hidden');
-    }
-
-    function createOrder() {
-        const tu = document.getElementById('kh-tu').value, den = document.getElementById('kh-den').value;
-        if(!tu || !den) return alert("Nhập đủ điểm đi/đến sếp nhé!");
-        db.ref('orders').push({
-            khach: curUser.sdt, tu, den, service: selectedService,
-            ngay: document.getElementById('kh-ngay').value, gio: document.getElementById('kh-gio').value,
-            status: 'pending_price', gia: 0
-        });
-        alert("Đã gửi yêu cầu. Chờ Admin báo giá!");
-        document.getElementById('kh-order-form').classList.add('hidden');
-    }
-
-    function loadKhData() {
-        db.ref('orders').orderByChild('khach').equalTo(curUser.sdt).on('value', ss => {
-            let h = "";
-            ss.forEach(child => {
-                const d = child.val();
-                let statusText = d.status === 'pending_price' ? "⏳ Chờ báo giá" : `💰 Giá: ${d.gia}K`;
-                h += `<div class="card">
-                    <b>${d.service}</b> | ${statusText}<br>
-                    <small>📍 ${d.tu} -> 🏁 ${d.den}</small>
-                    ${d.status === 'admin_priced' ? `<button class="btn-green" onclick="khConfirm('${child.key}')">ĐỒNG Ý ĐI</button>` : ''}
-                </div>`;
-            });
-            document.getElementById('kh-my-orders').innerHTML = h || "Chưa có chuyến nào.";
-        });
-    }
-
-    function khConfirm(id) {
-        db.ref('orders/' + id).update({ status: 'ready' });
-        alert("Đã chốt đơn! Hệ thống đang tìm tài xế.");
-    }
-
-    // DRIVER LOGIC
-    function loadTxData() {
-        db.ref('users/' + curUser.sdt).on('value', ss => {
-            const u = ss.val();
-            document.getElementById('tx-wallet').innerText = (u.soDu || 0) + "K";
-            if(u.status === 'active') {
-                document.getElementById('tx-onboarding').classList.add('hidden');
-                document.getElementById('tx-main').classList.remove('hidden');
-                loadAvailableOrders(u.soDu || 0);
-            }
-        });
-    }
-
-    function loadAvailableOrders(balance) {
-        db.ref('orders').orderByChild('status').equalTo('pushed').on('value', ss => {
-            let h = "";
-            ss.forEach(child => {
-                const d = child.val();
-                const phi = Math.round(d.gia * 0.2);
-                h += `<div class="card">
-                    <b style="color:red">${d.gia}K</b> (Phí: ${phi}K)<br>
-                    📍 ${d.tu} -> 🏁 ${d.den}
-                    <button class="btn-blue" onclick="txPick('${child.key}', ${phi}, ${balance})">NHẬN ĐƠN</button>
-                </div>`;
-            });
-            document.getElementById('tx-list-new').innerHTML = h || "Đang quét đơn mới...";
-        });
-    }
-
-    function txPick(id, phi, balance) {
-        if(balance < phi) return alert("Số dư không đủ để trừ phí sàn 20%!");
-        if(confirm(`Trừ ${phi}K phí nhận đơn?`)) {
-            db.ref('users/' + curUser.sdt).update({ soDu: balance - phi });
-            db.ref('orders/' + id).update({ status: 'taken', tx: curUser.sdt });
-            alert("Nhận đơn thành công! Kiểm tra lịch trình để gọi khách.");
-        }
-    }
-
-    // ADMIN LOGIC
-    function switchAdTab(t) {
-        document.getElementById('ad-tab-don').classList.toggle('hidden', t !== 'don');
-        document.getElementById('ad-tab-them').classList.toggle('hidden', t !== 'them');
-    }
-
-    db.ref('orders').on('value', ss => {
-        let h = "";
-        ss.forEach(child => {
-            const d = child.val();
-            if(d.status === 'pending_price') {
-                h += `<div class="card">
-                    <b>Khách: ${d.khach}</b> (${d.service})<br>
-                    📍 ${d.tu} -> ${d.den}<br>
-                    <input type="number" id="p-${child.key}" placeholder="Nhập giá (K)">
-                    <button onclick="adPrice('${child.key}')">GỬI GIÁ</button>
-                </div>`;
-            } else if(d.status === 'ready') {
-                h += `<div class="card" style="border:2px solid gold">
-                    <b>ĐƠN ĐÃ CHỐT - GIÁ ${d.gia}K</b><br>
-                    <button class="btn-blue" onclick="adPush('${child.key}')">ĐẨY ĐƠN CHO TẤT CẢ TX</button>
-                </div>`;
-            }
-        });
-        document.getElementById('ad-list-pending').innerHTML = h || "Không có đơn chờ.";
-    });
-
-    function adPrice(id) {
-        const p = document.getElementById('p-' + id).value;
-        db.ref('orders/' + id).update({ gia: p, status: 'admin_priced' });
-    }
-
-    function adPush(id) {
-        db.ref('orders/' + id).update({ status: 'pushed' });
-        alert("Đơn đã hiện lên máy tài xế!");
     }
 </script>
 </body>
