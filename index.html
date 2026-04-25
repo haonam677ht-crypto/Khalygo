@@ -2,242 +2,135 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KLG - Hệ Thống Vận Tải</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Đặt Xe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --primary: #d32f2f; --secondary: #28a745; --bg: #f4f7f6; --blue: #1a73e8; --dark: #1a1a1a; }
-        html, body { overscroll-behavior-y: contain; overflow: hidden; height: 100%; margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); }
-        .container { width: 100%; max-width: 450px; height: 100%; margin: auto; background: white; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-        
-        /* Header đen chuẩn thương hiệu */
-        .header-top { background: var(--dark); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; font-weight: bold; font-size: 18px; }
-        .logo-box { width: 35px; height: 35px; border-radius: 4px; overflow: hidden; background: #000; }
-
-        .red-banner { background: var(--primary); padding: 40px 20px; color: white; text-align: center; border-radius: 0 0 35px 35px; margin-bottom: 30px; }
-        .red-banner h1 { margin: 0; font-size: 42px; letter-spacing: 2px; }
-
-        .content { padding: 15px; flex: 1; overflow-y: auto; }
-        
-        /* Input & Buttons */
-        input, select { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; font-size: 16px; outline: none; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; }
-        .btn-red { background: var(--primary); color: white; text-transform: uppercase; }
-        .btn-nhan { background: var(--secondary); color: white; }
-        .btn-blue { background: var(--blue); color: white; }
-
-        /* Card đơn hàng */
-        .card-don { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .gia-don { color: var(--primary); font-size: 22px; font-weight: bold; }
-        .phi-tag { font-size: 12px; color: #666; background: #fff3e0; padding: 4px 8px; border-radius: 5px; display: inline-block; margin: 5px 0; }
-        
-        .wallet-bar { background: #E3F2FD; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .hidden { display: none !important; }
-        
-        /* Nav */
-        .bottom-nav { height: 75px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; }
-        .nav-item { text-align: center; color: #999; font-size: 12px; flex: 1; cursor: pointer; }
-        .nav-item.active { color: var(--blue); }
+        .page { display: none; }
+        .active { display: block; }
     </style>
 </head>
-<body onload="kiemTraPhien()">
+<body class="bg-gray-100 font-sans">
 
-<div class="container">
-    <div class="header-top">
-        <span>KhaLy GO</span>
-        <div class="logo-box"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6A6B7Nn-G-T7T1N3l3o8GqX7z6r6O7X-zWg&s" width="100%"></div>
-    </div>
-
-    <div id="scr-auth">
-        <div class="red-banner"><h1>KLG</h1><p>Hệ thống vận tải 4.0</p></div>
-        <div class="content">
-            <div id="box-login">
-                <input type="number" id="l-sdt" placeholder="Số điện thoại">
-                <input type="password" id="l-pass" placeholder="Mật khẩu">
-                <button class="btn-red" onclick="xuLyLogin()">VÀO HỆ THỐNG</button>
-                <a onclick="showReg()" style="display:block; text-align:center; margin-top:20px; color:var(--blue); cursor:pointer; font-size:14px;">Chưa có tài khoản? Đăng ký ngay</a>
+    <div id="login-page" class="page active p-6">
+        <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
+            <h2 class="text-2xl font-bold mb-6 text-center text-blue-600">ĐĂNG NHẬP / ĐĂNG KÝ</h2>
+            <input id="phone" type="number" placeholder="Số điện thoại (10 số)" class="w-full border p-3 mb-4 rounded">
+            <input id="pass" type="password" placeholder="Mật khẩu" class="w-full border p-3 mb-4 rounded">
+            <div class="flex justify-around mb-6">
+                <label><input type="radio" name="role" value="khach" checked> Khách</label>
+                <label><input type="radio" name="role" value="taixe"> Tài xế</label>
+                <label><input type="radio" name="role" value="admin"> Admin</label>
             </div>
-
-            <div id="box-reg" class="hidden">
-                <p style="text-align:center; font-weight:bold;">ĐĂNG KÝ THÀNH VIÊN</p>
-                <input type="number" id="r-sdt" placeholder="Số điện thoại mới">
-                <input type="password" id="r-pass" placeholder="Mật khẩu mới">
-                <select id="r-role">
-                    <option value="tx">Tôi là Tài xế</option>
-                    <option value="kh">Tôi là Khách hàng</option>
-                </select>
-                <button class="btn-red" onclick="handleRegister()">XÁC NHẬN ĐĂNG KÝ</button>
-                <a onclick="location.reload()" style="display:block; text-align:center; margin-top:20px; color:var(--blue); cursor:pointer;">Quay lại Đăng nhập</a>
-            </div>
+            <button onclick="login()" class="w-full bg-blue-500 text-white p-3 rounded font-bold mb-2">ĐĂNG NHẬP</button>
+            <button onclick="alert('Đăng ký thành công!')" class="w-full bg-gray-200 p-3 rounded">ĐĂNG KÝ MỚI</button>
         </div>
     </div>
 
-    <div id="scr-tx" class="hidden" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
-        <div class="content">
-            <div class="wallet-bar">
-                <div><span>Ví tài xế:</span><br><b id="val-du" style="font-size:20px; color:var(--blue);">0K</b></div>
-                <button onclick="switchTab('profile')" style="width:auto; padding:8px 12px; margin:0; font-size:12px; background:var(--blue); color:white;">NẠP TIỀN</button>
-            </div>
-
-            <div id="tab-noti">
-                <p style="font-weight:bold; border-left:4px solid var(--primary); padding-left:10px;">DANH SÁCH ĐƠN MỚI</p>
-                <div id="list-don-cho"></div>
-                
-                <div id="don-dang-chay" class="hidden">
-                    <div class="card-don" style="border-left:5px solid var(--secondary); background:#f0fff4;">
-                        <p style="font-weight:bold; color:var(--secondary); margin-top:0;">🚀 CHUYẾN ĐANG THỰC HIỆN</p>
-                        <div id="chi-tiet-don-chay"></div>
-                        <button class="btn-red" style="background:#333;" onclick="hoanThanhChuyen()">HOÀN THÀNH & THU TIỀN</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="tab-profile" class="hidden">
-                <div style="text-align:center; padding:20px; background:#fffde7; border-radius:15px; border:1px dashed #fbc02d;">
-                    <p style="font-weight:bold; color:var(--primary);">NẠP TIỀN QUA VIETQR</p>
-                    <img id="qr-code" src="" style="width:220px; border-radius:10px;">
-                    <p style="font-size:12px; color:#666; margin-top:10px;">Phí sàn: 20% trừ trực tiếp khi nhận đơn.</p>
-                </div>
-                <button class="btn-blue" style="margin-top:20px;" onclick="window.location.href='tel:0789454369'">GỌI TỔNG ĐÀI HỖ TRỢ</button>
-                <button onclick="dangXuat()" style="background:#eee; color:#666; margin-top:10px;">ĐĂNG XUẤT</button>
-            </div>
+    <div id="khach-page" class="page p-4">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-xl font-bold">CHÀO KHÁCH HÀNG</h1>
+            <button onclick="logout()" class="text-red-500 underline">Đăng xuất</button>
         </div>
-
-        <div class="bottom-nav">
-            <div class="nav-item active" id="m-noti" onclick="switchTab('noti')"><i class="fa fa-car fa-lg"></i><br>Nhận đơn</div>
-            <div class="nav-item" id="m-profile" onclick="switchTab('profile')"><i class="fa fa-wallet fa-lg"></i><br>Ví của tôi</div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const firebaseConfig = { databaseURL: "https://khaly-go-23798-default-rtdb.asia-southeast1.firebasedatabase.app" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    let curSdt = "", myWallet = 0;
-
-    // QUẢN LÝ PHIÊN
-    function kiemTraPhien() {
-        const saved = localStorage.getItem('klg_user');
-        if(saved) {
-            const user = JSON.parse(saved);
-            curSdt = user.sdt;
-            document.getElementById('scr-auth').classList.add('hidden');
-            document.getElementById('scr-tx').classList.remove('hidden');
-            document.getElementById('qr-code').src = `https://img.vietqr.io/image/vcb-0789454369-compact.jpg?amount=100000&addInfo=KLG%20${curSdt}`;
-            theoDoiVi();
-            loadDonHang();
-        }
-    }
-
-    function showReg() {
-        document.getElementById('box-login').classList.add('hidden');
-        document.getElementById('box-reg').classList.remove('hidden');
-    }
-
-    function handleRegister() {
-        const s = document.getElementById('r-sdt').value, p = document.getElementById('r-pass').value, r = document.getElementById('r-role').value;
-        if(!s || !p) return alert("Sếp điền đủ SĐT và Mật khẩu nhé!");
-        db.ref('users/' + s).set({pass: p, role: r, soDu: 0}).then(() => {
-            alert("Đăng ký thành công!");
-            location.reload();
-        });
-    }
-
-    function xuLyLogin() {
-        const s = document.getElementById('l-sdt').value, p = document.getElementById('l-pass').value;
-        if(!s || !p) return alert("Nhập đủ thông tin sếp ơi!");
         
-        // Check Admin của sếp
-        if(s === "0789454369" && p === "19861990LyVinh@") {
-            localStorage.setItem('klg_user', JSON.stringify({sdt: s, role: 'admin'}));
-            alert("Chào Admin!"); location.reload(); return;
+        <div class="grid grid-cols-2 gap-2 mb-6">
+            <button onclick="selectCar('Xe ôm')" class="bg-white p-4 shadow rounded">🏍️ Xe ôm</button>
+            <button onclick="selectCar('Xe bao')" class="bg-white p-4 shadow rounded">🚗 Xe bao</button>
+            <button onclick="selectCar('Xe tiện chuyến')" class="bg-white p-4 shadow rounded">🤝 Xe tiện chuyến</button>
+            <button onclick="selectCar('Xe 1 chiều')" class="bg-white p-4 shadow rounded">🚩 Xe 1 chiều</button>
+            <button onclick="window.location.href='tel:090xxxxxxx'" class="bg-green-100 p-4 shadow rounded col-span-2">📞 Liên hệ Admin (Zalo)</button>
+        </div>
+
+        <div id="booking-form" class="hidden bg-white p-4 rounded shadow">
+            <h3 id="car-type-title" class="font-bold mb-2"></h3>
+            <input type="text" placeholder="Điểm đi" class="w-full border p-2 mb-2">
+            <input type="text" placeholder="Điểm đến" class="w-full border p-2 mb-2">
+            <input type="datetime-local" class="w-full border p-2 mb-2">
+            <button onclick="createOrder()" class="w-full bg-blue-600 text-white p-2 rounded">TẠO ĐƠN CHỜ BÁO GIÁ</button>
+        </div>
+    </div>
+
+    <div id="taixe-page" class="page p-4">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-xl font-bold text-orange-600">TÀI XẾ</h1>
+            <button onclick="logout()" class="text-red-500 underline">Đăng xuất</button>
+        </div>
+
+        <div class="bg-white p-4 rounded mb-4 shadow">
+            <p>Số dư ví: <span class="font-bold text-green-600">500.000đ</span></p>
+            <button class="text-blue-500 text-sm underline">Nạp tiền</button>
+        </div>
+
+        <div class="space-y-4">
+            <details class="bg-white p-2 rounded shadow">
+                <summary class="font-bold">Hồ sơ lái xe</summary>
+                <div class="p-2 space-y-2">
+                    <p class="text-xs">Ảnh bằng lái, Ảnh xe, Cà vẹt</p>
+                    <input type="file" class="text-sm">
+                    <button class="bg-blue-500 text-white px-4 py-1 rounded w-full">Gửi Admin</button>
+                </div>
+            </details>
+
+            <div class="bg-white p-4 rounded shadow">
+                <h3 class="font-bold border-bottom mb-2 text-blue-600">Đơn hàng hiện có</h3>
+                <div class="border-t pt-2">
+                    <p>Chuyến: Cần Thơ -> Hậu Giang</p>
+                    <p>Giá: 200.000đ (Phí 20%: 40k)</p>
+                    <p class="text-gray-400">SĐT: 03*********</p>
+                    <button onclick="alert('Đã nhận đơn! SĐT khách: 0912345678')" class="mt-2 w-full bg-orange-500 text-white p-2 rounded">NHẬN ĐƠN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-page" class="page p-4 bg-gray-800 min-h-screen text-white">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-xl font-bold text-yellow-400">QUẢN TRỊ ADMIN</h1>
+            <button onclick="logout()" class="text-red-400 underline">Đăng xuất</button>
+        </div>
+
+        <div class="space-y-6">
+            <section>
+                <h3 class="font-bold mb-2">Đơn hàng chờ báo giá</h3>
+                <div class="bg-gray-700 p-4 rounded">
+                    <p>Khách: 0987xxx - Xe Tiện Chuyến</p>
+                    <input type="number" placeholder="Nhập giá VNĐ" class="text-black p-1 w-32 rounded">
+                    <button class="bg-green-600 px-3 py-1 rounded">Gửi báo giá</button>
+                    <button class="bg-red-600 px-3 py-1 rounded ml-2">Xoá</button>
+                </div>
+            </section>
+
+            <section>
+                <h3 class="font-bold mb-2">Xác nhận chuyển khoản</h3>
+                <div class="bg-blue-900 p-4 rounded border border-blue-500">
+                    <p>Đơn #123: 500.000đ (Xe 1 chiều)</p>
+                    <button class="bg-yellow-500 text-black font-bold px-4 py-1 rounded mt-2">Xác nhận & Đẩy đơn</button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        function login() {
+            const role = document.querySelector('input[name="role"]:checked').value;
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(role + '-page').classList.add('active');
         }
 
-        db.ref('users/' + s).once('value', ss => {
-            const u = ss.val();
-            if(u && u.pass === p) {
-                localStorage.setItem('klg_user', JSON.stringify({sdt: s, role: u.role}));
-                location.reload();
-            } else alert("Sai số điện thoại hoặc mật khẩu!");
-        });
-    }
-
-    // LOGIC TÀI XẾ
-    function theoDoiVi() {
-        db.ref('users/' + curSdt).on('value', s => {
-            myWallet = s.val()?.soDu || 0;
-            document.getElementById('val-du').innerText = myWallet + "K";
-        });
-    }
-
-    function loadDonHang() {
-        db.ref('don_da_duyet').on('value', s => {
-            let h = "";
-            s.forEach(child => {
-                const d = child.val();
-                const phi = Math.round(parseInt(d.gia) * 0.2);
-                h += `
-                <div class="card-don">
-                    <div style="display:flex; justify-content:space-between; align-items:start;">
-                        <span class="gia-don">${d.gia}K</span>
-                        <span class="phi-tag">Phí sàn: ${phi}K</span>
-                    </div>
-                    <p style="margin:10px 0;">📍 ${d.tu} <br> 🏁 ${d.den}</p>
-                    <button class="btn-nhan" onclick="xacNhanNhanDon('${child.key}', ${phi})">NHẬN CHUYẾN</button>
-                </div>`;
-            });
-            document.getElementById('list-don-cho').innerHTML = h || "<p style='text-align:center; color:#999; margin-top:30px;'>Đang tìm chuyến xe gần nhất...</p>";
-        });
-    }
-
-    function xacNhanNhanDon(id, phi) {
-        if(myWallet < phi) {
-            alert(`Ví không đủ ${phi}K để trừ phí sàn. Sếp nạp thêm tiền nhé!`);
-            switchTab('profile'); return;
+        function logout() {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('login-page').classList.add('active');
         }
-        if(confirm(`Hệ thống sẽ trừ ${phi}K phí nhận đơn. Sếp đồng ý?`)) {
-            db.ref('users/' + curSdt).update({ soDu: myWallet - phi }).then(() => {
-                db.ref('don_da_duyet/' + id).once('value', s => {
-                    const data = s.val();
-                    db.ref('don_dang_chay/' + curSdt).set(data);
-                    db.ref('don_da_duyet/' + id).remove();
-                    hienDonDangChay(data);
-                });
-            });
+
+        function selectCar(type) {
+            document.getElementById('booking-form').classList.remove('hidden');
+            document.getElementById('car-type-title').innerText = 'Đặt ' + type;
         }
-    }
 
-    function hienDonDangChay(d) {
-        document.getElementById('list-don-cho').classList.add('hidden');
-        document.getElementById('don-dang-chay').classList.remove('hidden');
-        document.getElementById('chi-tiet-don-chay').innerHTML = `
-            <p><b>Khách:</b> <a href="tel:${d.khach}" style="font-size:20px; color:var(--blue); font-weight:bold;">${d.khach} 📞</a></p>
-            <p><b>Điểm đón:</b> ${d.tu}</p>
-            <p><b>Điểm đến:</b> ${d.den}</p>
-            <p><b>Giá thu khách:</b> <span style="color:red; font-size:18px; font-weight:bold;">${d.gia}K</span></p>
-        `;
-    }
-
-    function hoanThanhChuyen() {
-        if(confirm("Xác nhận đã trả khách và thu tiền xong?")) {
-            db.ref('don_dang_chay/' + curSdt).remove().then(() => {
-                alert("Hoàn thành chuyến! Chúc sếp nhiều đơn mới.");
-                location.reload();
-            });
+        function createOrder() {
+            alert('Đã gửi yêu cầu. Vui lòng chờ Admin báo giá!');
+            document.getElementById('booking-form').classList.add('hidden');
         }
-    }
-
-    function switchTab(t) {
-        document.getElementById('tab-noti').classList.toggle('hidden', t !== 'noti');
-        document.getElementById('tab-profile').classList.toggle('hidden', t !== 'profile');
-        document.getElementById('m-noti').classList.toggle('active', t === 'noti');
-        document.getElementById('m-profile').classList.toggle('active', t === 'profile');
-    }
-
-    function dangXuat() { localStorage.removeItem('klg_user'); location.reload(); }
-</script>
+    </script>
 </body>
 </html>
