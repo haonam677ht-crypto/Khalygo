@@ -24,8 +24,7 @@
         .nav-bottom { position: fixed; bottom: 0; width: 100%; max-width: 450px; height: 70px; background: white; border-top: 1px solid #eee; display: flex; align-items: center; }
         .nav-item { flex: 1; text-align: center; color: #999; font-size: 12px; }
         .nav-item.active { color: var(--blue); }
-        .label-small { font-size: 12px; color: #666; margin-left: 5px; }
-        .time-info { font-size: 13px; color: #d32f2f; font-weight: bold; margin-bottom: 8px; display: block; }
+        .time-tag { font-size: 11px; color: #777; font-style: italic; display: block; margin-bottom: 5px; }
     </style>
 </head>
 <body onload="checkLogin()">
@@ -63,6 +62,7 @@
         <div class="header-top">KLG - ĐỐI TÁC</div>
         <div class="content">
             <div class="card" style="display:flex; justify-content:space-around; text-align:center; background:#e3f2fd;">
+                <div><small>Đã nạp</small><br><b id="tx-nap">0K</b></div>
                 <div><small>Số dư ví</small><br><b id="tx-du" style="color:var(--blue); font-size:18px;">0K</b></div>
             </div>
             <div id="tx-list-moi">
@@ -80,27 +80,13 @@
         <div class="header-top">KLG - ADMIN</div>
         <div class="content">
             <button class="btn-blue" onclick="document.getElementById('ad-form').classList.toggle('hidden')">+ TẠO ĐƠN GỌI TRỰC TIẾP</button>
-            
             <div id="ad-form" class="card hidden">
                 <input type="number" id="ad-sdt-k" placeholder="SĐT Khách">
                 <input type="text" id="ad-tu" placeholder="📍 Điểm đón">
                 <input type="text" id="ad-den" placeholder="🏁 Điểm đến">
-                
-                <div style="display: flex; gap: 10px;">
-                    <div style="flex: 1;">
-                        <span class="label-small">Ngày đón:</span>
-                        <input type="date" id="ad-ngay">
-                    </div>
-                    <div style="flex: 1;">
-                        <span class="label-small">Giờ đón:</span>
-                        <input type="time" id="ad-gio">
-                    </div>
-                </div>
-
                 <input type="number" id="ad-gia" placeholder="Giá tiền (Ví dụ: 500)">
                 <button class="btn-main" onclick="adPhatDon()">PHÁT ĐƠN NGAY</button>
             </div>
-
             <p><b>CHỜ TRẢ LƯƠNG (80%)</b></p>
             <div id="ad-list-tra"></div>
         </div>
@@ -115,15 +101,6 @@
     const ADMIN_HOTLINE = "0789454369";
     const ADMIN_PASS = "19861990LyVinh@";
 
-    // Tự động điền ngày hôm nay vào ô chọn ngày
-    function setDefaultDateTime() {
-        const now = new Date();
-        const date = now.toISOString().split('T')[0];
-        const time = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        if(document.getElementById('ad-ngay')) document.getElementById('ad-ngay').value = date;
-        if(document.getElementById('ad-gio')) document.getElementById('ad-gio').value = time;
-    }
-
     function showReg() { 
         document.getElementById('auth-login').classList.add('hidden');
         document.getElementById('auth-reg').classList.remove('hidden');
@@ -131,7 +108,7 @@
 
     function handleRegister() {
         const s = document.getElementById('r-sdt').value, p = document.getElementById('r-pass').value, r = document.getElementById('r-role').value;
-        if(!s || !p || !r) return alert("Sếp điền đủ thông tin!");
+        if(!s || !p || !r) return alert("Sếp điền đủ SĐT, Mật khẩu và chọn vai trò!");
         db.ref('users/' + s).set({pass:p, role:r, soDu:0}).then(() => {
             alert("Đăng ký thành công!");
             location.reload();
@@ -164,11 +141,14 @@
         const u = localStorage.getItem('klg_user'), r = localStorage.getItem('klg_role');
         if(!u) return;
         document.getElementById('scr-auth').classList.add('hidden');
-        if(u === ADMIN_HOTLINE || r === 'admin') {
-            loadAdmin();
-            setDefaultDateTime();
-        } 
+        if(u === ADMIN_HOTLINE || r === 'admin') loadAdmin(); 
         else if(r === 'tx') loadTX(u);
+    }
+
+    // LẤY THỜI GIAN THỰC
+    function getNow() {
+        const d = new Date();
+        return d.getHours() + ":" + (d.getMinutes()<10?'0':'') + d.getMinutes() + " - " + d.getDate() + "/" + (d.getMonth()+1);
     }
 
     function loadAdmin() {
@@ -178,10 +158,10 @@
             s.forEach(c => {
                 const d = c.val();
                 h += `<div class="card">
-                    <span class="time-info">📅 Lịch đón: ${d.gio} ngày ${d.ngay}</span>
+                    <span class="time-tag"><i class="far fa-clock"></i> Đặt lúc: ${d.time || 'Không rõ'}</span>
                     <b>TX ${d.tx} xong: ${d.gia}K</b><br>
-                    <span style="color:red">Lương 80%: ${Math.round(d.gia*0.8)}K</span><br>
-                    <button onclick="db.ref('don_hoan_thanh/${c.key}').remove()">XÁC NHẬN ĐÃ TRẢ TIỀN</button>
+                    <span style="color:red">Lương: ${Math.round(d.gia*0.8)}K</span><br>
+                    <button onclick="db.ref('don_hoan_thanh/${c.key}').remove()">XÁC NHẬN TRẢ TIỀN</button>
                 </div>`;
             });
             document.getElementById('ad-list-tra').innerHTML = h || "Chưa có đơn.";
@@ -190,13 +170,18 @@
 
     function adPhatDon() {
         const k = document.getElementById('ad-sdt-k').value, t = document.getElementById('ad-tu').value, d = document.getElementById('ad-den').value, g = document.getElementById('ad-gia').value;
-        const ngay = document.getElementById('ad-ngay').value;
-        const gio = document.getElementById('ad-gio').value;
+        if(!k || !g) return alert("Sếp nhập đủ SĐT khách và Giá!");
         
-        if(!k || !g || !ngay || !gio) return alert("Sếp vui lòng chọn đủ Ngày và Giờ đón!");
+        // Gửi đơn kèm theo thời gian
+        db.ref('don_da_duyet').push({
+            khach: k, 
+            tu: t, 
+            den: d, 
+            gia: g, 
+            time: getNow() 
+        });
         
-        db.ref('don_da_duyet').push({khach:k, tu:t, den:d, gia:g, ngay: ngay, gio: gio});
-        alert("Đã phát đơn thành công!");
+        alert("Đã phát đơn lúc " + getNow());
         document.getElementById('ad-form').classList.add('hidden');
     }
 
@@ -208,7 +193,7 @@
             s.forEach(c => {
                 const d = c.val(), phi = Math.round(d.gia*0.2);
                 h += `<div class="card">
-                    <span class="time-info"><i class="far fa-clock"></i> Đón lúc: ${d.gio} - ${d.ngay}</span>
+                    <span class="time-tag"><i class="far fa-clock"></i> Khách đặt lúc: ${d.time || 'Vừa xong'}</span>
                     <b>${d.gia}K</b> (Phí: ${phi}K)<br>
                     📍 ${d.tu} ➔ ${d.den}<br>
                     <button class="btn-blue" onclick="txNhan('${c.key}',${phi})">NHẬN & TRỪ PHÍ</button>
