@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { 
   View, Text, TextInput, TouchableOpacity, StyleSheet, 
-  ScrollView, Alert, ActivityIndicator 
+  ScrollView, Alert 
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // --- KẾT NỐI FIREBASE ---
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, push, onValue, update } from "firebase/database";
+import { getDatabase, ref, set, push } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA7D06JXpU4zFnT2pYpbuZlw-YCb8F8VpQ",
@@ -27,19 +27,19 @@ export default function App() {
   const [role, setRole] = useState('Khách hàng');
   const [phone, setPhone] = useState('');
 
-  // Tự động đăng nhập nếu có dữ liệu cũ
   useEffect(() => {
-    const checkSession = async () => {
-      const savedRole = await AsyncStorage.getItem('userRole');
-      const savedPhone = await AsyncStorage.getItem('userPhone');
-      if (savedRole && savedPhone) {
-        setRole(savedRole);
-        setPhone(savedPhone);
-        setIsLoggedIn(true);
-      }
-    };
     checkSession();
   }, []);
+
+  const checkSession = async () => {
+    const savedRole = await AsyncStorage.getItem('userRole');
+    const savedPhone = await AsyncStorage.getItem('userPhone');
+    if (savedRole && savedPhone) {
+      setRole(savedRole);
+      setPhone(savedPhone);
+      setIsLoggedIn(true);
+    }
+  };
 
   const handleLogin = async (selectedRole) => {
     if (phone.length < 10) {
@@ -75,7 +75,7 @@ export default function App() {
         </View>
         <TextInput 
           style={styles.inputField} 
-          placeholder="Số điện thoại (10 số)" 
+          placeholder="Số điện thoại" 
           keyboardType="numeric"
           maxLength={10}
           value={phone}
@@ -113,10 +113,9 @@ const CustomerUI = ({ onLogout, phone }) => {
       dropoff: to,
       serviceType: service,
       status: 'Chờ báo giá',
-      price: 0,
       createdAt: new Date().toISOString()
     }).then(() => {
-      Alert.alert("Thành công", "Đơn đã gửi. Admin sẽ báo giá sớm!");
+      Alert.alert("Thành công", "Đã gửi đơn!");
       setFrom(''); setTo('');
     });
   };
@@ -125,10 +124,11 @@ const CustomerUI = ({ onLogout, phone }) => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.roleName}>KHÁCH: {phone}</Text>
-        <TouchableOpacity onPress={onLogout} style={styles.logoutBtn}><Text style={styles.white}>Đăng xuất</Text></TouchableOpacity>
+        <TouchableOpacity onPress={onLogout} style={styles.logoutBtn}>
+          <Text style={styles.white}>Đăng xuất</Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.card}>
-        <Text style={styles.label}>Chọn dịch vụ:</Text>
         <View style={styles.serviceRow}>
           {['Xe ôm', 'Xe bao', 'Tiện chuyến', '1 Chiều'].map(s => (
             <TouchableOpacity key={s} onPress={() => setService(s)} style={[styles.sItem, service === s && styles.sActive]}>
@@ -136,38 +136,30 @@ const CustomerUI = ({ onLogout, phone }) => {
             </TouchableOpacity>
           ))}
         </View>
-        <TextInput style={styles.inputField} placeholder="Điểm đón khách" value={from} onChangeText={setFrom} />
+        <TextInput style={styles.inputField} placeholder="Điểm đón" value={from} onChangeText={setFrom} />
         <TextInput style={styles.inputField} placeholder="Điểm đến" value={to} onChangeText={setTo} />
         <TouchableOpacity style={styles.mainBtn} onPress={sendBooking}>
-          <Text style={styles.mainBtnText}>TẠO ĐƠN HÀNG</Text>
+          <Text style={styles.mainBtnText}>TẠO ĐƠN</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 };
 
-// --- GIAO DIỆN TÀI XẾ ---
+// --- GIAO DIỆN TÀI XẾ & ADMIN (RÚT GỌN) ---
 const DriverUI = ({ onLogout, phone }) => (
   <View style={styles.container}>
-    <View style={styles.header}>
-      <Text style={styles.roleName}>TÀI XẾ: {phone}</Text>
-      <TouchableOpacity onPress={onLogout} style={styles.logoutBtn}><Text style={styles.white}>Đăng xuất</Text></TouchableOpacity>
-    </View>
-    <View style={styles.card}>
-      <Text style={styles.bold}>Số dư ví: 0đ</Text>
-      <Text style={{marginTop: 10, color: 'gray'}}>Hồ sơ: Đang chờ duyệt ảnh xe/bằng lái...</Text>
-    </View>
+    <View style={styles.header}><Text style={styles.roleName}>TÀI XẾ: {phone}</Text>
+    <TouchableOpacity onPress={onLogout} style={styles.logoutBtn}><Text style={styles.white}>Đăng xuất</Text></TouchableOpacity></View>
+    <Text>Đang chờ đơn...</Text>
   </View>
 );
 
-// --- GIAO DIỆN ADMIN ---
 const AdminUI = ({ onLogout }) => (
   <View style={styles.container}>
-    <View style={styles.header}>
-      <Text style={styles.roleName}>ADMIN QUẢN TRỊ</Text>
-      <TouchableOpacity onPress={onLogout} style={styles.logoutBtn}><Text style={styles.white}>Đăng xuất</Text></TouchableOpacity>
-    </View>
-    <Text>Danh sách đơn hàng mới sẽ hiện tại đây...</Text>
+    <View style={styles.header}><Text style={styles.roleName}>ADMIN</Text>
+    <TouchableOpacity onPress={onLogout} style={styles.logoutBtn}><Text style={styles.white}>Đăng xuất</Text></TouchableOpacity></View>
+    <Text>Quản lý đơn hàng...</Text>
   </View>
 );
 
@@ -183,17 +175,15 @@ const styles = StyleSheet.create({
   tabTextActive: { color: '#000', fontWeight: 'bold' },
   inputField: { backgroundColor: '#fff', borderBottomWidth: 1.5, borderColor: '#eee', padding: 12, marginBottom: 20, fontSize: 16 },
   mainBtn: { backgroundColor: '#1a1a1a', padding: 18, borderRadius: 12, alignItems: 'center' },
-  mainBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  mainBtnText: { color: '#fff', fontWeight: 'bold' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 40, marginBottom: 20 },
   roleName: { fontSize: 18, fontWeight: 'bold' },
-  logoutBtn: { backgroundColor: '#ff4757', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
+  logoutBtn: { backgroundColor: '#ff4757', padding: 8, borderRadius: 6 },
   white: { color: '#fff' },
   black: { color: '#000' },
   card: { backgroundColor: '#fff', padding: 20, borderRadius: 15, elevation: 4 },
-  label: { fontWeight: 'bold', marginBottom: 10 },
   serviceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   sItem: { padding: 10, backgroundColor: '#eee', borderRadius: 8 },
-  sActive: { backgroundColor: '#1a1a1a' },
-  bold: { fontWeight: 'bold', fontSize: 18 }
+  sActive: { backgroundColor: '#1a1a1a' }
 });
           
