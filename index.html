@@ -5,123 +5,181 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KhaLy GO - Quản Trị Hệ Thống</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         .page { display: none; }
         .active { display: block; }
+        /* Tùy chỉnh thanh cuộn cho chuyên nghiệp */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-slate-900 font-sans text-slate-200">
 
-    <div id="login-page" class="page active p-6">
+    <div id="login-page" class="page p-6">
         <div class="max-w-md mx-auto bg-slate-800 p-8 rounded-2xl shadow-2xl mt-10 border border-slate-700">
-            <h2 class="text-2xl font-bold mb-6 text-center text-yellow-400">KhaLy GO</h2>
-            <input id="phone" type="number" placeholder="Số điện thoại (10 số)" class="w-full bg-slate-700 border-none p-3 mb-4 rounded-lg text-white">
-            <input id="pass" type="password" placeholder="Mật khẩu" class="w-full bg-slate-700 border-none p-3 mb-4 rounded-lg text-white">
-            <div class="flex justify-around mb-6 text-sm">
-                <label class="flex items-center gap-2"><input type="radio" name="role" value="khach"> Khách</label>
-                <label class="flex items-center gap-2"><input type="radio" name="role" value="taixe"> Tài xế</label>
-                <label class="flex items-center gap-2"><input type="radio" name="role" value="admin" checked> Admin</label>
+            <h2 class="text-3xl font-black mb-6 text-center text-yellow-400 tracking-tighter">KhaLy GO</h2>
+            <div class="space-y-4">
+                <input id="phone" type="number" placeholder="Số điện thoại (10 số)" class="w-full bg-slate-700 border-none p-4 rounded-xl text-white outline-none focus:ring-2 focus:ring-yellow-500">
+                <input id="pass" type="password" placeholder="Mật khẩu" class="w-full bg-slate-700 border-none p-4 rounded-xl text-white outline-none focus:ring-2 focus:ring-yellow-500">
+                
+                <div class="flex justify-around py-2 text-sm font-medium">
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="role" value="khach" class="accent-yellow-500"> Khách</label>
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="role" value="taixe" class="accent-yellow-500"> Tài xế</label>
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="role" value="admin" checked class="accent-yellow-500"> Admin</label>
+                </div>
+                
+                <button onclick="handleLogin()" class="w-full bg-yellow-500 text-slate-900 py-4 rounded-xl font-black text-lg shadow-lg hover:bg-yellow-400 transition-all active:scale-95">ĐĂNG NHẬP</button>
             </div>
-            <button onclick="login()" class="w-full bg-yellow-500 text-slate-900 p-3 rounded-lg font-bold mb-2 hover:bg-yellow-400">ĐĂNG NHẬP</button>
         </div>
     </div>
 
     <div id="admin-page" class="page p-4 min-h-screen">
         <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
             <div>
-                <h1 class="text-2xl font-bold text-yellow-400">QUẢN TRỊ ADMIN</h1>
-                <p class="text-xs text-slate-400 italic">Theo dõi & Điều phối đơn hàng</p>
+                <h1 class="text-2xl font-black text-yellow-400">QUẢN TRỊ ADMIN</h1>
+                <p class="text-[10px] text-slate-400 uppercase tracking-widest">KhaLy GO Transport System</p>
             </div>
-            <button onclick="logout()" class="text-red-400 text-sm border border-red-400 px-3 py-1 rounded hover:bg-red-400/10">Đăng xuất</button>
+            <button onclick="logout()" class="text-red-400 text-xs font-bold border border-red-400/50 px-4 py-2 rounded-lg hover:bg-red-400/10">THOÁT</button>
         </div>
 
         <div class="space-y-6">
             <section>
-                <h3 class="font-bold mb-3 text-blue-400 flex items-center">🗂️ Danh sách tài xế</h3>
-                <div class="bg-slate-800 p-3 rounded-lg border border-slate-700 text-sm">
-                    <div class="flex justify-between items-center border-b border-slate-700 pb-2 mb-2">
-                        <span>TX Nguyễn Văn A (0901...)</span>
-                        <span class="text-green-400">Ví: 500k</span>
+                <h3 class="font-bold mb-3 text-blue-400 text-sm flex items-center gap-2">🗂️ DANH SÁCH TÀI XẾ</h3>
+                <div id="ad-tx-list" class="space-y-2">
+                    <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                        <p class="text-slate-400 italic text-center text-xs">Đang tải dữ liệu...</p>
                     </div>
-                    <button class="text-xs bg-blue-600 px-2 py-1 rounded">Duyệt hồ sơ</button>
                 </div>
             </section>
 
             <section>
-                <h3 class="font-bold mb-3 text-orange-400 flex items-center">🔔 Đơn hàng chờ báo giá</h3>
-                
-                <div class="bg-slate-800 p-4 rounded-xl border-l-4 border-orange-500 shadow-lg space-y-3">
-                    <div class="flex justify-between">
-                        <span class="bg-orange-500/20 text-orange-400 text-[10px] px-2 py-1 rounded uppercase font-bold">Xe Tiện Chuyến</span>
-                        <span class="text-slate-400 text-xs font-mono">ID: #8892</span>
-                    </div>
-
-                    <div class="space-y-1">
-                        <p class="text-lg font-bold text-white leading-none">Khách: 0987.123.456</p>
-                        <p class="text-sm text-slate-300"><span class="text-slate-500">Từ:</span> Ninh Kiều, Cần Thơ</p>
-                        <p class="text-sm text-slate-300"><span class="text-slate-500">Đến:</span> Vị Thanh, Hậu Giang</p>
-                        <div class="flex gap-4 text-xs text-blue-300 pt-1">
-                            <span>📅 Ngày: 26/04/2026</span>
-                            <span>⏰ Giờ: 14:30</span>
+                <h3 class="font-bold mb-3 text-orange-400 text-sm flex items-center gap-2">🔔 ĐƠN CHỜ BÁO GIÁ</h3>
+                <div id="ad-order-pending" class="space-y-3">
+                    <div class="bg-slate-800 p-4 rounded-xl border-l-4 border-orange-500 shadow-xl">
+                        <div class="flex justify-between mb-2">
+                            <span class="bg-orange-500/20 text-orange-400 text-[10px] px-2 py-1 rounded font-bold uppercase">Xe Tiện Chuyến</span>
+                        </div>
+                        <div class="text-sm space-y-1">
+                            <p class="font-bold text-white">Khách: 0987.xxx.xxx</p>
+                            <p class="text-slate-400">📍 Cần Thơ → 🏁 Hậu Giang</p>
+                        </div>
+                        <div class="flex gap-2 mt-3">
+                            <input type="number" placeholder="VNĐ" class="flex-1 bg-white text-slate-900 font-bold p-2 rounded-lg text-sm">
+                            <button class="bg-green-600 px-4 rounded-lg font-bold text-xs uppercase">Báo giá</button>
                         </div>
                     </div>
-
-                    <div class="flex gap-2 pt-3 border-t border-slate-700">
-                        <input type="number" placeholder="Giá VNĐ" class="flex-1 bg-white text-slate-900 font-bold p-2 rounded-md outline-none">
-                        <button onclick="alert('Đã gửi báo giá cho khách!')" class="bg-green-600 px-4 rounded-md font-bold text-sm">Gửi báo giá</button>
-                        <button class="bg-red-600 px-3 rounded-md font-bold text-sm">Xoá</button>
-                    </div>
                 </div>
-            </section>
-
-            <section>
-                <h3 class="font-bold mb-3 text-yellow-400 flex items-center">💰 Xác nhận chuyển khoản</h3>
-                <div class="bg-blue-900/20 p-4 rounded-xl border border-blue-500/50">
-                    <div class="flex justify-between items-center mb-3">
-                        <p class="text-sm">Đơn #8890: <span class="text-white font-bold">700.000đ</span></p>
-                        <span class="text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded">Xe 1 Chiều</span>
-                    </div>
-                    <button onclick="alert('Đã xác nhận tiền! Đang đẩy đơn lên hệ thống tài xế.')" class="w-full bg-yellow-500 text-slate-900 font-black py-3 rounded-lg shadow-lg hover:bg-yellow-400 transition-transform active:scale-95">
-                        XÁC NHẬN & ĐẨY ĐƠN
-                    </button>
-                </div>
-            </section>
-
-            <section class="bg-slate-800/50 p-4 rounded-xl border border-dashed border-slate-600">
-                <h4 class="text-sm font-bold text-slate-400 mb-2">Tạo đơn trực tiếp cho khách gọi điện</h4>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" placeholder="SĐT khách" class="bg-slate-700 p-2 rounded text-xs">
-                    <input type="text" placeholder="Giá chốt" class="bg-slate-700 p-2 rounded text-xs">
-                    <button class="col-span-2 bg-slate-600 py-2 rounded text-xs font-bold uppercase tracking-wider">Tạo đơn & Đẩy lên tài xế</button>
-                </div>
-            </section>
-
-            <section class="pb-10 text-xs">
-                <p class="text-slate-500 text-center">--- Lịch sử đơn hàng ---</p>
             </section>
         </div>
     </div>
 
-    <div id="khach-page" class="page p-4">
-        <h2 class="text-center mt-20">Giao diện Khách hàng (Đã cấu hình)</h2>
-        <button onclick="logout()" class="block mx-auto mt-4 text-red-400 underline">Đăng xuất</button>
+    <div id="khach-page" class="page p-10 text-center">
+        <h2 class="text-xl font-bold">GIAO DIỆN KHÁCH HÀNG</h2>
+        <button onclick="logout()" class="mt-4 text-red-400 underline">Đăng xuất</button>
     </div>
-    <div id="taixe-page" class="page p-4">
-        <h2 class="text-center mt-20">Giao diện Tài xế (Đã cấu hình)</h2>
-        <button onclick="logout()" class="block mx-auto mt-4 text-red-400 underline">Đăng xuất</button>
+    
+    <div id="taixe-page" class="page p-10 text-center">
+        <h2 class="text-xl font-bold">GIAO DIỆN TÀI XẾ</h2>
+        <button onclick="logout()" class="mt-4 text-red-400 underline">Đăng xuất</button>
     </div>
 
     <script>
-        // Điều hướng đăng nhập đơn giản
-        function login() {
+        // CẤU HÌNH FIREBASE CỦA SẾP
+        const firebaseConfig = {
+            apiKey: "AIzaSyA7D06JXpU4zFnT2pYpbuZlw-YCb8F8VpQ",
+            authDomain: "khaly-go-23798.firebaseapp.com",
+            databaseURL: "https://khaly-go-23798-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "khaly-go-23798",
+            storageBucket: "khaly-go-23798.firebasestorage.app",
+            messagingSenderId: "328254923276",
+            appId: "1:328254923276:web:625f6be13a31b0a9264429"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 1. KIỂM TRA PHIÊN ĐĂNG NHẬP (LƯU TRỮ)
+        window.onload = function() {
+            const savedSession = localStorage.getItem('klg_user_session');
+            if (savedSession) {
+                const userData = JSON.parse(savedSession);
+                showPage(userData.role);
+            } else {
+                showPage('login');
+            }
+        };
+
+        // 2. XỬ LÝ ĐĂNG NHẬP
+        function handleLogin() {
+            const phone = document.getElementById('phone').value;
+            const pass = document.getElementById('pass').value;
             const role = document.querySelector('input[name="role"]:checked').value;
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(role + '-page').classList.add('active');
+
+            if (!phone || !pass) {
+                alert("Vui lòng nhập đầy đủ thông tin sếp ơi!");
+                return;
+            }
+
+            // Kiểm tra tài khoản Admin mặc định của sếp
+            if (phone === "0789454369" && pass === "19861990LyVinh@") {
+                const sessionData = { phone: phone, role: 'admin' };
+                localStorage.setItem('klg_user_session', JSON.stringify(sessionData));
+                showPage('admin');
+                return;
+            }
+
+            // Kiểm tra trên Firebase cho Khách và Tài xế
+            db.ref('users/' + phone).once('value').then((snapshot) => {
+                const data = snapshot.val();
+                if (data && data.pass === pass) {
+                    const sessionData = { phone: phone, role: data.role };
+                    localStorage.setItem('klg_user_session', JSON.stringify(sessionData));
+                    showPage(data.role);
+                } else {
+                    alert("Sai số điện thoại hoặc mật khẩu!");
+                }
+            });
         }
 
-        function logout() {
+        // 3. ĐIỀU HƯỚNG TRANG
+        function showPage(role) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('login-page').classList.add('active');
+            if (role === 'login') {
+                document.getElementById('login-page').classList.add('active');
+            } else {
+                const targetPage = document.getElementById(role + '-page');
+                if (targetPage) targetPage.classList.add('active');
+                if (role === 'admin') loadAdminData();
+            }
+        }
+
+        // 4. ĐĂNG XUẤT
+        function logout() {
+            localStorage.removeItem('klg_user_session');
+            location.reload();
+        }
+
+        // 5. LOAD DỮ LIỆU ADMIN THỰC TẾ
+        function loadAdminData() {
+            // Load Tài xế
+            db.ref('users').orderByChild('role').equalTo('taixe').on('value', (snapshot) => {
+                let html = "";
+                snapshot.forEach((child) => {
+                    const val = child.val();
+                    html += `
+                        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-white">${child.key}</p>
+                                <p class="text-[10px] text-green-400">Ví: ${val.soDu || 0}k</p>
+                            </div>
+                            <button class="text-[10px] bg-blue-600 px-3 py-1 rounded-md font-bold uppercase">Duyệt</button>
+                        </div>
+                    `;
+                });
+                document.getElementById('ad-tx-list').innerHTML = html || '<p class="text-center text-xs text-slate-500">Chưa có tài xế nào.</p>';
+            });
         }
     </script>
 </body>
