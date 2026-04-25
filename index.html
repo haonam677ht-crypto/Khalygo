@@ -3,127 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KhaLy GO - Ghi Nhớ Đăng Nhập</title>
+    <title>KhaLy GO - Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .page { display: none; }
         .active { display: block; }
     </style>
 </head>
-<body class="bg-slate-900 font-sans text-slate-200">
+<body class="bg-slate-900 font-sans">
 
     <div id="login-page" class="page p-6">
         <div class="max-w-md mx-auto bg-slate-800 p-8 rounded-2xl shadow-2xl mt-10 border border-slate-700">
-            <h2 class="text-2xl font-bold mb-6 text-center text-yellow-400">KhaLy GO</h2>
+            <h2 class="text-2xl font-bold mb-6 text-center text-yellow-400">ĐĂNG NHẬP ADMIN</h2>
             <input id="phone" type="number" placeholder="Số điện thoại" class="w-full bg-slate-700 border-none p-3 mb-4 rounded-lg text-white outline-none">
             <input id="pass" type="password" placeholder="Mật khẩu" class="w-full bg-slate-700 border-none p-3 mb-4 rounded-lg text-white outline-none">
-            
-            <div class="flex justify-around mb-6 text-sm">
-                <label class="flex items-center gap-2"><input type="radio" name="role" value="khach" checked> Khách</label>
-                <label class="flex items-center gap-2"><input type="radio" name="role" value="taixe"> Tài xế</label>
-                <label class="flex items-center gap-2"><input type="radio" name="role" value="admin"> Admin</label>
+            <button onclick="loginAdmin()" class="w-full bg-yellow-500 text-slate-900 p-3 rounded-lg font-bold hover:bg-yellow-400 transition-all">ĐĂNG NHẬP</button>
+        </div>
+    </div>
+
+    <div id="admin-page" class="page p-4 min-h-screen text-white">
+        <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-yellow-400">KhaLy GO</h1>
+                <p class="text-xs text-gray-400">Hệ thống Quản trị Admin</p>
             </div>
-            
-            <button onclick="login()" class="w-full bg-yellow-500 text-slate-900 p-3 rounded-lg font-bold mb-2 hover:bg-yellow-400 transition-all">ĐĂNG NHẬP</button>
-            <p class="text-center text-xs text-slate-500 mt-4 italic">Hệ thống sẽ ghi nhớ đăng nhập của bạn</p>
-        </div>
-    </div>
-
-    <div id="khach-page" class="page p-4">
-        <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-            <h1 class="text-xl font-bold text-blue-400">KhaLy GO - KHÁCH</h1>
-            <button onclick="logout()" class="text-red-400 text-sm border border-red-400 px-3 py-1 rounded">Đăng xuất</button>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-            <button class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">🏍️ Xe ôm</button>
-            <button class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">🚗 Xe bao</button>
-            <button class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">🤝 Tiện chuyến</button>
-            <button class="bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-700">🚩 1 Chiều</button>
-        </div>
-    </div>
-
-    <div id="taixe-page" class="page p-4">
-        <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-            <h1 class="text-xl font-bold text-orange-400">KhaLy GO - TÀI XẾ</h1>
-            <button onclick="logout()" class="text-red-400 text-sm border border-red-400 px-3 py-1 rounded">Đăng xuất</button>
-        </div>
-        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 mb-4">
-            <p class="text-slate-400 text-sm">Số dư ví:</p>
-            <p class="text-2xl font-bold text-green-400">500.000đ</p>
-        </div>
-        <p class="text-center text-slate-500 mt-10">Danh sách đơn hàng trống...</p>
-    </div>
-
-    <div id="admin-page" class="page p-4">
-        <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-            <h1 class="text-xl font-bold text-yellow-400">KhaLy GO - ADMIN</h1>
-            <button onclick="logout()" class="text-red-400 text-sm border border-red-400 px-3 py-1 rounded">Đăng xuất</button>
+            <button onclick="logout()" class="bg-red-500/20 text-red-400 px-3 py-1 rounded border border-red-500/50 text-sm">Đăng xuất</button>
         </div>
 
-        <div class="bg-slate-800 p-4 rounded-xl border-l-4 border-orange-500 shadow-lg space-y-2">
-            <p class="text-lg font-bold text-white">Khách: 0987.123.456</p>
-            <p class="text-sm text-slate-300 italic">Loại: Xe Tiện Chuyến (Chờ báo giá)</p>
-            <p class="text-sm">📍 Từ: Ninh Kiều, Cần Thơ</p>
-            <p class="text-sm">🏁 Đến: Vị Thanh, Hậu Giang</p>
-            <p class="text-xs text-blue-300">📅 26/04/2026 - ⏰ 14:30</p>
-            <div class="flex gap-2 pt-2 border-t border-slate-700">
-                <input type="number" placeholder="Giá VNĐ" class="flex-1 bg-white text-slate-900 font-bold p-2 rounded outline-none text-sm">
-                <button onclick="alert('Đã gửi báo giá!')" class="bg-green-600 px-4 rounded font-bold text-xs">GỬI</button>
-            </div>
+        <div class="space-y-6">
+            <section>
+                <h3 class="font-bold mb-3 flex items-center text-blue-400">
+                    <span class="mr-2">🔔</span> Đơn hàng chờ báo giá
+                </h3>
+                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-lg">
+                    <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+                        <p><span class="text-gray-400">Loại xe:</span> <span class="text-yellow-500 font-bold">Xe Tiện Chuyến</span></p>
+                        <p><span class="text-gray-400">Khách hàng:</span> <span class="text-green-400 font-bold text-lg">0987.654.321</span></p>
+                        <p class="col-span-2"><span class="text-gray-400">Điểm đi:</span> 123 Đường ABC, Cần Thơ</p>
+                        <p class="col-span-2"><span class="text-gray-400">Điểm đến:</span> Quận 1, TP. Hồ Chí Minh</p>
+                        <p><span class="text-gray-400">Ngày đi:</span> 28/04/2026</p>
+                        <p><span class="text-gray-400">Giờ đi:</span> 08:30 sáng</p>
+                    </div>
+                    
+                    <div class="flex gap-2 mt-4 border-t border-slate-700 pt-4">
+                        <input type="number" placeholder="Nhập giá VNĐ..." class="flex-1 bg-white text-black font-bold p-2 rounded outline-none focus:ring-2 focus:ring-blue-500">
+                        <button class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-bold transition-all">Gửi báo giá</button>
+                        <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-bold transition-all">Xoá</button>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h3 class="font-bold mb-3 flex items-center text-yellow-400">
+                    <span class="mr-2">💰</span> Xác nhận chuyển khoản
+                </h3>
+                <div class="bg-blue-900/30 p-4 rounded-lg border border-blue-500/50 shadow-inner">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <p class="font-bold text-lg text-blue-200 underline">Đơn #123 (Xe 1 chiều)</p>
+                            <p class="text-sm">Khách: <span class="font-bold text-white">0912.333.444</span></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-yellow-400 font-bold text-xl">500.000đ</p>
+                            <p class="text-[10px] text-gray-400 italic">Chờ xác nhận tiền về túi...</p>
+                        </div>
+                    </div>
+                    <button class="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-black py-3 rounded-md mt-2 shadow-lg transition-transform active:scale-95">
+                        XÁC NHẬN ĐÃ NHẬN TIỀN & ĐẨY ĐƠN
+                    </button>
+                </div>
+            </section>
+
+            <section class="bg-slate-800 p-4 rounded-lg border border-dashed border-slate-600">
+                <h3 class="font-bold mb-3 text-gray-300 italic">Tạo đơn hộ cho khách gọi Hotline</h3>
+                <div class="space-y-2">
+                    <input type="text" placeholder="SĐT khách..." class="w-full bg-slate-700 p-2 rounded text-sm outline-none">
+                    <input type="text" placeholder="Lộ trình..." class="w-full bg-slate-700 p-2 rounded text-sm outline-none">
+                    <button class="w-full bg-gray-600 py-2 rounded text-sm font-bold">TẠO ĐƠN NHANH</button>
+                </div>
+            </section>
         </div>
     </div>
 
     <script>
-        // KIỂM TRA ĐĂNG NHẬP KHI VỪA MỞ APP
+        // 1. TỰ ĐỘNG KIỂM TRA ĐĂNG NHẬP KHI MỞ FILE
         window.onload = function() {
-            const savedRole = localStorage.getItem('userRole');
-            if (savedRole) {
-                showPage(savedRole);
+            const status = localStorage.getItem('isLoggedIn');
+            if (status === 'true') {
+                showPage('admin-page');
             } else {
-                showPage('login');
+                showPage('login-page');
             }
         };
 
-        // HÀM CHUYỂN TRANG
-        function showPage(role) {
-            // Ẩn tất cả các trang
+        // 2. HÀM CHUYỂN TRANG
+        function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            
-            // Hiện trang tương ứng
-            if (role === 'login') {
-                document.getElementById('login-page').classList.add('active');
-            } else {
-                const targetPage = document.getElementById(role + '-page');
-                if (targetPage) {
-                    targetPage.classList.add('active');
-                } else {
-                    document.getElementById('login-page').classList.add('active');
-                }
-            }
+            document.getElementById(id).classList.add('active');
         }
 
-        // HÀM ĐĂNG NHẬP
-        function login() {
-            const role = document.querySelector('input[name="role"]:checked').value;
+        // 3. HÀM XỬ LÝ ĐĂNG NHẬP
+        function loginAdmin() {
             const phone = document.getElementById('phone').value;
+            const pass = document.getElementById('pass').value;
 
-            if (phone.length < 10) {
-                alert("Vui lòng nhập đúng số điện thoại!");
-                return;
+            // Kiểm tra sơ bộ (bạn có thể thêm mật khẩu đúng của mình ở đây)
+            if(phone !== "" && pass !== "") {
+                // LƯU TRẠNG THÁI VÀO MÁY
+                localStorage.setItem('isLoggedIn', 'true');
+                showPage('admin-page');
+            } else {
+                alert("Vui lòng nhập đầy đủ thông tin!");
             }
-
-            // LƯU VÀO BỘ NHỚ (Lưu 1 lần dùng mãi mãi cho đến khi đăng xuất)
-            localStorage.setItem('userRole', role);
-            
-            showPage(role);
         }
 
-        // HÀM ĐĂNG XUẤT
+        // 4. HÀM ĐĂNG XUẤT
         function logout() {
-            // XÓA DẤU VẾT TRONG BỘ NHỚ
-            localStorage.removeItem('userRole');
-            showPage('login');
+            // XÓA GHI NHỚ ĐĂNG NHẬP
+            localStorage.removeItem('isLoggedIn');
+            showPage('login-page');
         }
     </script>
+
 </body>
 </html>
