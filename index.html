@@ -8,123 +8,139 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #d32f2f; --blue: #1a73e8; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; }
+        :root { --primary: #d32f2f; --dark: #111; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); margin: 0; }
         .container { width: 100%; max-width: 450px; min-height: 100vh; background: white; margin: auto; position: relative; padding-bottom: 80px; }
-        .header-top { background: #222; color: white; padding: 15px; display: flex; justify-content: center; font-weight: bold; font-size: 20px; }
-        .red-box { background: var(--primary); padding: 40px 20px; color: white; text-align: center; border-radius: 0 0 30px 30px; margin-bottom: 20px; }
-        .content { padding: 20px; }
-        input, select { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-main { background: var(--primary); color: white; }
-        .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); }
-        .btn-blue { background: var(--blue); color: white; }
-        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        
+        /* Giao diện giống hệt ảnh sếp gửi */
+        .header-top { background: var(--dark); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; font-weight: bold; font-size: 18px; }
+        .logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid #444; }
+        
+        .red-section { background: var(--primary); padding: 40px 20px; color: white; text-align: center; border-radius: 0 0 30px 30px; margin-bottom: 30px; }
+        .red-section h1 { margin: 0; font-size: 45px; letter-spacing: 3px; }
+        .red-section p { margin: 5px 0 0; opacity: 0.9; font-size: 14px; }
+
+        .content { padding: 0 25px; }
+        input, select { width: 100%; padding: 15px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; font-size: 16px; outline: none; }
+        button { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; font-size: 16px; }
+        
+        .btn-main { background: var(--primary); color: white; text-transform: uppercase; }
+        .btn-blue { background: #1a73e8; color: white; }
+        .btn-link { background: none; color: #1a73e8; border: none; font-size: 14px; text-decoration: none; margin-top: 15px; }
+        
+        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
         .hidden { display: none !important; }
-        .nav-bottom { position: fixed; bottom: 0; width: 100%; max-width: 450px; height: 70px; background: white; border-top: 1px solid #eee; display: flex; align-items: center; }
-        .nav-item { flex: 1; text-align: center; color: #999; font-size: 12px; }
-        .nav-item.active { color: var(--blue); }
-        .time-info { color: var(--primary); font-weight: bold; font-size: 13px; margin-bottom: 5px; display: block; }
+        
+        /* Thanh điều hướng dưới cùng */
+        .nav-bottom { position: fixed; bottom: 0; width: 100%; max-width: 450px; height: 75px; background: white; border-top: 1px solid #eee; display: flex; align-items: center; z-index: 100; }
+        .nav-item { flex: 1; text-align: center; color: #999; font-size: 12px; cursor: pointer; }
+        .nav-item.active { color: var(--primary); }
+        
+        .badge-time { display: inline-block; background: #fff5f5; color: var(--primary); padding: 4px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; margin-bottom: 8px; border: 1px solid #ffebeb; }
     </style>
 </head>
 <body onload="checkLogin()">
 
 <div class="container">
     <div id="scr-auth">
-        <div class="header-top">KhaLy GO</div>
-        <div class="red-box">
-            <h1 style="margin:0;">KLG</h1>
+        <div class="header-top">
+            <span>KhaLy GO</span>
+            <div class="logo-small" style="background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6A6B7Nn-G-T7T1N3l3o8GqX7z6r6O7X-zWg&s') center/cover;"></div>
+        </div>
+        <div class="red-section">
+            <h1>KLG</h1>
             <p>Hệ thống vận tải 4.0</p>
         </div>
-        <div class="content">
-            <div id="auth-login">
-                <input type="number" id="l-sdt" placeholder="Số điện thoại">
-                <input type="password" id="l-pass" placeholder="Mật khẩu">
-                <button class="btn-main" onclick="handleLogin()">VÀO HỆ THỐNG</button>
-                <button class="btn-outline" onclick="showReg()">ĐĂNG KÝ TÀI KHOẢN MỚI</button>
+        <div class="content" id="box-login">
+            <input type="number" id="l-sdt" placeholder="Số điện thoại">
+            <input type="password" id="l-pass" placeholder="Mật khẩu">
+            <button class="btn-main" onclick="handleLogin()">VÀO HỆ THỐNG</button>
+            <div style="text-align: center;">
+                <button class="btn-link" onclick="toggleAuth(true)">Chưa có tài khoản? Đăng ký</button>
             </div>
-            <div id="auth-reg" class="hidden">
-                <p style="font-weight:bold; text-align:center;">ĐĂNG KÝ THÀNH VIÊN</p>
-                <input type="number" id="r-sdt" placeholder="Số điện thoại">
-                <input type="password" id="r-pass" placeholder="Mật khẩu mới">
-                <select id="r-role">
-                    <option value="">-- BẠN LÀ AI? --</option>
-                    <option value="kh">TÔI LÀ KHÁCH HÀNG</option>
-                    <option value="tx">TÔI LÀ TÀI XẾ</option>
-                </select>
-                <button class="btn-main" onclick="handleRegister()">XÁC NHẬN ĐĂNG KÝ</button>
-                <button class="btn-outline" onclick="location.reload()">QUAY LẠI ĐĂNG NHẬP</button>
-            </div>
+        </div>
+        <div class="content hidden" id="box-reg">
+            <p style="text-align:center; font-weight:bold;">ĐĂNG KÝ THÀNH VIÊN</p>
+            <input type="number" id="r-sdt" placeholder="Số điện thoại mới">
+            <input type="password" id="r-pass" placeholder="Mật khẩu mới">
+            <select id="r-role">
+                <option value="tx">Tôi là Tài xế</option>
+                <option value="kh">Tôi là Khách hàng</option>
+            </select>
+            <button class="btn-main" onclick="handleRegister()">XÁC NHẬN ĐĂNG KÝ</button>
+            <button class="btn-link" onclick="toggleAuth(false)">Đã có tài khoản? Đăng nhập</button>
         </div>
     </div>
 
     <div id="scr-tx" class="hidden">
-        <div class="header-top">KLG - ĐỐI TÁC</div>
-        <div class="content">
-            <div class="card" style="display:flex; justify-content:space-around; text-align:center; background:#e3f2fd;">
-                <div><small>Số dư ví</small><br><b id="tx-du" style="color:var(--blue); font-size:18px;">0K</b></div>
+        <div class="header-top"><span>KLG - ĐỐI TÁC</span></div>
+        <div class="content" style="padding-top: 20px;">
+            <div class="card" style="display:flex; justify-content:space-around; text-align:center; background:#fff;">
+                <div><small style="color:#888;">Số dư ví</small><br><b id="tx-du" style="color:var(--primary); font-size:22px;">0K</b></div>
             </div>
-            <div id="tx-list-moi">
-                <p><b>ĐƠN HÀNG MỚI</b></p>
-                <div id="list-don"></div>
-            </div>
+            <p style="font-weight: bold; border-left: 4px solid var(--primary); padding-left: 10px;">DANH SÁCH ĐƠN MỚI</p>
+            <div id="list-don"></div>
         </div>
         <div class="nav-bottom">
-            <div class="nav-item active"><i class="fa fa-car"></i><br>Cuốc xe</div>
-            <div class="nav-item" onclick="dangXuat()"><i class="fa fa-sign-out-alt"></i><br>Thoát</div>
+            <div class="nav-item active"><i class="fa fa-car fa-lg"></i><br>Cuốc xe</div>
+            <div class="nav-item" onclick="dangXuat()"><i class="fa fa-sign-out-alt fa-lg"></i><br>Thoát</div>
         </div>
     </div>
 
     <div id="scr-admin" class="hidden">
-        <div class="header-top">KLG - ADMIN</div>
-        <div class="content">
-            <button class="btn-blue" onclick="document.getElementById('ad-form').classList.toggle('hidden')">+ TẠO ĐƠN GỌI TRỰC TIẾP</button>
-            <div id="ad-form" class="card hidden">
-                <input type="number" id="ad-sdt-k" placeholder="SĐT Khách">
-                <input type="text" id="ad-tu" placeholder="📍 Điểm đón">
+        <div class="header-top"><span>KLG - QUẢN TRỊ</span></div>
+        <div class="content" style="padding-top: 20px;">
+            <button class="btn-blue" onclick="document.getElementById('ad-form').classList.toggle('hidden')">
+                <i class="fa fa-plus-circle"></i> TẠO ĐƠN GỌI TRỰC TIẾP
+            </button>
+            
+            <div id="ad-form" class="card hidden" style="margin-top:15px;">
+                <input type="number" id="ad-sdt-k" placeholder="Số điện thoại khách">
+                <input type="text" id="ad-tu" placeholder="📍 Điểm đón khách">
                 <input type="text" id="ad-den" placeholder="🏁 Điểm đến">
                 <div style="display:flex; gap:10px;">
-                    <input type="date" id="ad-ngay" style="flex:1;">
-                    <input type="time" id="ad-gio" style="flex:1;">
+                    <input type="date" id="ad-ngay">
+                    <input type="time" id="ad-gio">
                 </div>
                 <input type="number" id="ad-gia" placeholder="Giá tiền (Ví dụ: 500)">
-                <button class="btn-main" onclick="adPhatDon()">PHÁT ĐƠN NGAY</button>
+                <button class="btn-main" onclick="adPhatDon()">PHÁT ĐƠN CHO TÀI XẾ</button>
             </div>
-            <p><b>CHỜ THANH TOÁN (80% LƯƠNG)</b></p>
+
+            <p style="font-weight: bold; margin-top: 25px;">ĐƠN HOÀN THÀNH - CHỜ TRẢ LƯƠNG</p>
             <div id="ad-list-tra"></div>
         </div>
     </div>
 </div>
 
 <script>
+    // CẤU HÌNH FIREBASE CỦA SẾP
     const firebaseConfig = { databaseURL: "https://khaly-go-23798-default-rtdb.asia-southeast1.firebasedatabase.app" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
-    const ADMIN_HOTLINE = "0789454369";
-    const ADMIN_PASS = "19861990LyVinh@";
+    const ADMIN_SĐT = "0789454369";
+    const ADMIN_MK = "19861990LyVinh@";
 
-    function showReg() { 
-        document.getElementById('auth-login').classList.add('hidden');
-        document.getElementById('auth-reg').classList.remove('hidden');
+    function toggleAuth(isReg) {
+        document.getElementById('box-login').classList.toggle('hidden', isReg);
+        document.getElementById('box-reg').classList.toggle('hidden', !isReg);
     }
 
     function handleRegister() {
         const s = document.getElementById('r-sdt').value, p = document.getElementById('r-pass').value, r = document.getElementById('r-role').value;
-        if(!s || !p || !r) return alert("Sếp điền đủ thông tin!");
+        if(!s || !p) return alert("Sếp nhập đủ SĐT và Mật khẩu nhé!");
         db.ref('users/' + s).set({pass:p, role:r, soDu:0}).then(() => {
-            alert("Đăng ký thành công!");
+            alert("Đăng ký xong! Sếp đăng nhập đi.");
             location.reload();
         });
     }
 
     function handleLogin() {
         const s = document.getElementById('l-sdt').value, p = document.getElementById('l-pass').value;
-        if(s === ADMIN_HOTLINE && p === ADMIN_PASS) {
+        if(s === ADMIN_SĐT && p === ADMIN_MK) {
             localStorage.setItem('klg_user', s);
             localStorage.setItem('klg_role', 'admin');
-            location.reload();
-            return;
+            location.reload(); return;
         }
         db.ref('users/' + s).once('value', ss => {
             const u = ss.val();
@@ -132,7 +148,7 @@
                 localStorage.setItem('klg_user', s);
                 localStorage.setItem('klg_role', u.role);
                 location.reload();
-            } else alert("Sai thông tin đăng nhập!");
+            } else alert("Sai thông tin rồi sếp ơi!");
         });
     }
 
@@ -140,13 +156,13 @@
         const u = localStorage.getItem('klg_user'), r = localStorage.getItem('klg_role');
         if(!u) return;
         document.getElementById('scr-auth').classList.add('hidden');
-        if(u === ADMIN_HOTLINE || r === 'admin') loadAdmin(); else if(r === 'tx') loadTX(u);
+        if(r === 'admin') loadAdmin(); else if(r === 'tx') loadTX(u);
         
-        // Mặc định ngày giờ hiện tại cho Admin
+        // Tự điền ngày giờ hiện tại
         if(document.getElementById('ad-ngay')) {
-            const now = new Date();
-            document.getElementById('ad-ngay').value = now.toISOString().split('T')[0];
-            document.getElementById('ad-gio').value = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+            const d = new Date();
+            document.getElementById('ad-ngay').value = d.toISOString().split('T')[0];
+            document.getElementById('ad-gio').value = d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0');
         }
     }
 
@@ -156,16 +172,21 @@
             let h = "";
             s.forEach(c => {
                 const d = c.val();
-                h += `<div class="card"><span class="time-info">📅 ${d.gio} - ${d.ngay}</span><b>TX ${d.tx} xong: ${d.gia}K</b><br><span style="color:red">Trả lương 80%: ${Math.round(d.gia*0.8)}K</span><br><button onclick="db.ref('don_hoan_thanh/${c.key}').remove()">XÁC NHẬN ĐÃ TRẢ TIỀN</button></div>`;
+                h += `<div class="card">
+                    <span class="badge-time">HOÀN THÀNH: ${d.gio} | ${d.ngay}</span><br>
+                    <b>TX: ${d.tx}</b> - Khách: ${d.khach}<br>
+                    <span style="color:green">Giá: ${d.gia}K</span> → <span style="color:red; font-weight:bold;">Lương: ${Math.round(d.gia*0.8)}K</span><br>
+                    <button class="btn-blue" style="padding:10px; font-size:13px;" onclick="db.ref('don_hoan_thanh/${c.key}').remove()">XÁC NHẬN ĐÃ TRẢ TIỀN</button>
+                </div>`;
             });
-            document.getElementById('ad-list-tra').innerHTML = h || "Chưa có đơn.";
+            document.getElementById('ad-list-tra').innerHTML = h || "<p style='color:#999'>Chưa có đơn nào xong.</p>";
         });
     }
 
     function adPhatDon() {
-        const k = document.getElementById('ad-sdt-k').value, t = document.getElementById('ad-tu').value, d = document.getElementById('ad-den').value, g = document.getElementById('ad-gia').value, n = document.getElementById('ad-ngay').value, gio = document.getElementById('ad-gio').value;
-        if(!k || !g) return alert("Sếp nhập đủ SĐT và Giá!");
-        db.ref('don_da_duyet').push({khach:k, tu:t, den:d, gia:g, ngay:n, gio:gio});
+        const k = document.getElementById('ad-sdt-k').value, t = document.getElementById('ad-tu').value, d = document.getElementById('ad-den').value, g = document.getElementById('ad-gia').value, ngay = document.getElementById('ad-ngay').value, gio = document.getElementById('ad-gio').value;
+        if(!k || !g) return alert("Sếp thiếu SĐT khách hoặc Giá tiền!");
+        db.ref('don_da_duyet').push({khach:k, tu:t, den:d, gia:g, ngay:ngay, gio:gio});
         alert("Đã phát đơn thành công!");
         document.getElementById('ad-form').classList.add('hidden');
     }
@@ -177,9 +198,14 @@
             let h = "";
             s.forEach(c => {
                 const d = c.val(), phi = Math.round(d.gia*0.2);
-                h += `<div class="card"><span class="time-info">⏰ Lịch đón: ${d.gio} - ${d.ngay}</span><b>${d.gia}K</b> (Phí: ${phi}K)<br>${d.tu} ➔ ${d.den}<br><button class="btn-blue" onclick="txNhan('${c.key}',${phi})">NHẬN & TRỪ PHÍ</button></div>`;
+                h += `<div class="card">
+                    <span class="badge-time"><i class="far fa-clock"></i> ĐÓN: ${d.gio} - ${d.ngay}</span><br>
+                    <b style="font-size:18px; color:var(--primary);">${d.gia}K</b> (Phí: ${phi}K)<br>
+                    <small>📍 ${d.tu}</small><br><small>🏁 ${d.den}</small><br>
+                    <button class="btn-main" style="margin-top:15px;" onclick="txNhan('${c.key}',${phi})">NHẬN CHUYẾN NÀY</button>
+                </div>`;
             });
-            document.getElementById('list-don').innerHTML = h || "Chờ đơn...";
+            document.getElementById('list-don').innerHTML = h || "<p style='color:#999; text-align:center;'>Đang chờ sếp phát đơn...</p>";
         });
     }
 
@@ -187,13 +213,13 @@
         const u = localStorage.getItem('klg_user');
         db.ref('users/' + u).once('value', s => {
             const sd = s.val().soDu || 0;
-            if(sd < phi) return alert("Ví không đủ tiền!");
+            if(sd < phi) return alert("Ví không đủ tiền sếp ơi, nạp thêm đi!");
             db.ref('users/' + u).update({soDu: sd - phi});
             db.ref('don_da_duyet/' + id).once('value', ss => {
                 const data = ss.val(); data.tx = u;
                 db.ref('don_hoan_thanh').push(data);
                 db.ref('don_da_duyet/' + id).remove();
-                alert("Đã nhận đơn!");
+                alert("Nhận đơn thành công! Chúc sếp thượng lộ bình an.");
             });
         });
     }
