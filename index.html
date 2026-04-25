@@ -3,118 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KLG - Hệ Thống Vận Tải Chuyên Nghiệp</title>
+    <title>KLG - Quản Lý Chuyến Xe</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #d32f2f; --secondary: #28a745; --bg: #f4f7f6; --blue: #1a73e8; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; }
-        .container { width: 100%; max-width: 450px; min-height: 100vh; background: white; margin: auto; position: relative; padding-bottom: 80px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 450px; min-height: 100vh; background: white; position: relative; padding-bottom: 80px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
         .header { background: var(--primary); color: white; padding: 20px; text-align: center; border-radius: 0 0 20px 20px; }
         .content { padding: 15px; }
         
-        /* Form & Input */
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .btn-main { background: var(--primary); color: white; }
-        .btn-success { background: var(--secondary); color: white; }
-        .btn-blue { background: var(--blue); color: white; }
+        /* Đơn hàng */
+        .card-don { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .gia-don { color: var(--primary); font-size: 20px; font-weight: bold; }
+        .phi-du-kien { font-size: 13px; color: #666; background: #fff3e0; padding: 4px 8px; border-radius: 5px; display: inline-block; margin-top: 5px; }
         
-        /* Card Styles */
-        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .gia-thanh { color: var(--primary); font-size: 22px; font-weight: bold; }
-        .phi-badge { background: #fff3e0; color: #e65100; padding: 4px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; }
-        
-        /* Bottom Nav */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 450px; height: 70px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-        .nav-item { text-align: center; color: #999; font-size: 11px; flex: 1; cursor: pointer; }
-        .nav-item.active { color: var(--blue); }
+        /* Buttons */
+        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-nhan { background: var(--secondary); color: white; }
+        .btn-call { background: var(--blue); color: white; position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 100; }
+        .btn-hoanthanh { background: #333; color: white; }
+
+        /* Wallet */
+        .wallet-bar { background: #E3F2FD; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .hidden { display: none !important; }
         
-        /* Admin Tab Navigation */
-        .admin-tabs { display: flex; gap: 5px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 10px; font-size: 12px; background: #eee; border-radius: 8px; border: none; }
-        .tab-btn.active { background: var(--primary); color: white; }
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 450px; height: 70px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; }
+        .nav-item { text-align: center; color: #999; font-size: 12px; flex: 1; cursor: pointer; }
+        .nav-item.active { color: var(--blue); }
     </style>
 </head>
 <body onload="kiemTraPhien()">
 
 <div class="container">
-    <div id="scr-login">
-        <div class="header"><h1>KLG</h1><p>Hệ thống vận tải 4.0</p></div>
-        <div class="content">
-            <input type="number" id="l-sdt" placeholder="Số điện thoại">
-            <button class="btn-main" onclick="xuLyLogin()">VÀO HỆ THỐNG</button>
-            <p style="text-align:center; font-size:13px; color:#666;">Dành cho Admin & Đối tác tài xế</p>
-        </div>
-    </div>
-
-    <div id="scr-admin" class="hidden">
-        <div class="header"><h3>QUẢN TRỊ KLG</h3></div>
-        <div class="content">
-            <div class="admin-tabs">
-                <button class="tab-btn active" onclick="switchAdminTab('create')">TẠO ĐƠN</button>
-                <button class="tab-btn" onclick="switchAdminTab('pay')">TRẢ LƯƠNG</button>
-                <button class="tab-btn" onclick="switchAdminTab('users')">TÀI XẾ</button>
-            </div>
-
-            <div id="ad-view-create">
-                <p style="font-weight:bold; color:var(--blue);">LÊN ĐƠN KHÁCH GỌI TRỰC TIẾP</p>
-                <input type="number" id="ad-khach" placeholder="SĐT Khách">
-                <input type="text" id="ad-tu" placeholder="📍 Điểm đón">
-                <input type="text" id="ad-den" placeholder="🏁 Điểm đến">
-                <input type="number" id="ad-gia" placeholder="Giá thu khách (VD: 500)">
-                <button class="btn-success" onclick="adPhatDon()">PHÁT ĐƠN CHO TÀI XẾ</button>
-            </div>
-
-            <div id="ad-view-pay" class="hidden">
-                <p style="font-weight:bold;">ĐƠN CHỜ THANH TOÁN (80%)</p>
-                <div id="ad-list-pay"></div>
-            </div>
-
-            <div id="ad-view-users" class="hidden">
-                <div id="ad-list-tx"></div>
-            </div>
-            
-            <button onclick="dangXuat()" style="background:#666; color:white;">THOÁT</button>
-        </div>
-    </div>
-
     <div id="scr-tx" class="hidden">
-        <div class="header"><h3>ĐỐI TÁC KLG</h3></div>
+        <div class="header"><h3>Hệ thống KLG</h3></div>
+        
         <div class="content">
-            <div class="card" style="background:#E3F2FD; display:flex; justify-content:space-between; align-items:center;">
-                <div><span>Ví của tôi:</span><br><b id="tx-wallet" style="font-size:20px; color:var(--blue);">0K</b></div>
-                <button onclick="switchTXTab('profile')" style="width:auto; margin:0; padding:8px 12px; font-size:12px;">NẠP TIỀN</button>
+            <div class="wallet-bar">
+                <div><span>Số dư ví:</span><br><b id="val-du" style="font-size:18px; color:var(--blue);">0K</b></div>
+                <button onclick="switchTab('profile')" style="width:auto; padding:8px 15px; margin:0; font-size:12px;">NẠP TIỀN</button>
             </div>
 
-            <div id="tx-view-don">
-                <div id="tx-list-moi"></div>
-                <div id="tx-dang-chay" class="hidden">
-                    <div class="card" style="border-left:5px solid var(--secondary);">
-                        <p style="font-weight:bold; color:var(--secondary);">ĐƠN ĐANG THỰC HIỆN</p>
-                        <div id="tx-details-chay"></div>
-                        <button class="btn-main" onclick="hoanThanhChuyen()">HOÀN THÀNH (BÁO SẾP TRẢ LƯƠNG)</button>
+            <div id="tab-noti">
+                <div id="list-don-cho"></div>
+                <div id="don-dang-chay" class="hidden">
+                    <div class="card-don" style="border-left:5px solid var(--secondary);">
+                        <p style="font-weight:bold; color:var(--secondary);">ĐANG THỰC HIỆN CHUYẾN</p>
+                        <div id="chi-tiet-don-chay"></div>
+                        <button class="btn-hoanthanh" onclick="hoanThanhChuyen()">BẤM HOÀN THÀNH CHUYẾN</button>
                     </div>
                 </div>
             </div>
 
-            <div id="tx-view-profile" class="hidden">
-                <div style="text-align:center;">
-                    <p style="font-weight:bold;">QUÉT QR NẠP TIỀN VÀO VÍ</p>
-                    <img src="https://img.vietqr.io/image/vcb-0789454369-compact.jpg?amount=100000&addInfo=KLG%20Nap%20Tien" style="width:200px; border:1px solid #ddd;">
-                    <p style="font-size:12px; color:#666;">Nạp xong báo Sếp để được cộng tiền vào ví.</p>
+            <div id="tab-profile" class="hidden">
+                <div style="text-align:center; padding:20px; background:#fffde7; border-radius:12px;">
+                    <p style="font-weight:bold; color:var(--primary);">QUÉT MÃ NẠP TIỀN VÀO VÍ</p>
+                    <img src="https://img.vietqr.io/image/vcb-0789454369-compact.jpg?amount=100000&addInfo=KLG%20Nap%20Tien" style="width:200px;">
+                    <p style="font-size:12px;">Nạp ít nhất 100K để duy trì nhận đơn.<br>Phí hệ thống: 20%/đơn.</p>
                 </div>
-                <button onclick="dangXuat()" style="background:#eee; margin-top:20px;">ĐĂNG XUẤT</button>
+                <button onclick="dangXuat()" style="background:#eee; margin-top:30px;">ĐĂNG XUẤT</button>
             </div>
         </div>
 
-        <a href="tel:0789454369"><button style="position:fixed; bottom:85px; right:20px; width:60px; height:60px; border-radius:50%; background:var(--blue); color:white; box-shadow:0 4px 10px rgba(0,0,0,0.2);"><i class="fa fa-phone"></i></button></a>
+        <a href="tel:0789454369"><button class="btn-call"><i class="fa fa-phone"></i></button></a>
 
         <div class="bottom-nav">
-            <div class="nav-item active" id="m-don" onclick="switchTXTab('don')"><i class="fa fa-car" style="font-size:20px;"></i><br>Cuốc xe</div>
-            <div class="nav-item" id="m-pro" onclick="switchTXTab('profile')"><i class="fa fa-wallet" style="font-size:20px;"></i><br>Ví & Nạp</div>
+            <div class="nav-item active" id="m-noti" onclick="switchTab('noti')"><i class="fa fa-car"></i><br>Chuyến xe</div>
+            <div class="nav-item" id="m-profile" onclick="switchTab('profile')"><i class="fa fa-wallet"></i><br>Ví & Nạp tiền</div>
+        </div>
+    </div>
+
+    <div id="scr-login">
+        <div class="header"><h1>KLG</h1></div>
+        <div class="content">
+            <input type="number" id="l-sdt" style="width:100%; padding:12px; margin-bottom:10px;" placeholder="Số điện thoại">
+            <button class="btn-nhan" onclick="xuLyLogin()">VÀO APP TÀI XẾ</button>
         </div>
     </div>
 </div>
@@ -123,129 +89,96 @@
     const firebaseConfig = { databaseURL: "https://khaly-go-23798-default-rtdb.asia-southeast1.firebasedatabase.app" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const SO_SEP = "0789454369";
     let curSdt = "", myWallet = 0;
 
     function kiemTraPhien() {
         const u = localStorage.getItem('klg_user');
         if(u) {
             curSdt = JSON.parse(u).sdt;
-            if(curSdt === SO_SEP) hienAdmin(); else hienTX();
+            document.getElementById('scr-login').classList.add('hidden');
+            document.getElementById('scr-tx').classList.remove('hidden');
+            theoDoiVi();
+            loadDonHang();
         }
     }
 
-    // --- LOGIC ADMIN ---
-    function hienAdmin() {
-        document.getElementById('scr-login').classList.add('hidden');
-        document.getElementById('scr-admin').classList.remove('hidden');
-        loadAdminPay();
-    }
-
-    function adPhatDon() {
-        const k = document.getElementById('ad-khach').value, t = document.getElementById('ad-tu').value,
-              d = document.getElementById('ad-den').value, g = document.getElementById('ad-gia').value;
-        if(!k || !g) return alert("Sếp điền đủ thông tin khách và giá!");
-        db.ref('don_da_duyet').push({khach: k, tu: t, den: d, gia: g, status: "moi"});
-        alert("Đã phát đơn thành công!");
-    }
-
-    function loadAdminPay() {
-        db.ref('don_hoan_thanh').on('value', s => {
-            let h = "";
-            s.forEach(c => {
-                const d = c.val();
-                const luong = Math.round(d.gia * 0.8);
-                h += `<div class="card">
-                    <b>TX ${d.tx}:</b> Xong đơn ${d.gia}K<br>
-                    <span style="color:red">Cần trả lương: ${luong}K (80%)</span>
-                    <button class="btn-blue" onclick="adXacNhanTraLuong('${c.key}')" style="padding:8px; font-size:12px;">ĐÃ CHUYỂN KHOẢN</button>
-                </div>`;
-            });
-            document.getElementById('ad-list-pay').innerHTML = h || "Chưa có đơn nào cần trả tiền.";
-        });
-    }
-
-    function adXacNhanTraLuong(id) { db.ref('don_hoan_thanh/' + id).remove(); }
-
-    function switchAdminTab(t) {
-        document.getElementById('ad-view-create').classList.toggle('hidden', t !== 'create');
-        document.getElementById('ad-view-pay').classList.toggle('hidden', t !== 'pay');
-        document.getElementById('ad-view-users').classList.toggle('hidden', t !== 'users');
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
-    }
-
-    // --- LOGIC TÀI XẾ ---
-    function hienTX() {
-        document.getElementById('scr-login').classList.add('hidden');
-        document.getElementById('scr-tx').classList.remove('hidden');
+    function theoDoiVi() {
         db.ref('users/' + curSdt).on('value', s => {
             myWallet = s.val()?.soDu || 0;
-            document.getElementById('tx-wallet').innerText = myWallet + "K";
+            document.getElementById('val-du').innerText = myWallet + "K";
         });
-        loadDonTX();
     }
 
-    function loadDonTX() {
+    function loadDonHang() {
         db.ref('don_da_duyet').on('value', s => {
             let h = "";
-            s.forEach(c => {
-                const d = c.val();
-                const phi = Math.round(d.gia * 0.2);
-                h += `<div class="card">
-                    <span class="gia-thanh">${d.gia}K</span> <span class="phi-badge">Phí trừ ví: ${phi}K</span>
-                    <p>📍 ${d.tu} ➔ 🏁 ${d.den}</p>
-                    <button class="btn-success" onclick="txNhanDon('${c.key}', ${phi})">NHẬN ĐƠN & TRỪ PHÍ</button>
+            s.forEach(child => {
+                const d = child.val();
+                const giaSo = parseInt(d.gia);
+                const phi = Math.round(giaSo * 0.2);
+                h += `
+                <div class="card-don">
+                    <div class="gia-don">${d.gia}K</div>
+                    <div class="phi-du-kien">Phí trừ ví: ${phi}K (20%)</div>
+                    <p>📍 ${d.tu} <br> 🏁 ${d.den}</p>
+                    <button class="btn-nhan" onclick="xacNhanNhanDon('${child.key}', ${phi}, ${giaSo})">NHẬN ĐƠN NGAY</button>
                 </div>`;
             });
-            document.getElementById('tx-list-moi').innerHTML = h || "<p style='text-align:center; color:#999;'>Chờ đơn từ Sếp...</p>";
+            document.getElementById('list-don-cho').innerHTML = h || "<p style='text-align:center; color:#999;'>Đang quét đơn mới...</p>";
         });
     }
 
-    function txNhanDon(id, phi) {
-        if(myWallet < phi) return alert("Ví không đủ " + phi + "K. Nạp thêm tiền sếp ơi!");
-        if(confirm("Nhận đơn này sẽ trừ ngay " + phi + "K phí sàn. Đồng ý?")) {
-            db.ref('users/' + curSdt).update({ soDu: myWallet - phi });
-            db.ref('don_da_duyet/' + id).once('value', s => {
-                const data = s.val(); data.tx = curSdt;
-                db.ref('don_dang_chay/' + curSdt).set(data);
-                db.ref('don_da_duyet/' + id).remove();
-                hienViecDangLam(data);
+    function xacNhanNhanDon(id, phi, gia) {
+        if(myWallet < phi) {
+            alert("Số dư ví không đủ " + phi + "K để nhận đơn này. Vui lòng nạp thêm!");
+            switchTab('profile');
+            return;
+        }
+
+        if(confirm("Hệ thống sẽ trừ " + phi + "K phí sàn ngay lập tức. Bạn đồng ý?")) {
+            // 1. Trừ tiền ví tài xế
+            const newBalance = myWallet - phi;
+            db.ref('users/' + curSdt).update({ soDu: newBalance }).then(() => {
+                // 2. Chuyển đơn vào mục "Đang chạy" và xóa khỏi mục chung
+                db.ref('don_da_duyet/' + id).once('value', s => {
+                    const data = s.val();
+                    db.ref('don_dang_chay/' + curSdt).set(data);
+                    db.ref('don_da_duyet/' + id).remove();
+                    hienDonDangChay(data);
+                });
             });
         }
     }
 
-    function hienViecDangLam(d) {
-        document.getElementById('tx-list-moi').classList.add('hidden');
-        document.getElementById('tx-dang-chay').classList.remove('hidden');
-        document.getElementById('tx-details-chay').innerHTML = `
-            <p><b>KHÁCH:</b> <a href="tel:${d.khach}" style="font-size:20px; color:var(--blue);">${d.khach}</a></p>
-            <p><b>LỘ TRÌNH:</b> ${d.tu} - ${d.den}</p>
-            <p>Sếp đã thu của khách: <b>${d.gia}K</b>. Trả khách xong bấm nút dưới.</p>
+    function hienDonDangChay(d) {
+        document.getElementById('list-don-cho').classList.add('hidden');
+        document.getElementById('don-dang-chay').classList.remove('hidden');
+        document.getElementById('chi-tiet-don-chay').innerHTML = `
+            <p><b>Khách:</b> <a href="tel:${d.khach}" style="font-size:18px; color:var(--blue); font-weight:bold;">${d.khach} (Bấm để gọi)</a></p>
+            <p><b>Lộ trình:</b> ${d.tu} đi ${d.den}</p>
+            <p><b>Thu khách:</b> <span style="color:red; font-weight:bold;">${d.gia}K</span></p>
         `;
     }
 
     function hoanThanhChuyen() {
-        if(confirm("Xác nhận đã trả khách an toàn?")) {
-            db.ref('don_dang_chay/' + curSdt).once('value', s => {
-                db.ref('don_hoan_thanh').push(s.val());
-                db.ref('don_dang_chay/' + curSdt).remove();
-                alert("Đã báo Sếp hoàn thành. Chờ Sếp chuyển 80% lương nhen!");
+        if(confirm("Xác nhận đã trả khách và thu tiền xong?")) {
+            db.ref('don_dang_chay/' + curSdt).remove().then(() => {
+                alert("Chúc mừng bạn hoàn thành chuyến xe!");
                 location.reload();
             });
         }
     }
 
-    function switchTXTab(t) {
-        document.getElementById('tx-view-don').classList.toggle('hidden', t !== 'don');
-        document.getElementById('tx-view-profile').classList.toggle('hidden', t !== 'profile');
-        document.getElementById('m-don').classList.toggle('active', t === 'don');
-        document.getElementById('m-pro').classList.toggle('active', t === 'profile');
+    function switchTab(t) {
+        document.getElementById('tab-noti').classList.toggle('hidden', t !== 'noti');
+        document.getElementById('tab-profile').classList.toggle('hidden', t !== 'profile');
+        document.getElementById('m-noti').classList.toggle('active', t === 'noti');
+        document.getElementById('m-profile').classList.toggle('active', t === 'profile');
     }
 
     function xuLyLogin() {
         const sdt = document.getElementById('l-sdt').value;
-        if(!sdt) return alert("Nhập số điện thoại!");
+        if(!sdt) return;
         localStorage.setItem('klg_user', JSON.stringify({sdt: sdt}));
         location.reload();
     }
