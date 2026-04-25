@@ -2,35 +2,42 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KLG - Quản Lý Chuyến Xe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KLG - Hệ Thống Vận Tải</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #d32f2f; --secondary: #28a745; --bg: #f4f7f6; --blue: #1a73e8; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 450px; min-height: 100vh; background: white; position: relative; padding-bottom: 80px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-        .header { background: var(--primary); color: white; padding: 20px; text-align: center; border-radius: 0 0 20px 20px; }
-        .content { padding: 15px; }
+        :root { --primary: #d32f2f; --secondary: #28a745; --bg: #f4f7f6; --blue: #1a73e8; --dark: #1a1a1a; }
+        html, body { overscroll-behavior-y: contain; overflow: hidden; height: 100%; margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); }
+        .container { width: 100%; max-width: 450px; height: 100%; margin: auto; background: white; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
         
-        /* Đơn hàng */
-        .card-don { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .gia-don { color: var(--primary); font-size: 20px; font-weight: bold; }
-        .phi-du-kien { font-size: 13px; color: #666; background: #fff3e0; padding: 4px 8px; border-radius: 5px; display: inline-block; margin-top: 5px; }
-        
-        /* Buttons */
-        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-nhan { background: var(--secondary); color: white; }
-        .btn-call { background: var(--blue); color: white; position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 100; }
-        .btn-hoanthanh { background: #333; color: white; }
+        /* Header đen chuẩn thương hiệu */
+        .header-top { background: var(--dark); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; font-weight: bold; font-size: 18px; }
+        .logo-box { width: 35px; height: 35px; border-radius: 4px; overflow: hidden; background: #000; }
 
-        /* Wallet */
-        .wallet-bar { background: #E3F2FD; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .red-banner { background: var(--primary); padding: 40px 20px; color: white; text-align: center; border-radius: 0 0 35px 35px; margin-bottom: 30px; }
+        .red-banner h1 { margin: 0; font-size: 42px; letter-spacing: 2px; }
+
+        .content { padding: 15px; flex: 1; overflow-y: auto; }
+        
+        /* Input & Buttons */
+        input, select { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; font-size: 16px; outline: none; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; }
+        .btn-red { background: var(--primary); color: white; text-transform: uppercase; }
+        .btn-nhan { background: var(--secondary); color: white; }
+        .btn-blue { background: var(--blue); color: white; }
+
+        /* Card đơn hàng */
+        .card-don { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .gia-don { color: var(--primary); font-size: 22px; font-weight: bold; }
+        .phi-tag { font-size: 12px; color: #666; background: #fff3e0; padding: 4px 8px; border-radius: 5px; display: inline-block; margin: 5px 0; }
+        
+        .wallet-bar { background: #E3F2FD; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .hidden { display: none !important; }
         
-        /* Bottom Nav */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 450px; height: 70px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; }
+        /* Nav */
+        .bottom-nav { height: 75px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; padding-bottom: 10px; }
         .nav-item { text-align: center; color: #999; font-size: 12px; flex: 1; cursor: pointer; }
         .nav-item.active { color: var(--blue); }
     </style>
@@ -38,49 +45,69 @@
 <body onload="kiemTraPhien()">
 
 <div class="container">
-    <div id="scr-tx" class="hidden">
-        <div class="header"><h3>Hệ thống KLG</h3></div>
-        
+    <div class="header-top">
+        <span>KhaLy GO</span>
+        <div class="logo-box"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6A6B7Nn-G-T7T1N3l3o8GqX7z6r6O7X-zWg&s" width="100%"></div>
+    </div>
+
+    <div id="scr-auth">
+        <div class="red-banner"><h1>KLG</h1><p>Hệ thống vận tải 4.0</p></div>
+        <div class="content">
+            <div id="box-login">
+                <input type="number" id="l-sdt" placeholder="Số điện thoại">
+                <input type="password" id="l-pass" placeholder="Mật khẩu">
+                <button class="btn-red" onclick="xuLyLogin()">VÀO HỆ THỐNG</button>
+                <a onclick="showReg()" style="display:block; text-align:center; margin-top:20px; color:var(--blue); cursor:pointer; font-size:14px;">Chưa có tài khoản? Đăng ký ngay</a>
+            </div>
+
+            <div id="box-reg" class="hidden">
+                <p style="text-align:center; font-weight:bold;">ĐĂNG KÝ THÀNH VIÊN</p>
+                <input type="number" id="r-sdt" placeholder="Số điện thoại mới">
+                <input type="password" id="r-pass" placeholder="Mật khẩu mới">
+                <select id="r-role">
+                    <option value="tx">Tôi là Tài xế</option>
+                    <option value="kh">Tôi là Khách hàng</option>
+                </select>
+                <button class="btn-red" onclick="handleRegister()">XÁC NHẬN ĐĂNG KÝ</button>
+                <a onclick="location.reload()" style="display:block; text-align:center; margin-top:20px; color:var(--blue); cursor:pointer;">Quay lại Đăng nhập</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="scr-tx" class="hidden" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
         <div class="content">
             <div class="wallet-bar">
-                <div><span>Số dư ví:</span><br><b id="val-du" style="font-size:18px; color:var(--blue);">0K</b></div>
-                <button onclick="switchTab('profile')" style="width:auto; padding:8px 15px; margin:0; font-size:12px;">NẠP TIỀN</button>
+                <div><span>Ví tài xế:</span><br><b id="val-du" style="font-size:20px; color:var(--blue);">0K</b></div>
+                <button onclick="switchTab('profile')" style="width:auto; padding:8px 12px; margin:0; font-size:12px; background:var(--blue); color:white;">NẠP TIỀN</button>
             </div>
 
             <div id="tab-noti">
+                <p style="font-weight:bold; border-left:4px solid var(--primary); padding-left:10px;">DANH SÁCH ĐƠN MỚI</p>
                 <div id="list-don-cho"></div>
+                
                 <div id="don-dang-chay" class="hidden">
-                    <div class="card-don" style="border-left:5px solid var(--secondary);">
-                        <p style="font-weight:bold; color:var(--secondary);">ĐANG THỰC HIỆN CHUYẾN</p>
+                    <div class="card-don" style="border-left:5px solid var(--secondary); background:#f0fff4;">
+                        <p style="font-weight:bold; color:var(--secondary); margin-top:0;">🚀 CHUYẾN ĐANG THỰC HIỆN</p>
                         <div id="chi-tiet-don-chay"></div>
-                        <button class="btn-hoanthanh" onclick="hoanThanhChuyen()">BẤM HOÀN THÀNH CHUYẾN</button>
+                        <button class="btn-red" style="background:#333;" onclick="hoanThanhChuyen()">HOÀN THÀNH & THU TIỀN</button>
                     </div>
                 </div>
             </div>
 
             <div id="tab-profile" class="hidden">
-                <div style="text-align:center; padding:20px; background:#fffde7; border-radius:12px;">
-                    <p style="font-weight:bold; color:var(--primary);">QUÉT MÃ NẠP TIỀN VÀO VÍ</p>
-                    <img src="https://img.vietqr.io/image/vcb-0789454369-compact.jpg?amount=100000&addInfo=KLG%20Nap%20Tien" style="width:200px;">
-                    <p style="font-size:12px;">Nạp ít nhất 100K để duy trì nhận đơn.<br>Phí hệ thống: 20%/đơn.</p>
+                <div style="text-align:center; padding:20px; background:#fffde7; border-radius:15px; border:1px dashed #fbc02d;">
+                    <p style="font-weight:bold; color:var(--primary);">NẠP TIỀN QUA VIETQR</p>
+                    <img id="qr-code" src="" style="width:220px; border-radius:10px;">
+                    <p style="font-size:12px; color:#666; margin-top:10px;">Phí sàn: 20% trừ trực tiếp khi nhận đơn.</p>
                 </div>
-                <button onclick="dangXuat()" style="background:#eee; margin-top:30px;">ĐĂNG XUẤT</button>
+                <button class="btn-blue" style="margin-top:20px;" onclick="window.location.href='tel:0789454369'">GỌI TỔNG ĐÀI HỖ TRỢ</button>
+                <button onclick="dangXuat()" style="background:#eee; color:#666; margin-top:10px;">ĐĂNG XUẤT</button>
             </div>
         </div>
 
-        <a href="tel:0789454369"><button class="btn-call"><i class="fa fa-phone"></i></button></a>
-
         <div class="bottom-nav">
-            <div class="nav-item active" id="m-noti" onclick="switchTab('noti')"><i class="fa fa-car"></i><br>Chuyến xe</div>
-            <div class="nav-item" id="m-profile" onclick="switchTab('profile')"><i class="fa fa-wallet"></i><br>Ví & Nạp tiền</div>
-        </div>
-    </div>
-
-    <div id="scr-login">
-        <div class="header"><h1>KLG</h1></div>
-        <div class="content">
-            <input type="number" id="l-sdt" style="width:100%; padding:12px; margin-bottom:10px;" placeholder="Số điện thoại">
-            <button class="btn-nhan" onclick="xuLyLogin()">VÀO APP TÀI XẾ</button>
+            <div class="nav-item active" id="m-noti" onclick="switchTab('noti')"><i class="fa fa-car fa-lg"></i><br>Nhận đơn</div>
+            <div class="nav-item" id="m-profile" onclick="switchTab('profile')"><i class="fa fa-wallet fa-lg"></i><br>Ví của tôi</div>
         </div>
     </div>
 </div>
@@ -91,17 +118,54 @@
     const db = firebase.database();
     let curSdt = "", myWallet = 0;
 
+    // QUẢN LÝ PHIÊN
     function kiemTraPhien() {
-        const u = localStorage.getItem('klg_user');
-        if(u) {
-            curSdt = JSON.parse(u).sdt;
-            document.getElementById('scr-login').classList.add('hidden');
+        const saved = localStorage.getItem('klg_user');
+        if(saved) {
+            const user = JSON.parse(saved);
+            curSdt = user.sdt;
+            document.getElementById('scr-auth').classList.add('hidden');
             document.getElementById('scr-tx').classList.remove('hidden');
+            document.getElementById('qr-code').src = `https://img.vietqr.io/image/vcb-0789454369-compact.jpg?amount=100000&addInfo=KLG%20${curSdt}`;
             theoDoiVi();
             loadDonHang();
         }
     }
 
+    function showReg() {
+        document.getElementById('box-login').classList.add('hidden');
+        document.getElementById('box-reg').classList.remove('hidden');
+    }
+
+    function handleRegister() {
+        const s = document.getElementById('r-sdt').value, p = document.getElementById('r-pass').value, r = document.getElementById('r-role').value;
+        if(!s || !p) return alert("Sếp điền đủ SĐT và Mật khẩu nhé!");
+        db.ref('users/' + s).set({pass: p, role: r, soDu: 0}).then(() => {
+            alert("Đăng ký thành công!");
+            location.reload();
+        });
+    }
+
+    function xuLyLogin() {
+        const s = document.getElementById('l-sdt').value, p = document.getElementById('l-pass').value;
+        if(!s || !p) return alert("Nhập đủ thông tin sếp ơi!");
+        
+        // Check Admin của sếp
+        if(s === "0789454369" && p === "19861990LyVinh@") {
+            localStorage.setItem('klg_user', JSON.stringify({sdt: s, role: 'admin'}));
+            alert("Chào Admin!"); location.reload(); return;
+        }
+
+        db.ref('users/' + s).once('value', ss => {
+            const u = ss.val();
+            if(u && u.pass === p) {
+                localStorage.setItem('klg_user', JSON.stringify({sdt: s, role: u.role}));
+                location.reload();
+            } else alert("Sai số điện thoại hoặc mật khẩu!");
+        });
+    }
+
+    // LOGIC TÀI XẾ
     function theoDoiVi() {
         db.ref('users/' + curSdt).on('value', s => {
             myWallet = s.val()?.soDu || 0;
@@ -114,32 +178,28 @@
             let h = "";
             s.forEach(child => {
                 const d = child.val();
-                const giaSo = parseInt(d.gia);
-                const phi = Math.round(giaSo * 0.2);
+                const phi = Math.round(parseInt(d.gia) * 0.2);
                 h += `
                 <div class="card-don">
-                    <div class="gia-don">${d.gia}K</div>
-                    <div class="phi-du-kien">Phí trừ ví: ${phi}K (20%)</div>
-                    <p>📍 ${d.tu} <br> 🏁 ${d.den}</p>
-                    <button class="btn-nhan" onclick="xacNhanNhanDon('${child.key}', ${phi}, ${giaSo})">NHẬN ĐƠN NGAY</button>
+                    <div style="display:flex; justify-content:space-between; align-items:start;">
+                        <span class="gia-don">${d.gia}K</span>
+                        <span class="phi-tag">Phí sàn: ${phi}K</span>
+                    </div>
+                    <p style="margin:10px 0;">📍 ${d.tu} <br> 🏁 ${d.den}</p>
+                    <button class="btn-nhan" onclick="xacNhanNhanDon('${child.key}', ${phi})">NHẬN CHUYẾN</button>
                 </div>`;
             });
-            document.getElementById('list-don-cho').innerHTML = h || "<p style='text-align:center; color:#999;'>Đang quét đơn mới...</p>";
+            document.getElementById('list-don-cho').innerHTML = h || "<p style='text-align:center; color:#999; margin-top:30px;'>Đang tìm chuyến xe gần nhất...</p>";
         });
     }
 
-    function xacNhanNhanDon(id, phi, gia) {
+    function xacNhanNhanDon(id, phi) {
         if(myWallet < phi) {
-            alert("Số dư ví không đủ " + phi + "K để nhận đơn này. Vui lòng nạp thêm!");
-            switchTab('profile');
-            return;
+            alert(`Ví không đủ ${phi}K để trừ phí sàn. Sếp nạp thêm tiền nhé!`);
+            switchTab('profile'); return;
         }
-
-        if(confirm("Hệ thống sẽ trừ " + phi + "K phí sàn ngay lập tức. Bạn đồng ý?")) {
-            // 1. Trừ tiền ví tài xế
-            const newBalance = myWallet - phi;
-            db.ref('users/' + curSdt).update({ soDu: newBalance }).then(() => {
-                // 2. Chuyển đơn vào mục "Đang chạy" và xóa khỏi mục chung
+        if(confirm(`Hệ thống sẽ trừ ${phi}K phí nhận đơn. Sếp đồng ý?`)) {
+            db.ref('users/' + curSdt).update({ soDu: myWallet - phi }).then(() => {
                 db.ref('don_da_duyet/' + id).once('value', s => {
                     const data = s.val();
                     db.ref('don_dang_chay/' + curSdt).set(data);
@@ -154,16 +214,17 @@
         document.getElementById('list-don-cho').classList.add('hidden');
         document.getElementById('don-dang-chay').classList.remove('hidden');
         document.getElementById('chi-tiet-don-chay').innerHTML = `
-            <p><b>Khách:</b> <a href="tel:${d.khach}" style="font-size:18px; color:var(--blue); font-weight:bold;">${d.khach} (Bấm để gọi)</a></p>
-            <p><b>Lộ trình:</b> ${d.tu} đi ${d.den}</p>
-            <p><b>Thu khách:</b> <span style="color:red; font-weight:bold;">${d.gia}K</span></p>
+            <p><b>Khách:</b> <a href="tel:${d.khach}" style="font-size:20px; color:var(--blue); font-weight:bold;">${d.khach} 📞</a></p>
+            <p><b>Điểm đón:</b> ${d.tu}</p>
+            <p><b>Điểm đến:</b> ${d.den}</p>
+            <p><b>Giá thu khách:</b> <span style="color:red; font-size:18px; font-weight:bold;">${d.gia}K</span></p>
         `;
     }
 
     function hoanThanhChuyen() {
         if(confirm("Xác nhận đã trả khách và thu tiền xong?")) {
             db.ref('don_dang_chay/' + curSdt).remove().then(() => {
-                alert("Chúc mừng bạn hoàn thành chuyến xe!");
+                alert("Hoàn thành chuyến! Chúc sếp nhiều đơn mới.");
                 location.reload();
             });
         }
@@ -176,12 +237,6 @@
         document.getElementById('m-profile').classList.toggle('active', t === 'profile');
     }
 
-    function xuLyLogin() {
-        const sdt = document.getElementById('l-sdt').value;
-        if(!sdt) return;
-        localStorage.setItem('klg_user', JSON.stringify({sdt: sdt}));
-        location.reload();
-    }
     function dangXuat() { localStorage.removeItem('klg_user'); location.reload(); }
 </script>
 </body>
