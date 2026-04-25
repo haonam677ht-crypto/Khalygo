@@ -8,35 +8,34 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #d32f2f; --dark: #111; --bg: #f8f9fa; }
+        :root { --primary: #d32f2f; --dark: #1a1a1a; --bg: #ffffff; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); margin: 0; }
-        .container { width: 100%; max-width: 450px; min-height: 100vh; background: white; margin: auto; position: relative; padding-bottom: 80px; }
+        .container { width: 100%; max-width: 450px; min-height: 100vh; margin: auto; position: relative; }
         
-        /* Giao diện giống hệt ảnh sếp gửi */
+        /* Header đen chuẩn ảnh sếp gửi */
         .header-top { background: var(--dark); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; font-weight: bold; font-size: 18px; }
-        .logo-small { width: 35px; height: 35px; border-radius: 5px; border: 1px solid #444; }
+        .logo-box { width: 35px; height: 35px; border-radius: 4px; overflow: hidden; border: 1px solid #333; }
         
-        .red-section { background: var(--primary); padding: 40px 20px; color: white; text-align: center; border-radius: 0 0 30px 30px; margin-bottom: 30px; }
-        .red-section h1 { margin: 0; font-size: 45px; letter-spacing: 3px; }
-        .red-section p { margin: 5px 0 0; opacity: 0.9; font-size: 14px; }
+        /* Khối đỏ đặc trưng KLG */
+        .red-banner { background: var(--primary); padding: 50px 20px; color: white; text-align: center; border-radius: 0 0 35px 35px; margin-bottom: 40px; }
+        .red-banner h1 { margin: 0; font-size: 42px; letter-spacing: 2px; }
+        .red-banner p { margin: 8px 0 0; opacity: 0.9; font-size: 15px; }
 
         .content { padding: 0 25px; }
-        input, select { width: 100%; padding: 15px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; font-size: 16px; outline: none; }
-        button { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; font-size: 16px; }
+        input, select { width: 100%; padding: 16px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; font-size: 16px; outline: none; background: #fff; }
         
-        .btn-main { background: var(--primary); color: white; text-transform: uppercase; }
-        .btn-blue { background: #1a73e8; color: white; }
-        .btn-link { background: none; color: #1a73e8; border: none; font-size: 14px; text-decoration: none; margin-top: 15px; }
+        /* Nút đỏ bo góc chuẩn ảnh */
+        .btn-red { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; background: var(--primary); color: white; text-transform: uppercase; margin-top: 15px; font-size: 16px; }
+        .btn-blue { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; background: #1a73e8; color: white; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         
-        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+        .sub-text { text-align: center; color: #888; font-size: 13px; margin-top: 15px; }
+        .link-text { display: block; text-align: center; color: #1a73e8; margin-top: 20px; text-decoration: none; font-size: 14px; cursor: pointer; }
+        
+        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .hidden { display: none !important; }
-        
-        /* Thanh điều hướng dưới cùng */
-        .nav-bottom { position: fixed; bottom: 0; width: 100%; max-width: 450px; height: 75px; background: white; border-top: 1px solid #eee; display: flex; align-items: center; z-index: 100; }
-        .nav-item { flex: 1; text-align: center; color: #999; font-size: 12px; cursor: pointer; }
-        .nav-item.active { color: var(--primary); }
-        
-        .badge-time { display: inline-block; background: #fff5f5; color: var(--primary); padding: 4px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; margin-bottom: 8px; border: 1px solid #ffebeb; }
+        .admin-sub-header { background: #222; color: white; padding: 12px 20px; font-size: 16px; font-weight: 500; }
+        .nav-bottom { position: fixed; bottom: 0; width: 100%; max-width: 450px; height: 70px; background: white; border-top: 1px solid #eee; display: flex; align-items: center; }
+        .nav-item { flex: 1; text-align: center; color: #999; font-size: 12px; }
     </style>
 </head>
 <body onload="checkLogin()">
@@ -45,99 +44,108 @@
     <div id="scr-auth">
         <div class="header-top">
             <span>KhaLy GO</span>
-            <div class="logo-small" style="background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6A6B7Nn-G-T7T1N3l3o8GqX7z6r6O7X-zWg&s') center/cover;"></div>
+            <div class="logo-box"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6A6B7Nn-G-T7T1N3l3o8GqX7z6r6O7X-zWg&s" width="100%"></div>
         </div>
-        <div class="red-section">
+        <div class="red-banner">
             <h1>KLG</h1>
             <p>Hệ thống vận tải 4.0</p>
         </div>
-        <div class="content" id="box-login">
-            <input type="number" id="l-sdt" placeholder="Số điện thoại">
-            <input type="password" id="l-pass" placeholder="Mật khẩu">
-            <button class="btn-main" onclick="handleLogin()">VÀO HỆ THỐNG</button>
-            <div style="text-align: center;">
-                <button class="btn-link" onclick="toggleAuth(true)">Chưa có tài khoản? Đăng ký</button>
+        <div class="content">
+            <div id="box-login">
+                <input type="number" id="l-sdt" placeholder="Số điện thoại">
+                <input type="password" id="l-pass" placeholder="Mật khẩu">
+                <button class="btn-red" onclick="handleLogin()">VÀO HỆ THỐNG</button>
+                <p class="sub-text">Dành cho Admin & Đối tác tài xế</p>
+                <a class="link-text" onclick="showReg()">Chưa có tài khoản? Đăng ký ngay</a>
+            </div>
+
+            <div id="box-reg" class="hidden">
+                <p style="text-align:center; font-weight:bold; color:var(--primary);">ĐĂNG KÝ THÀNH VIÊN MỚI</p>
+                <input type="number" id="r-sdt" placeholder="Nhập số điện thoại">
+                <input type="password" id="r-pass" placeholder="Tạo mật khẩu">
+                <select id="r-role">
+                    <option value="tx">Tôi là Tài xế (Đăng ký rước khách)</option>
+                    <option value="kh">Tôi là Khách hàng (Đăng ký đặt xe)</option>
+                </select>
+                <button class="btn-red" onclick="handleRegister()">XÁC NHẬN ĐĂNG KÝ</button>
+                <a class="link-text" onclick="location.reload()">Đã có tài khoản? Đăng nhập</a>
             </div>
         </div>
-        <div class="content hidden" id="box-reg">
-            <p style="text-align:center; font-weight:bold;">ĐĂNG KÝ THÀNH VIÊN</p>
-            <input type="number" id="r-sdt" placeholder="Số điện thoại mới">
-            <input type="password" id="r-pass" placeholder="Mật khẩu mới">
-            <select id="r-role">
-                <option value="tx">Tôi là Tài xế</option>
-                <option value="kh">Tôi là Khách hàng</option>
-            </select>
-            <button class="btn-main" onclick="handleRegister()">XÁC NHẬN ĐĂNG KÝ</button>
-            <button class="btn-link" onclick="toggleAuth(false)">Đã có tài khoản? Đăng nhập</button>
+    </div>
+
+    <div id="scr-admin" class="hidden">
+        <div class="header-top">
+            <span>KhaLy GO</span>
+            <div class="logo-box"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6A6B7Nn-G-T7T1N3l3o8GqX7z6r6O7X-zWg&s" width="100%"></div>
+        </div>
+        <div class="admin-sub-header">KLG - QUẢN TRỊ</div>
+        <div class="content" style="padding-top: 25px;">
+            <button class="btn-blue" onclick="document.getElementById('ad-form').classList.toggle('hidden')">
+                <i class="fa fa-plus-circle"></i> TẠO ĐƠN GỌI TRỰC TIẾP
+            </button>
+            <div id="ad-form" class="card hidden">
+                <input type="number" id="ad-sdt-k" placeholder="SĐT Khách">
+                <input type="text" id="ad-tu" placeholder="📍 Điểm đón">
+                <input type="text" id="ad-den" placeholder="🏁 Điểm đến">
+                <div style="display:flex; gap:10px;">
+                    <input type="date" id="ad-ngay">
+                    <input type="time" id="ad-gio">
+                </div>
+                <input type="number" id="ad-gia" placeholder="Giá cước (K)">
+                <button class="btn-red" onclick="adPhatDon()">PHÁT ĐƠN CHO TÀI XẾ</button>
+            </div>
+            <p style="font-weight: bold; border-left: 4px solid var(--primary); padding-left: 10px;">ĐƠN CHỜ THANH TOÁN</p>
+            <div id="ad-list-tra"></div>
         </div>
     </div>
 
     <div id="scr-tx" class="hidden">
         <div class="header-top"><span>KLG - ĐỐI TÁC</span></div>
         <div class="content" style="padding-top: 20px;">
-            <div class="card" style="display:flex; justify-content:space-around; text-align:center; background:#fff;">
-                <div><small style="color:#888;">Số dư ví</small><br><b id="tx-du" style="color:var(--primary); font-size:22px;">0K</b></div>
+            <div class="card" style="text-align:center; background: #fff5f5;">
+                <small style="color:#888;">Số dư ví rước khách</small><br>
+                <b id="tx-du" style="color:var(--primary); font-size:24px;">0K</b>
             </div>
-            <p style="font-weight: bold; border-left: 4px solid var(--primary); padding-left: 10px;">DANH SÁCH ĐƠN MỚI</p>
+            <p style="font-weight:bold;">CUỐC XE ĐANG CÓ</p>
             <div id="list-don"></div>
         </div>
         <div class="nav-bottom">
-            <div class="nav-item active"><i class="fa fa-car fa-lg"></i><br>Cuốc xe</div>
-            <div class="nav-item" onclick="dangXuat()"><i class="fa fa-sign-out-alt fa-lg"></i><br>Thoát</div>
-        </div>
-    </div>
-
-    <div id="scr-admin" class="hidden">
-        <div class="header-top"><span>KLG - QUẢN TRỊ</span></div>
-        <div class="content" style="padding-top: 20px;">
-            <button class="btn-blue" onclick="document.getElementById('ad-form').classList.toggle('hidden')">
-                <i class="fa fa-plus-circle"></i> TẠO ĐƠN GỌI TRỰC TIẾP
-            </button>
-            
-            <div id="ad-form" class="card hidden" style="margin-top:15px;">
-                <input type="number" id="ad-sdt-k" placeholder="Số điện thoại khách">
-                <input type="text" id="ad-tu" placeholder="📍 Điểm đón khách">
-                <input type="text" id="ad-den" placeholder="🏁 Điểm đến">
-                <div style="display:flex; gap:10px;">
-                    <input type="date" id="ad-ngay">
-                    <input type="time" id="ad-gio">
-                </div>
-                <input type="number" id="ad-gia" placeholder="Giá tiền (Ví dụ: 500)">
-                <button class="btn-main" onclick="adPhatDon()">PHÁT ĐƠN CHO TÀI XẾ</button>
-            </div>
-
-            <p style="font-weight: bold; margin-top: 25px;">ĐƠN HOÀN THÀNH - CHỜ TRẢ LƯƠNG</p>
-            <div id="ad-list-tra"></div>
+            <div class="nav-item" style="color:var(--primary)"><i class="fa fa-car"></i><br>Nhận đơn</div>
+            <div class="nav-item" onclick="dangXuat()"><i class="fa fa-sign-out-alt"></i><br>Thoát</div>
         </div>
     </div>
 </div>
 
 <script>
-    // CẤU HÌNH FIREBASE CỦA SẾP
+    // CẤU HÌNH DATABASE
     const firebaseConfig = { databaseURL: "https://khaly-go-23798-default-rtdb.asia-southeast1.firebasedatabase.app" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
-    const ADMIN_SĐT = "0789454369";
-    const ADMIN_MK = "19861990LyVinh@";
+    // THÔNG TIN ADMIN CỦA SẾP
+    const ADMIN_SDT = "0789454369";
+    const ADMIN_PASS = "19861990LyVinh@";
 
-    function toggleAuth(isReg) {
-        document.getElementById('box-login').classList.toggle('hidden', isReg);
-        document.getElementById('box-reg').classList.toggle('hidden', !isReg);
+    function showReg() {
+        document.getElementById('box-login').classList.add('hidden');
+        document.getElementById('box-reg').classList.remove('hidden');
     }
 
     function handleRegister() {
-        const s = document.getElementById('r-sdt').value, p = document.getElementById('r-pass').value, r = document.getElementById('r-role').value;
-        if(!s || !p) return alert("Sếp nhập đủ SĐT và Mật khẩu nhé!");
-        db.ref('users/' + s).set({pass:p, role:r, soDu:0}).then(() => {
-            alert("Đăng ký xong! Sếp đăng nhập đi.");
+        const s = document.getElementById('r-sdt').value;
+        const p = document.getElementById('r-pass').value;
+        const r = document.getElementById('r-role').value;
+        if(!s || !p) return alert("Sếp vui lòng nhập đủ SĐT và Mật khẩu!");
+        db.ref('users/' + s).set({pass: p, role: r, soDu: 0}).then(() => {
+            alert("Đăng ký thành công tài khoản " + (r === 'tx' ? 'Tài xế' : 'Khách hàng') + "!");
             location.reload();
         });
     }
 
     function handleLogin() {
-        const s = document.getElementById('l-sdt').value, p = document.getElementById('l-pass').value;
-        if(s === ADMIN_SĐT && p === ADMIN_MK) {
+        const s = document.getElementById('l-sdt').value;
+        const p = document.getElementById('l-pass').value;
+        if(s === ADMIN_SDT && p === ADMIN_PASS) {
             localStorage.setItem('klg_user', s);
             localStorage.setItem('klg_role', 'admin');
             location.reload(); return;
@@ -148,7 +156,7 @@
                 localStorage.setItem('klg_user', s);
                 localStorage.setItem('klg_role', u.role);
                 location.reload();
-            } else alert("Sai thông tin rồi sếp ơi!");
+            } else alert("Thông tin đăng nhập không chính xác!");
         });
     }
 
@@ -158,11 +166,11 @@
         document.getElementById('scr-auth').classList.add('hidden');
         if(r === 'admin') loadAdmin(); else if(r === 'tx') loadTX(u);
         
-        // Tự điền ngày giờ hiện tại
+        // Tự động lấy ngày giờ hiện tại cho Admin
         if(document.getElementById('ad-ngay')) {
-            const d = new Date();
-            document.getElementById('ad-ngay').value = d.toISOString().split('T')[0];
-            document.getElementById('ad-gio').value = d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0');
+            const now = new Date();
+            document.getElementById('ad-ngay').value = now.toISOString().split('T')[0];
+            document.getElementById('ad-gio').value = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
         }
     }
 
@@ -173,22 +181,23 @@
             s.forEach(c => {
                 const d = c.val();
                 h += `<div class="card">
-                    <span class="badge-time">HOÀN THÀNH: ${d.gio} | ${d.ngay}</span><br>
-                    <b>TX: ${d.tx}</b> - Khách: ${d.khach}<br>
-                    <span style="color:green">Giá: ${d.gia}K</span> → <span style="color:red; font-weight:bold;">Lương: ${Math.round(d.gia*0.8)}K</span><br>
-                    <button class="btn-blue" style="padding:10px; font-size:13px;" onclick="db.ref('don_hoan_thanh/${c.key}').remove()">XÁC NHẬN ĐÃ TRẢ TIỀN</button>
+                    <span style="color:var(--primary); font-size:12px; font-weight:bold;">${d.gio} | ${d.ngay}</span><br>
+                    <b>Tài xế: ${d.tx}</b> vừa xong đơn ${d.gia}K<br>
+                    <button class="btn-red" style="padding:8px; font-size:12px; width:auto;" onclick="db.ref('don_hoan_thanh/${c.key}').remove()">XÁC NHẬN TRẢ LƯƠNG</button>
                 </div>`;
             });
-            document.getElementById('ad-list-tra').innerHTML = h || "<p style='color:#999'>Chưa có đơn nào xong.</p>";
+            document.getElementById('ad-list-tra').innerHTML = h || "<p style='color:#ccc'>Hiện chưa có đơn nào cần trả lương.</p>";
         });
     }
 
     function adPhatDon() {
-        const k = document.getElementById('ad-sdt-k').value, t = document.getElementById('ad-tu').value, d = document.getElementById('ad-den').value, g = document.getElementById('ad-gia').value, ngay = document.getElementById('ad-ngay').value, gio = document.getElementById('ad-gio').value;
-        if(!k || !g) return alert("Sếp thiếu SĐT khách hoặc Giá tiền!");
-        db.ref('don_da_duyet').push({khach:k, tu:t, den:d, gia:g, ngay:ngay, gio:gio});
-        alert("Đã phát đơn thành công!");
-        document.getElementById('ad-form').classList.add('hidden');
+        const k = document.getElementById('ad-sdt-k').value, g = document.getElementById('ad-gia').value;
+        if(!k || !g) return alert("Sếp điền thiếu SĐT khách hoặc Giá cước!");
+        db.ref('don_da_duyet').push({
+            khach: k, tu: document.getElementById('ad-tu').value, den: document.getElementById('ad-den').value,
+            gia: g, ngay: document.getElementById('ad-ngay').value, gio: document.getElementById('ad-gio').value
+        });
+        alert("Đã phát đơn lên hệ thống thành công!");
     }
 
     function loadTX(sdt) {
@@ -197,30 +206,25 @@
         db.ref('don_da_duyet').on('value', s => {
             let h = "";
             s.forEach(c => {
-                const d = c.val(), phi = Math.round(d.gia*0.2);
+                const d = c.val();
                 h += `<div class="card">
-                    <span class="badge-time"><i class="far fa-clock"></i> ĐÓN: ${d.gio} - ${d.ngay}</span><br>
-                    <b style="font-size:18px; color:var(--primary);">${d.gia}K</b> (Phí: ${phi}K)<br>
-                    <small>📍 ${d.tu}</small><br><small>🏁 ${d.den}</small><br>
-                    <button class="btn-main" style="margin-top:15px;" onclick="txNhan('${c.key}',${phi})">NHẬN CHUYẾN NÀY</button>
+                    <span style="color:var(--primary); font-weight:bold;">⏰ Đón lúc: ${d.gio}</span><br>
+                    <b style="font-size:20px;">${d.gia}K</b><br>
+                    <small>Từ: ${d.tu}</small><br><small>Đến: ${d.den}</small><br>
+                    <button class="btn-red" onclick="txNhan('${c.key}')">NHẬN CHUYẾN</button>
                 </div>`;
             });
-            document.getElementById('list-don').innerHTML = h || "<p style='color:#999; text-align:center;'>Đang chờ sếp phát đơn...</p>";
+            document.getElementById('list-don').innerHTML = h || "<p style='text-align:center; color:#999;'>Đang chờ đơn mới từ Admin...</p>";
         });
     }
 
-    function txNhan(id, phi) {
+    function txNhan(id) {
         const u = localStorage.getItem('klg_user');
-        db.ref('users/' + u).once('value', s => {
-            const sd = s.val().soDu || 0;
-            if(sd < phi) return alert("Ví không đủ tiền sếp ơi, nạp thêm đi!");
-            db.ref('users/' + u).update({soDu: sd - phi});
-            db.ref('don_da_duyet/' + id).once('value', ss => {
-                const data = ss.val(); data.tx = u;
-                db.ref('don_hoan_thanh').push(data);
-                db.ref('don_da_duyet/' + id).remove();
-                alert("Nhận đơn thành công! Chúc sếp thượng lộ bình an.");
-            });
+        db.ref('don_da_duyet/' + id).once('value', ss => {
+            const data = ss.val(); data.tx = u;
+            db.ref('don_hoan_thanh').push(data);
+            db.ref('don_da_duyet/' + id).remove();
+            alert("Đã nhận đơn thành công! Sếp chuẩn bị rước khách nhé.");
         });
     }
 
