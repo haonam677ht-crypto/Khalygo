@@ -12,195 +12,189 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; }
         .container { width: 100%; max-width: 450px; min-height: 100vh; background: white; margin: auto; position: relative; padding-bottom: 80px; }
         
-        /* Giữ giao diện Header như ảnh sếp gửi */
-        .header-top { background: #222; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .header-brand { font-size: 20px; font-weight: bold; }
-        .red-bar { background: var(--primary); height: 50px; border-radius: 0 0 25px 25px; margin-bottom: 20px; }
+        /* Giao diện Header y hệt ảnh sếp gửi */
+        .header-top { background: #222; color: white; padding: 15px; display: flex; justify-content: center; font-weight: bold; font-size: 20px; }
+        .red-box { background: var(--primary); padding: 40px 20px; color: white; text-align: center; border-radius: 0 0 30px 30px; margin-bottom: 20px; }
 
-        .content { padding: 15px; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .content { padding: 20px; }
+        input, select { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         
         .btn-main { background: var(--primary); color: white; }
+        .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); }
         .btn-blue { background: var(--blue); color: white; }
-        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
-        /* Bottom Nav giống ảnh sếp gửi */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 450px; height: 65px; background: white; border-top: 1px solid #eee; display: flex; z-index: 100; }
-        .nav-item { flex: 1; text-align: center; padding-top: 10px; color: #999; font-size: 12px; cursor: pointer; }
-        .nav-item.active { color: var(--blue); }
+        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .hidden { display: none !important; }
+        .nav-bottom { position: fixed; bottom: 0; width: 100%; max-width: 450px; height: 70px; background: white; border-top: 1px solid #eee; display: flex; align-items: center; }
+        .nav-item { flex: 1; text-align: center; color: #999; font-size: 12px; }
+        .nav-item.active { color: var(--blue); }
     </style>
 </head>
-<body onload="kiemTraPhien()">
+<body onload="checkLogin()">
 
 <div class="container">
+    
     <div id="scr-auth">
-        <div class="header-top"><span class="header-brand">KhaLy GO</span></div>
-        <div class="red-bar"></div>
-        <div class="content" style="text-align:center;">
-            <h2 style="color:#333;">KLG</h2>
-            <p style="color:#666; font-size:14px;">Hệ thống vận tải 4.0</p>
-            <input type="number" id="auth-sdt" placeholder="Số điện thoại">
-            <input type="password" id="auth-pass" placeholder="Mật khẩu">
-            <button class="btn-main" onclick="xuLyAuth()">VÀO HỆ THỐNG</button>
-            <p onclick="toggleReg()" id="toggle-text" style="color:var(--blue); margin-top:20px; cursor:pointer;">Chưa có tài khoản? Đăng ký</p>
+        <div class="header-top">KhaLy GO</div>
+        <div class="red-box">
+            <h1 style="margin:0;">KLG</h1>
+            <p>Hệ thống vận tải 4.0</p>
+        </div>
+        <div class="content">
+            <div id="auth-login">
+                <input type="number" id="l-sdt" placeholder="Số điện thoại">
+                <input type="password" id="l-pass" placeholder="Mật khẩu">
+                <button class="btn-main" onclick="handleLogin()">VÀO HỆ THỐNG</button>
+                <button class="btn-outline" onclick="showReg()">ĐĂNG KÝ TÀI KHOẢN MỚI</button>
+                <p style="text-align:center; color:#999; font-size:12px; margin-top:15px;">Dành cho Admin & Đối tác tài xế</p>
+            </div>
+
+            <div id="auth-reg" class="hidden">
+                <p style="font-weight:bold; text-align:center;">ĐĂNG KÝ THÀNH VIÊN</p>
+                <input type="number" id="r-sdt" placeholder="Số điện thoại">
+                <input type="password" id="r-pass" placeholder="Mật khẩu mới">
+                <select id="r-role">
+                    <option value="">-- BẠN LÀ AI? --</option>
+                    <option value="kh">TÔI LÀ KHÁCH HÀNG</option>
+                    <option value="tx">TÔI LÀ TÀI XẾ</option>
+                </select>
+                <button class="btn-main" onclick="handleRegister()">XÁC NHẬN ĐĂNG KÝ</button>
+                <button class="btn-outline" onclick="location.reload()">QUAY LẠI ĐĂNG NHẬP</button>
+            </div>
         </div>
     </div>
 
     <div id="scr-tx" class="hidden">
-        <div class="header-top"><span class="header-brand">KhaLy GO</span></div>
+        <div class="header-top">KLG - ĐỐI TÁC</div>
         <div class="content">
-            <div class="card" style="text-align:center;">
-                <div style="display:flex; justify-content:space-around;">
-                    <div><small>Đã nạp</small><br><b id="tx-nap">0K</b></div>
-                    <div><small>Phí</small><br><b id="tx-phi">0K</b></div>
-                    <div><small>Số dư</small><br><b id="tx-du" style="color:var(--blue);">0K</b></div>
-                </div>
+            <div class="card" style="display:flex; justify-content:space-around; text-align:center; background:#e3f2fd;">
+                <div><small>Đã nạp</small><br><b id="tx-nap">0K</b></div>
+                <div><small>Số dư ví</small><br><b id="tx-du" style="color:var(--blue); font-size:18px;">0K</b></div>
             </div>
-
-            <div id="tx-view-cuoc">
-                <p><b>CUỐC XE ĐANG CHỜ</b></p>
-                <div id="list-cuoc-moi"></div>
-                <div id="cuoc-dang-chay" class="hidden">
-                    <div class="card" style="border-left:5px solid green;">
-                        <p style="color:green; font-weight:bold;">ĐANG THỰC HIỆN</p>
-                        <div id="ct-cuoc"></div>
-                        <button class="btn-main" onclick="txHoanThanh()">HOÀN THÀNH (HỐI SẾP TRẢ LƯƠNG)</button>
-                    </div>
+            <div id="tx-list-moi">
+                <p><b>ĐƠN HÀNG MỚI</b></p>
+                <div id="list-don"></div>
+            </div>
+            <div id="tx-dang-chay" class="hidden">
+                <div class="card" style="border-left:5px solid #28a745;">
+                    <p style="color:#28a745; font-weight:bold;">ĐANG THỰC HIỆN</p>
+                    <div id="ct-chuyen"></div>
+                    <button class="btn-main" onclick="txDone()">BÁO SẾP: HOÀN THÀNH CHUYẾN</button>
                 </div>
             </div>
         </div>
-        <div class="bottom-nav">
+        <div class="nav-bottom">
             <div class="nav-item active"><i class="fa fa-car"></i><br>Cuốc xe</div>
-            <div class="nav-item" onclick="alert('Nạp tiền: Chuyển khoản QR cho Sếp')"><i class="fa fa-wallet"></i><br>Tài khoản</div>
-            <div class="nav-item" onclick="location.reload()"><i class="fa fa-sign-out-alt"></i><br>Thoát</div>
+            <div class="nav-item" onclick="dangXuat()"><i class="fa fa-sign-out-alt"></i><br>Thoát</div>
         </div>
     </div>
 
     <div id="scr-admin" class="hidden">
-        <div class="header-top"><span class="header-brand">KLG - ADMIN</span></div>
+        <div class="header-top">KLG - ADMIN</div>
         <div class="content">
-            <button class="btn-blue" onclick="showFormTao()">+ TỰ TẠO ĐƠN MỚI</button>
-            
-            <div id="form-tao-don" class="hidden card" style="margin-top:10px;">
+            <button class="btn-blue" onclick="document.getElementById('ad-form').classList.toggle('hidden')">+ TẠO ĐƠN GỌI TRỰC TIẾP</button>
+            <div id="ad-form" class="card hidden" style="margin-top:10px;">
                 <input type="number" id="ad-sdt-k" placeholder="SĐT Khách">
                 <input type="text" id="ad-tu" placeholder="Điểm đón">
                 <input type="text" id="ad-den" placeholder="Điểm đến">
-                <input type="number" id="ad-gia" placeholder="Giá thu khách (Vd: 500)">
+                <input type="number" id="ad-gia" placeholder="Giá tiền (Ví dụ: 500)">
                 <button class="btn-main" onclick="adPhatDon()">PHÁT ĐƠN NGAY</button>
             </div>
-
-            <p><b>ĐƠN CHỜ TRẢ LƯƠNG (80%)</b></p>
-            <div id="list-tra-luong"></div>
+            <p><b>CHỜ THANH TOÁN (80% LƯƠNG)</b></p>
+            <div id="ad-list-tra"></div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- CẤU HÌNH ---
     const firebaseConfig = { databaseURL: "https://khaly-go-23798-default-rtdb.asia-southeast1.firebasedatabase.app" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const SDT_ADMIN = "0789454369"; // Số của sếp
+    const ADMIN_HOTLINE = "0789454369";
 
-    function xuLyAuth() {
-        const sdt = document.getElementById('auth-sdt').value;
-        const pass = document.getElementById('auth-pass').value;
-        if(!sdt || !pass) return alert("Nhập đủ SĐT và Mật khẩu sếp ơi!");
+    function showReg() { 
+        document.getElementById('auth-login').classList.add('hidden');
+        document.getElementById('auth-reg').classList.remove('hidden');
+    }
 
-        db.ref('users/' + sdt).once('value', s => {
-            const u = s.val();
-            if(!u) { // Đăng ký mới nếu chưa có
-                db.ref('users/' + sdt).set({pass:pass, soDu:0, role: (sdt===SDT_ADMIN?'admin':'tx')});
-                alert("Đã tạo tài khoản mới!");
-                location.reload();
-            } else {
-                if(u.pass !== pass) return alert("Sai mật khẩu!");
-                localStorage.setItem('klg_user', sdt);
-                location.reload();
-            }
+    function handleRegister() {
+        const s = document.getElementById('r-sdt').value, p = document.getElementById('r-pass').value, r = document.getElementById('r-role').value;
+        if(!s || !p || !r) return alert("Sếp điền đủ SĐT, Mật khẩu và chọn vai trò!");
+        db.ref('users/' + s).set({pass:p, role:r, soDu:0}).then(() => {
+            alert("Đăng ký thành công! Hãy đăng nhập.");
+            location.reload();
         });
     }
 
-    function kiemTraPhien() {
-        const sdt = localStorage.getItem('klg_user');
-        if(!sdt) return;
+    function handleLogin() {
+        const s = document.getElementById('l-sdt').value, p = document.getElementById('l-pass').value;
+        db.ref('users/' + s).once('value', ss => {
+            const u = ss.val();
+            if(u && u.pass === p) {
+                localStorage.setItem('klg_user', s);
+                localStorage.setItem('klg_role', u.role);
+                location.reload();
+            } else alert("Sai thông tin đăng nhập!");
+        });
+    }
+
+    function checkLogin() {
+        const u = localStorage.getItem('klg_user'), r = localStorage.getItem('klg_role');
+        if(!u) return;
         document.getElementById('scr-auth').classList.add('hidden');
-        if(sdt === SDT_ADMIN) hienAdmin(); else hienTX(sdt);
+        if(u === ADMIN_HOTLINE) loadAdmin(); else if(r === 'tx') loadTX(u);
     }
 
-    // --- LOGIC TÀI XẾ ---
-    function hienTX(sdt) {
-        document.getElementById('scr-tx').classList.remove('hidden');
-        db.ref('users/' + sdt).on('value', s => {
-            const v = s.val();
-            document.getElementById('tx-du').innerText = (v.soDu || 0) + "K";
-        });
-        loadCuocTX(sdt);
-    }
-
-    function loadCuocTX(sdt) {
-        db.ref('don_da_duyet').on('value', s => {
+    // --- ADMIN ---
+    function loadAdmin() {
+        document.getElementById('scr-admin').classList.remove('hidden');
+        db.ref('don_hoan_thanh').on('value', s => {
             let h = "";
             s.forEach(c => {
                 const d = c.val();
-                const phi = Math.round(d.gia * 0.2);
-                h += `<div class="card">
-                    <b style="color:red; font-size:18px;">${d.gia}K</b> (Phí: ${phi}K)<br>
-                    📍 ${d.tu} ➔ ${d.den}<br>
-                    <button class="btn-blue" onclick="txNhanDon('${c.key}', ${phi}, ${d.gia})">NHẬN ĐƠN (TRỪ ${phi}K VÍ)</button>
-                </div>`;
+                h += `<div class="card"><b>TX ${d.tx} xong: ${d.gia}K</b><br><span style="color:red">Trả lương: ${Math.round(d.gia*0.8)}K</span><br><button onclick="db.ref('don_hoan_thanh/${c.key}').remove()">XÁC NHẬN ĐÃ TRẢ TIỀN</button></div>`;
             });
-            document.getElementById('list-cuoc-moi').innerHTML = h || "Đang chờ sếp phát đơn...";
+            document.getElementById('ad-list-tra').innerHTML = h || "Chưa có đơn hoàn thành.";
         });
     }
 
-    function txNhanDon(id, phi, gia) {
-        const sdt = localStorage.getItem('klg_user');
-        db.ref('users/' + sdt).once('value', s => {
+    function adPhatDon() {
+        const k = document.getElementById('ad-sdt-k').value, t = document.getElementById('ad-tu').value, d = document.getElementById('ad-den').value, g = document.getElementById('ad-gia').value;
+        db.ref('don_da_duyet').push({khach:k, tu:t, den:d, gia:g});
+        alert("Đã phát đơn!");
+    }
+
+    // --- TÀI XẾ ---
+    function loadTX(sdt) {
+        document.getElementById('scr-tx').classList.remove('hidden');
+        db.ref('users/' + sdt).on('value', s => document.getElementById('tx-du').innerText = (s.val().soDu || 0) + "K");
+        db.ref('don_da_duyet').on('value', s => {
+            let h = "";
+            s.forEach(c => {
+                const d = c.val(), phi = Math.round(d.gia*0.2);
+                h += `<div class="card"><b>${d.gia}K</b> (Phí: ${phi}K)<br>${d.tu} ➔ ${d.den}<br><button class="btn-blue" onclick="txNhan('${c.key}',${phi})">NHẬN & TRỪ PHÍ</button></div>`;
+            });
+            document.getElementById('list-don').innerHTML = h || "Chờ đơn...";
+        });
+    }
+
+    function txNhan(id, phi) {
+        const u = localStorage.getItem('klg_user');
+        db.ref('users/' + u).once('value', s => {
             const sd = s.val().soDu || 0;
-            if(sd < phi) return alert("Ví không đủ tiền trừ phí 20%!");
-            
-            db.ref('users/' + sdt).update({soDu: sd - phi});
+            if(sd < phi) return alert("Ví không đủ tiền!");
+            db.ref('users/' + u).update({soDu: sd - phi});
             db.ref('don_da_duyet/' + id).once('value', ss => {
-                const data = ss.val(); data.tx = sdt;
-                db.ref('don_dang_chay/' + sdt).set(data);
+                const data = ss.val(); data.tx = u;
+                db.ref('don_dang_chay/' + u).set(data);
                 db.ref('don_da_duyet/' + id).remove();
                 location.reload();
             });
         });
     }
 
-    // --- LOGIC ADMIN ---
-    function hienAdmin() {
-        document.getElementById('scr-admin').classList.remove('hidden');
-        db.ref('don_hoan_thanh').on('value', s => {
-            let h = "";
-            s.forEach(c => {
-                const d = c.val();
-                const luong = Math.round(d.gia * 0.8);
-                h += `<div class="card">
-                    <b>TX ${d.tx} xong đơn ${d.gia}K</b><br>
-                    <span style="color:red">Sếp trả lương: ${luong}K (80%)</span>
-                    <button onclick="db.ref('don_hoan_thanh/${c.key}').remove()" style="background:#eee;">ĐÃ TRẢ LƯƠNG XONG</button>
-                </div>`;
-            });
-            document.getElementById('list-tra-luong').innerHTML = h;
-        });
-    }
-
-    function adPhatDon() {
-        const k = document.getElementById('ad-sdt-k').value, t = document.getElementById('ad-tu').value,
-              d = document.getElementById('ad-den').value, g = document.getElementById('ad-gia').value;
-        db.ref('don_da_duyet').push({khach:k, tu:t, den:d, gia:g});
-        alert("Đã phát đơn!");
-        document.getElementById('form-tao-don').classList.add('hidden');
-    }
-
-    function showFormTao() { document.getElementById('form-tao-don').classList.toggle('hidden'); }
-    function txHoanThanh() { /* Code gửi sang don_hoan_thanh tương tự bản trước */ }
-    function toggleReg() { alert("Sếp chỉ cần nhập SĐT và Mật khẩu mới rồi bấm vào hệ thống là tự tạo tài khoản luôn!"); }
+    function dangXuat() { localStorage.clear(); location.reload(); }
 </script>
 </body>
 </html>
