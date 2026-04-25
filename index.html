@@ -1,129 +1,223 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KhaLy GO - Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .page { display: none; }
-        .active { display: block; }
-    </style>
-</head>
-<body class="bg-slate-900 font-sans">
+import React, { useState, useEffect } from 'react';
+import { 
+  View, Text, TextInput, TouchableOpacity, StyleSheet, 
+  ScrollView, Alert, Modal, Image 
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-    <div id="login-page" class="page p-6">
-        <div class="max-w-md mx-auto bg-slate-800 p-8 rounded-2xl shadow-2xl mt-10 border border-slate-700">
-            <h2 class="text-2xl font-bold mb-6 text-center text-yellow-400">ĐĂNG NHẬP ADMIN</h2>
-            <input id="phone" type="number" placeholder="Số điện thoại" class="w-full bg-slate-700 border-none p-3 mb-4 rounded-lg text-white outline-none">
-            <input id="pass" type="password" placeholder="Mật khẩu" class="w-full bg-slate-700 border-none p-3 mb-4 rounded-lg text-white outline-none">
-            <button onclick="loginAdmin()" class="w-full bg-yellow-500 text-slate-900 p-3 rounded-lg font-bold hover:bg-yellow-400 transition-all">ĐĂNG NHẬP</button>
-        </div>
-    </div>
+// --- TRẠNG THÁI ỨNG DỤNG ---
+export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [role, setRole] = useState('Khách hàng'); // Khách hàng | Tài xế | Admin
+  const [phone, setPhone] = useState('');
 
-    <div id="admin-page" class="page p-4 min-h-screen text-white">
-        <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
-            <div>
-                <h1 class="text-2xl font-bold text-yellow-400">KhaLy GO</h1>
-                <p class="text-xs text-gray-400">Hệ thống Quản trị Admin</p>
-            </div>
-            <button onclick="logout()" class="bg-red-500/20 text-red-400 px-3 py-1 rounded border border-red-500/50 text-sm">Đăng xuất</button>
-        </div>
+  useEffect(() => {
+    const loadData = async () => {
+      const savedRole = await AsyncStorage.getItem('userRole');
+      if (savedRole) {
+        setRole(savedRole);
+        setIsLoggedIn(true);
+      }
+    };
+    loadData();
+  }, []);
 
-        <div class="space-y-6">
-            <section>
-                <h3 class="font-bold mb-3 flex items-center text-blue-400">
-                    <span class="mr-2">🔔</span> Đơn hàng chờ báo giá
-                </h3>
-                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-lg">
-                    <div class="grid grid-cols-2 gap-2 text-sm mb-3">
-                        <p><span class="text-gray-400">Loại xe:</span> <span class="text-yellow-500 font-bold">Xe Tiện Chuyến</span></p>
-                        <p><span class="text-gray-400">Khách hàng:</span> <span class="text-green-400 font-bold text-lg">0987.654.321</span></p>
-                        <p class="col-span-2"><span class="text-gray-400">Điểm đi:</span> 123 Đường ABC, Cần Thơ</p>
-                        <p class="col-span-2"><span class="text-gray-400">Điểm đến:</span> Quận 1, TP. Hồ Chí Minh</p>
-                        <p><span class="text-gray-400">Ngày đi:</span> 28/04/2026</p>
-                        <p><span class="text-gray-400">Giờ đi:</span> 08:30 sáng</p>
-                    </div>
-                    
-                    <div class="flex gap-2 mt-4 border-t border-slate-700 pt-4">
-                        <input type="number" placeholder="Nhập giá VNĐ..." class="flex-1 bg-white text-black font-bold p-2 rounded outline-none focus:ring-2 focus:ring-blue-500">
-                        <button class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-bold transition-all">Gửi báo giá</button>
-                        <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-bold transition-all">Xoá</button>
-                    </div>
-                </div>
-            </section>
+  const handleLogin = async (selectedRole) => {
+    if (phone.length !== 10) {
+      Alert.alert("Lỗi", "Số điện thoại phải đủ 10 số");
+      return;
+    }
+    await AsyncStorage.setItem('userRole', selectedRole);
+    setRole(selectedRole);
+    setIsLoggedIn(true);
+  };
 
-            <section>
-                <h3 class="font-bold mb-3 flex items-center text-yellow-400">
-                    <span class="mr-2">💰</span> Xác nhận chuyển khoản
-                </h3>
-                <div class="bg-blue-900/30 p-4 rounded-lg border border-blue-500/50 shadow-inner">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <p class="font-bold text-lg text-blue-200 underline">Đơn #123 (Xe 1 chiều)</p>
-                            <p class="text-sm">Khách: <span class="font-bold text-white">0912.333.444</span></p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-yellow-400 font-bold text-xl">500.000đ</p>
-                            <p class="text-[10px] text-gray-400 italic">Chờ xác nhận tiền về túi...</p>
-                        </div>
-                    </div>
-                    <button class="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-black py-3 rounded-md mt-2 shadow-lg transition-transform active:scale-95">
-                        XÁC NHẬN ĐÃ NHẬN TIỀN & ĐẨY ĐƠN
-                    </button>
-                </div>
-            </section>
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('userRole');
+    setIsLoggedIn(false);
+    setPhone('');
+  };
 
-            <section class="bg-slate-800 p-4 rounded-lg border border-dashed border-slate-600">
-                <h3 class="font-bold mb-3 text-gray-300 italic">Tạo đơn hộ cho khách gọi Hotline</h3>
-                <div class="space-y-2">
-                    <input type="text" placeholder="SĐT khách..." class="w-full bg-slate-700 p-2 rounded text-sm outline-none">
-                    <input type="text" placeholder="Lộ trình..." class="w-full bg-slate-700 p-2 rounded text-sm outline-none">
-                    <button class="w-full bg-gray-600 py-2 rounded text-sm font-bold">TẠO ĐƠN NHANH</button>
-                </div>
-            </section>
-        </div>
-    </div>
+  if (!isLoggedIn) {
+    return (
+      <View style={styles.loginContainer}>
+        <Text style={styles.logo}>ỨNG DỤNG ĐẶT XE</Text>
+        <View style={styles.tabBar}>
+          {['Khách hàng', 'Tài xế', 'Admin'].map(r => (
+            <TouchableOpacity 
+              key={r} 
+              style={[styles.tab, role === r && styles.activeTab]}
+              onPress={() => setRole(r)}
+            >
+              <Text style={role === r ? styles.activeTabText : styles.tabText}>{r}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <TextInput 
+          style={styles.input} 
+          placeholder="Số điện thoại (10 số)" 
+          keyboardType="numeric"
+          value={phone}
+          onChangeText={setPhone}
+          maxLength={10}
+        />
+        <TextInput style={styles.input} placeholder="Mật khẩu" secureTextEntry />
+        <TouchableOpacity style={styles.btnPrimary} onPress={() => handleLogin(role)}>
+          <Text style={styles.btnText}>ĐĂNG NHẬP</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.btnSecondary}>
+          <Text style={styles.btnTextSecondary}>Đăng ký mới</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
-    <script>
-        // 1. TỰ ĐỘNG KIỂM TRA ĐĂNG NHẬP KHI MỞ FILE
-        window.onload = function() {
-            const status = localStorage.getItem('isLoggedIn');
-            if (status === 'true') {
-                showPage('admin-page');
-            } else {
-                showPage('login-page');
-            }
-        };
+  return (
+    <View style={{ flex: 1 }}>
+      {role === 'Khách hàng' && <CustomerScreen onLogout={handleLogout} />}
+      {role === 'Tài xế' && <DriverScreen onLogout={handleLogout} />}
+      {role === 'Admin' && <AdminScreen onLogout={handleLogout} />}
+    </View>
+  );
+}
 
-        // 2. HÀM CHUYỂN TRANG
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
+// --- 1. GIAO DIỆN KHÁCH HÀNG ---
+const CustomerScreen = ({ onLogout }) => {
+  const [step, setStep] = useState('menu'); // menu | booking | waiting
+  return (
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>KHÁCH HÀNG</Text>
+        <TouchableOpacity onPress={onLogout} style={styles.btnLogout}><Text style={styles.white}>Đăng xuất</Text></TouchableOpacity>
+      </View>
 
-        // 3. HÀM XỬ LÝ ĐĂNG NHẬP
-        function loginAdmin() {
-            const phone = document.getElementById('phone').value;
-            const pass = document.getElementById('pass').value;
+      {step === 'menu' && (
+        <View style={styles.grid}>
+          {['Xe ôm', 'Xe bao', 'Tiện chuyến', 'Xe 1 chiều'].map(item => (
+            <TouchableOpacity key={item} style={styles.menuItem} onPress={() => setStep('booking')}>
+              <Text style={styles.menuText}>{item}</Text>
+            </TouchableOpacity>
+          ))}
+          <TouchableOpacity style={[styles.menuItem, {backgroundColor: '#2ecc71'}]}>
+            <Text style={styles.white}>Zalo Admin</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
-            // Kiểm tra sơ bộ (bạn có thể thêm mật khẩu đúng của mình ở đây)
-            if(phone !== "" && pass !== "") {
-                // LƯU TRẠNG THÁI VÀO MÁY
-                localStorage.setItem('isLoggedIn', 'true');
-                showPage('admin-page');
-            } else {
-                alert("Vui lòng nhập đầy đủ thông tin!");
-            }
-        }
+      {step === 'booking' && (
+        <View style={styles.formCard}>
+          <Text style={styles.label}>Điểm đi:</Text>
+          <TextInput style={styles.input} placeholder="Nhập địa chỉ đi" />
+          <Text style={styles.label}>Điểm đến:</Text>
+          <TextInput style={styles.input} placeholder="Nhập địa chỉ đến" />
+          <TouchableOpacity style={styles.btnPrimary} onPress={() => setStep('waiting')}>
+            <Text style={styles.btnText}>TẠO ĐƠN</Text>
+          </TouchableOpacity>
+          <ButtonSmall title="Quay lại" onPress={() => setStep('menu')} />
+        </View>
+      )}
 
-        // 4. HÀM ĐĂNG XUẤT
-        function logout() {
-            // XÓA GHI NHỚ ĐĂNG NHẬP
-            localStorage.removeItem('isLoggedIn');
-            showPage('login-page');
-        }
-    </script>
+      {step === 'waiting' && (
+        <View style={styles.center}>
+          <Text style={styles.statusText}>Chờ Admin báo giá...</Text>
+          <TouchableOpacity style={styles.btnSecondary} onPress={() => setStep('menu')}>
+            <Text>Hủy yêu cầu</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </ScrollView>
+  );
+};
 
-</body>
-</html>
+// --- 2. GIAO DIỆN TÀI XẾ ---
+const DriverScreen = ({ onLogout }) => {
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>TÀI XẾ</Text>
+        <TouchableOpacity onPress={onLogout} style={styles.btnLogout}><Text style={styles.white}>Đăng xuất</Text></TouchableOpacity>
+      </View>
+      
+      <View style={styles.walletCard}>
+        <Text>Số dư ví: <Text style={{fontWeight:'bold', color: '#27ae60'}}>500,000đ</Text></Text>
+        <TouchableOpacity style={styles.btnSmall}><Text style={styles.white}>Nạp tiền</Text></TouchableOpacity>
+      </View>
+
+      <Text style={styles.sectionTitle}>Đơn hàng đang chờ</Text>
+      <View style={styles.orderCard}>
+        <Text style={styles.orderLabel}>Loại xe: Xe bao</Text>
+        <Text>Lịch trình: Hà Nội - Quảng Ninh</Text>
+        <Text style={styles.price}>Giá: 1,200,000đ</Text>
+        <TouchableOpacity style={styles.btnPrimary} onPress={() => Alert.alert("Thông báo", "Số dư không đủ để trừ 20% phí sàn!")}>
+          <Text style={styles.btnText}>NHẬN ĐƠN</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+// --- 3. GIAO DIỆN ADMIN ---
+const AdminScreen = ({ onLogout }) => (
+  <ScrollView style={styles.container}>
+    <View style={styles.header}>
+      <Text style={styles.headerTitle}>QUẢN TRỊ VIÊN</Text>
+      <TouchableOpacity onPress={onLogout} style={styles.btnLogout}><Text style={styles.white}>Đăng xuất</Text></TouchableOpacity>
+    </View>
+
+    <View style={styles.adminCard}>
+      <Text style={styles.bold}>Đơn hàng chờ báo giá (1)</Text>
+      <Text>Khách: 0987xxx - Đi: Hà Nội</Text>
+      <TextInput style={styles.inputSmall} placeholder="Nhập giá tiền..." keyboardType="numeric" />
+      <View style={{flexDirection:'row', gap: 10}}>
+        <TouchableOpacity style={[styles.btnSmall, {backgroundColor: '#27ae60'}]}><Text style={styles.white}>Gửi giá</Text></TouchableOpacity>
+        <TouchableOpacity style={[styles.btnSmall, {backgroundColor: '#e74c3c'}]}><Text style={styles.white}>Xóa đơn</Text></TouchableOpacity>
+      </View>
+    </View>
+
+    <View style={styles.adminCard}>
+      <Text style={styles.bold}>Duyệt hồ sơ tài xế</Text>
+      <Text>Tài xế: Nguyễn Văn A</Text>
+      <TouchableOpacity style={styles.btnSmall}><Text style={styles.white}>Xem ảnh xe & bằng lái</Text></TouchableOpacity>
+    </View>
+  </ScrollView>
+);
+
+const ButtonSmall = ({title, onPress}) => (
+  <TouchableOpacity onPress={onPress} style={{marginTop: 10}}><Text style={{textAlign:'center', color: '#7f8c8d'}}>{title}</Text></TouchableOpacity>
+);
+
+// --- HỆ THỐNG STYLES ---
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#f0f2f5', padding: 15 },
+  loginContainer: { flex: 1, justifyContent: 'center', padding: 30, backgroundColor: '#fff' },
+  logo: { fontSize: 28, fontWeight: 'bold', color: '#2c3e50', textAlign: 'center', marginBottom: 30 },
+  tabBar: { flexDirection: 'row', marginBottom: 20, backgroundColor: '#eee', borderRadius: 10, padding: 5 },
+  tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 8 },
+  activeTab: { backgroundColor: '#fff', elevation: 2 },
+  tabText: { color: '#7f8c8d' },
+  activeTabText: { color: '#2c3e50', fontWeight: 'bold' },
+  input: { backgroundColor: '#fff', borderWeight: 1, borderColor: '#ddd', borderWidth: 1, padding: 12, borderRadius: 8, marginBottom: 15 },
+  inputSmall: { backgroundColor: '#eee', padding: 8, borderRadius: 5, marginVertical: 10 },
+  btnPrimary: { backgroundColor: '#2c3e50', padding: 15, borderRadius: 8, alignItems: 'center' },
+  btnSecondary: { padding: 15, alignItems: 'center' },
+  btnText: { color: '#fff', fontWeight: 'bold' },
+  btnTextSecondary: { color: '#2c3e50' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 40, marginBottom: 20 },
+  headerTitle: { fontSize: 20, fontWeight: 'bold' },
+  btnLogout: { backgroundColor: '#e74c3c', padding: 8, borderRadius: 5 },
+  white: { color: '#fff' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  menuItem: { width: '48%', backgroundColor: '#fff', padding: 25, borderRadius: 12, marginBottom: 15, alignItems: 'center', elevation: 3 },
+  menuText: { fontWeight: 'bold', fontSize: 16 },
+  formCard: { backgroundColor: '#fff', padding: 20, borderRadius: 15 },
+  label: { marginBottom: 5, fontWeight: 'bold' },
+  statusText: { fontSize: 18, fontStyle: 'italic', color: '#e67e22', textAlign: 'center', marginTop: 50 },
+  walletCard: { backgroundColor: '#fff', padding: 15, borderRadius: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  btnSmall: { backgroundColor: '#3498db', padding: 8, borderRadius: 5, alignItems: 'center' },
+  orderCard: { backgroundColor: '#fff', padding: 15, borderRadius: 10, marginTop: 20, borderLeftWidth: 5, borderLeftColor: '#27ae60' },
+  price: { fontSize: 18, fontWeight: 'bold', color: '#e74c3c', marginVertical: 10 },
+  adminCard: { backgroundColor: '#fff', padding: 15, borderRadius: 10, marginBottom: 15 },
+  bold: { fontWeight: 'bold', fontSize: 16, marginBottom: 5 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' }
+});
+              
