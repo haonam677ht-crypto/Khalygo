@@ -1,64 +1,128 @@
-    <div id="admin-page" class="page p-4 bg-slate-900 min-h-screen text-white">
-        <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
-            <div>
-                <h1 class="text-2xl font-bold text-yellow-400">KhaLy GO</h1>
-                <p class="text-xs text-gray-400">Hệ thống Quản trị Admin</p>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KhaLy GO - Quản Trị Hệ Thống</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .page { display: none; }
+        .active { display: block; }
+    </style>
+</head>
+<body class="bg-slate-900 font-sans text-slate-200">
+
+    <div id="login-page" class="page active p-6">
+        <div class="max-w-md mx-auto bg-slate-800 p-8 rounded-2xl shadow-2xl mt-10 border border-slate-700">
+            <h2 class="text-2xl font-bold mb-6 text-center text-yellow-400">KhaLy GO</h2>
+            <input id="phone" type="number" placeholder="Số điện thoại (10 số)" class="w-full bg-slate-700 border-none p-3 mb-4 rounded-lg text-white">
+            <input id="pass" type="password" placeholder="Mật khẩu" class="w-full bg-slate-700 border-none p-3 mb-4 rounded-lg text-white">
+            <div class="flex justify-around mb-6 text-sm">
+                <label class="flex items-center gap-2"><input type="radio" name="role" value="khach"> Khách</label>
+                <label class="flex items-center gap-2"><input type="radio" name="role" value="taixe"> Tài xế</label>
+                <label class="flex items-center gap-2"><input type="radio" name="role" value="admin" checked> Admin</label>
             </div>
-            <button onclick="logout()" class="bg-red-500/20 text-red-400 px-3 py-1 rounded border border-red-500/50 text-sm">Đăng xuất</button>
+            <button onclick="login()" class="w-full bg-yellow-500 text-slate-900 p-3 rounded-lg font-bold mb-2 hover:bg-yellow-400">ĐĂNG NHẬP</button>
+        </div>
+    </div>
+
+    <div id="admin-page" class="page p-4 min-h-screen">
+        <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-yellow-400">QUẢN TRỊ ADMIN</h1>
+                <p class="text-xs text-slate-400 italic">Theo dõi & Điều phối đơn hàng</p>
+            </div>
+            <button onclick="logout()" class="text-red-400 text-sm border border-red-400 px-3 py-1 rounded hover:bg-red-400/10">Đăng xuất</button>
         </div>
 
         <div class="space-y-6">
             <section>
-                <h3 class="font-bold mb-3 flex items-center text-blue-400">
-                    <span class="mr-2">🔔</span> Đơn hàng chờ báo giá
-                </h3>
-                <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-lg">
-                    <div class="grid grid-cols-2 gap-2 text-sm mb-3">
-                        <p><span class="text-gray-400">Loại xe:</span> <span class="text-yellow-500 font-bold">Xe Tiện Chuyến</span></p>
-                        <p><span class="text-gray-400">Khách hàng:</span> <span class="text-green-400 font-bold text-lg">0987.654.321</span></p>
-                        <p class="col-span-2"><span class="text-gray-400">Điểm đi:</span> 123 Đường ABC, Cần Thơ</p>
-                        <p class="col-span-2"><span class="text-gray-400">Điểm đến:</span> Quận 1, TP. Hồ Chí Minh</p>
-                        <p><span class="text-gray-400">Ngày đi:</span> 28/04/2026</p>
-                        <p><span class="text-gray-400">Giờ đi:</span> 08:30 sáng</p>
+                <h3 class="font-bold mb-3 text-blue-400 flex items-center">🗂️ Danh sách tài xế</h3>
+                <div class="bg-slate-800 p-3 rounded-lg border border-slate-700 text-sm">
+                    <div class="flex justify-between items-center border-b border-slate-700 pb-2 mb-2">
+                        <span>TX Nguyễn Văn A (0901...)</span>
+                        <span class="text-green-400">Ví: 500k</span>
                     </div>
-                    
-                    <div class="flex gap-2 mt-4 border-t border-slate-700 pt-4">
-                        <input type="number" placeholder="Nhập giá VNĐ..." class="flex-1 bg-white text-black font-bold p-2 rounded outline-none focus:ring-2 focus:ring-blue-500">
-                        <button class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-bold transition-all">Gửi báo giá</button>
-                        <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-bold transition-all">Xoá</button>
+                    <button class="text-xs bg-blue-600 px-2 py-1 rounded">Duyệt hồ sơ</button>
+                </div>
+            </section>
+
+            <section>
+                <h3 class="font-bold mb-3 text-orange-400 flex items-center">🔔 Đơn hàng chờ báo giá</h3>
+                
+                <div class="bg-slate-800 p-4 rounded-xl border-l-4 border-orange-500 shadow-lg space-y-3">
+                    <div class="flex justify-between">
+                        <span class="bg-orange-500/20 text-orange-400 text-[10px] px-2 py-1 rounded uppercase font-bold">Xe Tiện Chuyến</span>
+                        <span class="text-slate-400 text-xs font-mono">ID: #8892</span>
+                    </div>
+
+                    <div class="space-y-1">
+                        <p class="text-lg font-bold text-white leading-none">Khách: 0987.123.456</p>
+                        <p class="text-sm text-slate-300"><span class="text-slate-500">Từ:</span> Ninh Kiều, Cần Thơ</p>
+                        <p class="text-sm text-slate-300"><span class="text-slate-500">Đến:</span> Vị Thanh, Hậu Giang</p>
+                        <div class="flex gap-4 text-xs text-blue-300 pt-1">
+                            <span>📅 Ngày: 26/04/2026</span>
+                            <span>⏰ Giờ: 14:30</span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 pt-3 border-t border-slate-700">
+                        <input type="number" placeholder="Giá VNĐ" class="flex-1 bg-white text-slate-900 font-bold p-2 rounded-md outline-none">
+                        <button onclick="alert('Đã gửi báo giá cho khách!')" class="bg-green-600 px-4 rounded-md font-bold text-sm">Gửi báo giá</button>
+                        <button class="bg-red-600 px-3 rounded-md font-bold text-sm">Xoá</button>
                     </div>
                 </div>
             </section>
 
             <section>
-                <h3 class="font-bold mb-3 flex items-center text-yellow-400">
-                    <span class="mr-2">💰</span> Xác nhận chuyển khoản
-                </h3>
-                <div class="bg-blue-900/30 p-4 rounded-lg border border-blue-500/50 shadow-inner">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <p class="font-bold text-lg text-blue-200 underline">Đơn #123 (Xe 1 chiều)</p>
-                            <p class="text-sm">Khách: <span class="font-bold text-white">0912.333.444</span></p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-yellow-400 font-bold text-xl">500.000đ</p>
-                            <p class="text-[10px] text-gray-400 italic">Chờ xác nhận tiền về túi...</p>
-                        </div>
+                <h3 class="font-bold mb-3 text-yellow-400 flex items-center">💰 Xác nhận chuyển khoản</h3>
+                <div class="bg-blue-900/20 p-4 rounded-xl border border-blue-500/50">
+                    <div class="flex justify-between items-center mb-3">
+                        <p class="text-sm">Đơn #8890: <span class="text-white font-bold">700.000đ</span></p>
+                        <span class="text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded">Xe 1 Chiều</span>
                     </div>
-                    <button class="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-black py-3 rounded-md mt-2 shadow-lg transition-transform active:scale-95">
-                        XÁC NHẬN ĐÃ NHẬN TIỀN & ĐẨY ĐƠN
+                    <button onclick="alert('Đã xác nhận tiền! Đang đẩy đơn lên hệ thống tài xế.')" class="w-full bg-yellow-500 text-slate-900 font-black py-3 rounded-lg shadow-lg hover:bg-yellow-400 transition-transform active:scale-95">
+                        XÁC NHẬN & ĐẨY ĐƠN
                     </button>
                 </div>
             </section>
 
-            <section class="bg-slate-800 p-4 rounded-lg border border-dashed border-slate-600">
-                <h3 class="font-bold mb-3 text-gray-300 italic">Tạo đơn hộ cho khách gọi Hotline</h3>
-                <div class="space-y-2">
-                    <input type="text" placeholder="SĐT khách..." class="w-full bg-slate-700 p-2 rounded text-sm outline-none">
-                    <input type="text" placeholder="Lộ trình..." class="w-full bg-slate-700 p-2 rounded text-sm outline-none">
-                    <button class="w-full bg-gray-600 py-2 rounded text-sm font-bold">TẠO ĐƠN NHANH</button>
+            <section class="bg-slate-800/50 p-4 rounded-xl border border-dashed border-slate-600">
+                <h4 class="text-sm font-bold text-slate-400 mb-2">Tạo đơn trực tiếp cho khách gọi điện</h4>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" placeholder="SĐT khách" class="bg-slate-700 p-2 rounded text-xs">
+                    <input type="text" placeholder="Giá chốt" class="bg-slate-700 p-2 rounded text-xs">
+                    <button class="col-span-2 bg-slate-600 py-2 rounded text-xs font-bold uppercase tracking-wider">Tạo đơn & Đẩy lên tài xế</button>
                 </div>
+            </section>
+
+            <section class="pb-10 text-xs">
+                <p class="text-slate-500 text-center">--- Lịch sử đơn hàng ---</p>
             </section>
         </div>
     </div>
-    
+
+    <div id="khach-page" class="page p-4">
+        <h2 class="text-center mt-20">Giao diện Khách hàng (Đã cấu hình)</h2>
+        <button onclick="logout()" class="block mx-auto mt-4 text-red-400 underline">Đăng xuất</button>
+    </div>
+    <div id="taixe-page" class="page p-4">
+        <h2 class="text-center mt-20">Giao diện Tài xế (Đã cấu hình)</h2>
+        <button onclick="logout()" class="block mx-auto mt-4 text-red-400 underline">Đăng xuất</button>
+    </div>
+
+    <script>
+        // Điều hướng đăng nhập đơn giản
+        function login() {
+            const role = document.querySelector('input[name="role"]:checked').value;
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(role + '-page').classList.add('active');
+        }
+
+        function logout() {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('login-page').classList.add('active');
+        }
+    </script>
+</body>
+</html>
