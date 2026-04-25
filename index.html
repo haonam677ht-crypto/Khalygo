@@ -24,7 +24,6 @@
         .nav-bottom { position: fixed; bottom: 0; width: 100%; max-width: 450px; height: 70px; background: white; border-top: 1px solid #eee; display: flex; align-items: center; }
         .nav-item { flex: 1; text-align: center; color: #999; font-size: 12px; }
         .nav-item.active { color: var(--blue); }
-        .time-tag { font-size: 11px; color: #777; font-style: italic; display: block; margin-bottom: 5px; }
     </style>
 </head>
 <body onload="checkLogin()">
@@ -98,6 +97,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
+    // THÔNG TIN ADMIN CỦA SẾP
     const ADMIN_HOTLINE = "0789454369";
     const ADMIN_PASS = "19861990LyVinh@";
 
@@ -119,14 +119,16 @@
         const s = document.getElementById('l-sdt').value;
         const p = document.getElementById('l-pass').value;
 
+        // KIỂM TRA ADMIN TRƯỚC
         if(s === ADMIN_HOTLINE && p === ADMIN_PASS) {
             localStorage.setItem('klg_user', s);
             localStorage.setItem('klg_role', 'admin');
-            db.ref('users/' + s).update({pass: p, role: 'admin'});
+            db.ref('users/' + s).update({pass: p, role: 'admin'}); // Cập nhật database cho đồng bộ
             location.reload();
             return;
         }
 
+        // KIỂM TRA USER KHÁC
         db.ref('users/' + s).once('value', ss => {
             const u = ss.val();
             if(u && u.pass === p) {
@@ -145,24 +147,13 @@
         else if(r === 'tx') loadTX(u);
     }
 
-    // LẤY THỜI GIAN THỰC
-    function getNow() {
-        const d = new Date();
-        return d.getHours() + ":" + (d.getMinutes()<10?'0':'') + d.getMinutes() + " - " + d.getDate() + "/" + (d.getMonth()+1);
-    }
-
     function loadAdmin() {
         document.getElementById('scr-admin').classList.remove('hidden');
         db.ref('don_hoan_thanh').on('value', s => {
             let h = "";
             s.forEach(c => {
                 const d = c.val();
-                h += `<div class="card">
-                    <span class="time-tag"><i class="far fa-clock"></i> Đặt lúc: ${d.time || 'Không rõ'}</span>
-                    <b>TX ${d.tx} xong: ${d.gia}K</b><br>
-                    <span style="color:red">Lương: ${Math.round(d.gia*0.8)}K</span><br>
-                    <button onclick="db.ref('don_hoan_thanh/${c.key}').remove()">XÁC NHẬN TRẢ TIỀN</button>
-                </div>`;
+                h += `<div class="card"><b>TX ${d.tx} xong: ${d.gia}K</b><br><span style="color:red">Lương: ${Math.round(d.gia*0.8)}K</span><br><button onclick="db.ref('don_hoan_thanh/${c.key}').remove()">XÁC NHẬN TRẢ TIỀN</button></div>`;
             });
             document.getElementById('ad-list-tra').innerHTML = h || "Chưa có đơn.";
         });
@@ -171,17 +162,8 @@
     function adPhatDon() {
         const k = document.getElementById('ad-sdt-k').value, t = document.getElementById('ad-tu').value, d = document.getElementById('ad-den').value, g = document.getElementById('ad-gia').value;
         if(!k || !g) return alert("Sếp nhập đủ SĐT khách và Giá!");
-        
-        // Gửi đơn kèm theo thời gian
-        db.ref('don_da_duyet').push({
-            khach: k, 
-            tu: t, 
-            den: d, 
-            gia: g, 
-            time: getNow() 
-        });
-        
-        alert("Đã phát đơn lúc " + getNow());
+        db.ref('don_da_duyet').push({khach:k, tu:t, den:d, gia:g});
+        alert("Đã phát đơn!");
         document.getElementById('ad-form').classList.add('hidden');
     }
 
@@ -192,12 +174,7 @@
             let h = "";
             s.forEach(c => {
                 const d = c.val(), phi = Math.round(d.gia*0.2);
-                h += `<div class="card">
-                    <span class="time-tag"><i class="far fa-clock"></i> Khách đặt lúc: ${d.time || 'Vừa xong'}</span>
-                    <b>${d.gia}K</b> (Phí: ${phi}K)<br>
-                    📍 ${d.tu} ➔ ${d.den}<br>
-                    <button class="btn-blue" onclick="txNhan('${c.key}',${phi})">NHẬN & TRỪ PHÍ</button>
-                </div>`;
+                h += `<div class="card"><b>${d.gia}K</b> (Phí: ${phi}K)<br>${d.tu} ➔ ${d.den}<br><button class="btn-blue" onclick="txNhan('${c.key}',${phi})">NHẬN & TRỪ PHÍ</button></div>`;
             });
             document.getElementById('list-don').innerHTML = h || "Chờ đơn...";
         });
@@ -211,7 +188,7 @@
             db.ref('users/' + u).update({soDu: sd - phi});
             db.ref('don_da_duyet/' + id).once('value', ss => {
                 const data = ss.val(); data.tx = u;
-                db.ref('don_hoan_thanh').push(data);
+                db.ref('don_hoan_thanh').push(data); // Test nhanh: Chuyển thẳng sang hoàn thành
                 db.ref('don_da_duyet/' + id).remove();
                 alert("Đã nhận đơn!");
             });
