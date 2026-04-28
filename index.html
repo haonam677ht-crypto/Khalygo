@@ -86,7 +86,7 @@
 
             <section class="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden">
                 <button onclick="document.getElementById('ad-cus-list').classList.toggle('hidden')" class="w-full p-3 flex justify-between items-center font-black text-blue-400 uppercase italic text-[10px]">
-                <span>👤 Danh sách Khách hàng</span>
+                    <span>👤 Danh sách Khách hàng</span>
                     <span>▼</span>
                 </button>
                 <div id="ad-cus-list" class="space-y-1 p-2 border-t border-slate-700 hidden"></div>
@@ -123,11 +123,13 @@
             </div>
         </div>
     </div>
-
     <div id="khach-page" class="page p-4">
         <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
             <span class="text-red-500 font-black italic text-sm uppercase">KhaLy GO</span>
-            <button onclick="logout()" class="text-red-400 border border-red-400 px-2 py-1 rounded font-bold uppercase text-[8px]">Thoát</button>
+            <div class="flex gap-2">
+                <button onclick="location.href='tel:0789454369'" class="bg-blue-600 px-2 py-1 rounded font-bold">📞 ADMIN</button>
+                <button onclick="logout()" class="text-red-400 border border-red-400 px-2 py-1 rounded font-bold uppercase text-[8px]">Thoát</button>
+            </div>
         </div>
         <div class="flex border-b border-slate-700 mb-4 text-center font-bold">
             <button onclick="showTxTab('kh-booking','khach')" id="kh-tab-o" class="flex-1 py-2 tab-btn active uppercase text-[10px]">Đặt xe</button>
@@ -176,9 +178,8 @@
     };
     firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
-    // BIẾN THEO DÕI THÔNG BÁO (ĐẶT Ở NGOÀI CÁC HÀM)
-    var lastAdminOrderCount = -1;
-    var lastTaixeOrderCount = -1;
+    var lastAdminCount = -1;
+    var lastTaixeCount = -1;
 
     function handleLogin() {
         const p = document.getElementById('phone').value, mk = document.getElementById('pass').value, r = document.querySelector('input[name="role"]:checked').value;
@@ -252,18 +253,14 @@
         const uSes = JSON.parse(localStorage.getItem('klg_u'));
         db.ref('users/' + uSes.p).on('value', s => { document.getElementById('tx-so-du').innerText = (s.val().soDu || 0) + "K"; });
         db.ref('orders').on('value', s => {
-            let h=""; 
-            let countDa = 0;
+            let h=""; let countDa = 0;
             s.forEach(o => { 
                 const d=o.val(); 
                 if(d.status === 'da') countDa++;
                 if(d.status === 'da' || (d.status === 'da_nhan' && d.taiXe === uSes.p)) {
                     const daNhan = (d.status === 'da_nhan');
                     h+=`<div class="bg-[#242745] p-4 rounded-xl border border-slate-700 mb-3 shadow-lg">
-                        <div class="flex justify-between mb-2">
-                           <span class="bg-red-600 px-2 py-0.5 rounded text-[8px] font-black uppercase text-white">${d.svc}</span>
-                           <span class="text-[9px] text-yellow-400 font-bold italic">📅 ${d.gio || ''} - ${d.ngay || ''}</span>
-                        </div>
+                        <div class="flex justify-between mb-2"><span class="bg-red-600 px-2 py-0.5 rounded text-[8px] font-black uppercase text-white">${d.svc}</span><span class="text-[9px] text-yellow-400 font-bold italic">📅 ${d.gio || ''} - ${d.ngay || ''}</span></div>
                         <p class="text-[10px]">📍 ${d.tu} → ${d.den}</p>
                         <p class="font-bold mt-1 text-blue-400">📞 SĐT: ${daNhan ? `<a href="tel:${d.khach}" class="underline">${d.khach}</a>` : '*********'}</p>
                         <p class="text-green-400 font-black text-sm">${d.gia}K</p>
@@ -272,10 +269,10 @@
                     </div>`;
                 }
             });
-            if(lastTaixeOrderCount !== -1 && countDa > lastTaixeOrderCount && Notification.permission === "granted") {
+            if(lastTaixeCount !== -1 && countDa > lastTaixeCount && Notification.permission === "granted") {
                 new Notification("KhaLy GO", { body: "Có đơn mới đã báo giá! Vào húp ngay anh em ơi." });
             }
-            lastTaixeOrderCount = countDa;
+            lastTaixeCount = countDa;
             document.getElementById('tx-list').innerHTML = h || "Đợi đơn...";
         });
     }
@@ -283,37 +280,31 @@
     function xemHoSo(p, type) {
         db.ref('users/'+p).once('value', s => {
             const u = s.val();
-            if(type === 'taixe') {
-                alert(`TÀI XẾ: ${p}\n- Tên: ${u.ten||'Trống'}\n- Bằng lái: ${u.banglai||'N/A'}\n- Ảnh xe: ${u.anhxe||'N/A'}\n- Cà vẹt: ${u.cavet||'N/A'}`);
-            } else {
-                alert(`KHÁCH HÀNG: ${p}\n- Tên: ${u.ten||'Chưa cập nhật'}`);
-            }
+            if(type === 'taixe') alert(`TÀI XẾ: ${p}\n- Tên: ${u.ten||'Trống'}\n- Bằng lái: ${u.banglai||'N/A'}\n- Ảnh xe: ${u.anhxe||'N/A'}\n- Cà vẹt: ${u.cavet||'N/A'}`);
+            else alert(`KHÁCH HÀNG: ${p}\n- Tên: ${u.ten||'Chưa cập nhật'}`);
         });
     }
+
     function loadAdmin() {
         db.ref('orders').on('value', s => {
-            let hO = ""; 
-            let countCho = 0;
+            let hO = ""; let countCho = 0;
             s.forEach(o => { 
                 const d = o.val(); 
                 if(d.status === 'cho') countCho++;
                 if(d.status === 'cho' || d.status === 'da') {
                     hO += `<div class="bg-[#242745] p-3 rounded-lg border-l-4 ${d.status==='da'?'border-green-500':'border-yellow-500'} mb-2 relative shadow-md">
                         <button onclick="db.ref('orders/${o.key}').remove()" class="absolute right-2 top-2 text-red-500 font-bold">×</button>
-                        <div class="flex justify-between items-center mb-1">
-                           <span class="bg-red-600 px-2 py-0.5 rounded text-[8px] font-black uppercase text-white">${d.svc}</span>
-                           <span class="text-yellow-400 text-[9px] italic">⏰ ${d.gio||'?'}, ngày ${d.ngay||'?'}</span>
-                        </div>
+                        <div class="flex justify-between items-center mb-1"><span class="bg-red-600 px-2 py-0.5 rounded text-[8px] font-black uppercase text-white">${d.svc}</span><span class="text-yellow-400 text-[9px] italic">⏰ ${d.gio||'?'}, ngày ${d.ngay||'?'}</span></div>
                         <p class="text-blue-400 font-bold mb-1">📞 Khách: <a href="tel:${d.khach}" class="underline">${d.khach}</a></p>
                         <p class="text-[9px]">📍 ${d.tu} → ${d.den}</p>
                         <div class="flex gap-2 mt-2"><input id="g-${o.key}" type="number" value="${d.gia||''}" class="text-black w-16 p-1 text-[10px] rounded" placeholder="Giá"><button onclick="db.ref('orders/${o.key}').update({gia:document.getElementById('g-${o.key}').value,status:'da'})" class="bg-green-600 px-2 rounded text-[10px] font-bold text-white uppercase">Đẩy giá</button></div>
                     </div>`;
                 }
             });
-            if(lastAdminOrderCount !== -1 && countCho > lastAdminOrderCount && Notification.permission === "granted") {
+            if(lastAdminCount !== -1 && countCho > lastAdminCount && Notification.permission === "granted") {
                 new Notification("KhaLy GO - ADMIN", { body: "Có đơn khách đặt mới! Sếp vào báo giá ngay." });
             }
-            lastAdminOrderCount = countCho;
+            lastAdminCount = countCho;
             document.getElementById('ad-ord-list').innerHTML = hO;
         });
         db.ref('users').on('value', s => {
@@ -327,15 +318,23 @@
         });
     }
 
+    function khachHuyDon(id) {
+        if(confirm("Bạn muốn hủy đơn này?")) db.ref('orders/' + id).remove().then(() => alert("Đã hủy đơn!"));
+    }
     function loadKhach() {
         const u=JSON.parse(localStorage.getItem('klg_u'));
         db.ref('orders').orderByChild('khach').equalTo(u.p).on('value', s => {
             let h=""; s.forEach(o => { 
-                const d=o.val(); if(d.status !== 'hoan_thanh') {
-                h+=`<div class="bg-[#242745] p-4 rounded-xl border border-slate-700 mb-2">
-                    <p class="text-[10px]">📍 ${d.tu} → ${d.den}</p>
-                    <p class="text-yellow-500 font-bold mt-1 text-[10px] italic">${d.status==='cho'?'Đợi báo giá...':(d.status==='da'?'Giá: '+d.gia+'K':'Tài xế đang đến')}</p>
-                </div>`; }
+                const d=o.val(); 
+                if(d.status !== 'hoan_thanh' && d.status !== 'da_nhan') {
+                    h+=`<div class="bg-[#242745] p-4 rounded-xl border border-slate-700 mb-2 relative">
+                        <button onclick="khachHuyDon('${o.key}')" class="absolute right-3 top-3 bg-red-900/50 text-red-500 border border-red-500/30 px-2 py-1 rounded text-[8px] font-bold">HỦY ĐƠN</button>
+                        <p class="text-[10px]">📍 ${d.tu} → ${d.den}</p>
+                        <p class="text-yellow-500 font-bold mt-1 text-[10px] italic">${d.status==='cho'?'Đợi báo giá...':(d.status==='da'?'Giá: '+d.gia+'K':'Tài xế đang đến')}</p>
+                    </div>`; 
+                } else if (d.status === 'da_nhan') {
+                     h+=`<div class="bg-[#242745] p-4 rounded-xl border border-green-700 mb-2"><p class="text-[10px]">📍 ${d.tu} → ${d.den}</p><p class="text-green-400 font-bold mt-1 text-[10px] italic">Tài xế đã nhận đơn!</p></div>`;
+                }
             });
             document.getElementById('kh-list').innerHTML = h || "Chưa có đơn.";
         });
@@ -363,11 +362,7 @@
     function toggleAuth(t) { document.getElementById('login-form').classList.toggle('hidden', t==='reg'); document.getElementById('reg-form').classList.toggle('hidden', t==='login'); }
 
     window.onload = () => { 
-        // XIN QUYỀN THÔNG BÁO KHI VỪA VÀO TRANG
-        if (window.Notification && Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
-
+        if (window.Notification && Notification.permission !== "granted") Notification.requestPermission();
         const u=localStorage.getItem('klg_u'); 
         if(u){ 
             const j=JSON.parse(u); 
