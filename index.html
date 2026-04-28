@@ -61,9 +61,9 @@
                     <input id="ad-ng-new" type="date" class="flex-1 bg-slate-800 p-2 rounded border border-slate-600 text-white text-[10px]">
                     <input id="ad-gi-new" type="time" class="flex-1 bg-slate-800 p-2 rounded border border-slate-600 text-white text-[10px]">
                 </div>
+                <input id="ad-note-new" type="text" placeholder="Ghi chú (Ví dụ: khách đi 4 tiếng về)" class="w-full bg-slate-800 p-2 rounded border border-slate-600 text-white text-[10px]">
                 <button onclick="adminCreateOrder()" class="w-full bg-blue-600 py-2 rounded font-black mt-2 uppercase text-white">Tạo đơn</button>
             </div>
-
             <div class="bg-green-900/20 p-4 rounded-xl border border-green-500/30 mb-4 text-center">
                 <h3 class="text-green-400 font-black uppercase italic text-[10px] mb-2">💰 Ví tiền tài xế</h3>
                 <button onclick="napTienTX()" class="w-full bg-green-600 py-3 rounded font-black uppercase text-white shadow-lg">Bấm nạp tiền</button>
@@ -222,10 +222,11 @@
     function adminCreateOrder() {
         const p = document.getElementById('ad-p').value, s = document.getElementById('ad-svc').value;
         const tu = document.getElementById('ad-tu-new').value, den = document.getElementById('ad-den-new').value, ng = document.getElementById('ad-ng-new').value, gi = document.getElementById('ad-gi-new').value;
+        const note = document.getElementById('ad-note-new').value; // Lấy giá trị ghi chú
         if(!p || !s || !tu || !den) return alert("Thiếu tin!");
         db.ref('users/' + p).once('value', s_kh => {
             if (!s_kh.exists()) db.ref('users/' + p).set({ pass: "123", role: "khach", soDu: 0 });
-            db.ref('orders').push({ khach: p, svc: s, tu: tu, den: den, ngay: ng, gio: gi, status: 'cho' }).then(() => alert("Đã tạo!"));
+            db.ref('orders').push({ khach: p, svc: s, tu: tu, den: den, ngay: ng, gio: gi, status: 'cho', note: note }).then(() => alert("Đã tạo!"));
         });
     }
 
@@ -249,7 +250,7 @@
             }
         });
     }
-    function loadTaixe() {
+function loadTaixe() {
         const uSes = JSON.parse(localStorage.getItem('klg_u'));
         db.ref('users/' + uSes.p).on('value', s => { document.getElementById('tx-so-du').innerText = (s.val().soDu || 0) + "K"; });
         db.ref('orders').on('value', s => {
@@ -262,6 +263,7 @@
                     h+=`<div class="bg-[#242745] p-4 rounded-xl border border-slate-700 mb-3 shadow-lg">
                         <div class="flex justify-between mb-2"><span class="bg-red-600 px-2 py-0.5 rounded text-[8px] font-black uppercase text-white">${d.svc}</span><span class="text-[9px] text-yellow-400 font-bold italic">📅 ${d.gio || ''} - ${d.ngay || ''}</span></div>
                         <p class="text-[10px]">📍 ${d.tu} → ${d.den}</p>
+                        <p class="text-orange-400 text-[9px] italic mt-1">${d.note ? '📝 ' + d.note : ''}</p>
                         <p class="font-bold mt-1 text-blue-400">📞 SĐT: ${daNhan ? `<a href="tel:${d.khach}" class="underline">${d.khach}</a>` : '*********'}</p>
                         <p class="text-green-400 font-black text-sm">${d.gia}K</p>
                         ${!daNhan ? `<button onclick="txNhanDon('${o.key}',${d.gia})" class="w-full bg-blue-600 mt-2 py-3 rounded-xl font-black text-white uppercase">NHẬN ĐƠN</button>` : 
@@ -297,7 +299,13 @@
                         <div class="flex justify-between items-center mb-1"><span class="bg-red-600 px-2 py-0.5 rounded text-[8px] font-black uppercase text-white">${d.svc}</span><span class="text-yellow-400 text-[9px] italic">⏰ ${d.gio||'?'}, ngày ${d.ngay||'?'}</span></div>
                         <p class="text-blue-400 font-bold mb-1">📞 Khách: <a href="tel:${d.khach}" class="underline">${d.khach}</a></p>
                         <p class="text-[9px]">📍 ${d.tu} → ${d.den}</p>
-                        <div class="flex gap-2 mt-2"><input id="g-${o.key}" type="number" value="${d.gia||''}" class="text-black w-16 p-1 text-[10px] rounded" placeholder="Giá"><button onclick="db.ref('orders/${o.key}').update({gia:document.getElementById('g-${o.key}').value,status:'da'})" class="bg-green-600 px-2 rounded text-[10px] font-bold text-white uppercase">Đẩy giá</button></div>
+                        <div class="mt-2 space-y-1">
+                            <input id="note-${o.key}" type="text" value="${d.note||''}" class="w-full bg-slate-800 p-1 text-[9px] rounded border border-slate-600 text-white" placeholder="Ghi chú (khách đi 4 tiếng về)">
+                            <div class="flex gap-2">
+                                <input id="g-${o.key}" type="number" value="${d.gia||''}" class="text-black w-16 p-1 text-[10px] rounded" placeholder="Giá">
+                                <button onclick="db.ref('orders/${o.key}').update({gia:document.getElementById('g-${o.key}').value, note:document.getElementById('note-${o.key}').value, status:'da'})" class="flex-1 bg-green-600 px-2 rounded text-[10px] font-bold text-white uppercase">Đẩy giá & Lưu</button>
+                            </div>
+                        </div>
                     </div>`;
                 }
             });
@@ -331,6 +339,7 @@
                         <button onclick="khachHuyDon('${o.key}')" class="absolute right-3 top-3 bg-red-900/50 text-red-500 border border-red-500/30 px-2 py-1 rounded text-[8px] font-bold">HỦY ĐƠN</button>
                         <p class="text-[10px]">📍 ${d.tu} → ${d.den}</p>
                         <p class="text-yellow-500 font-bold mt-1 text-[10px] italic">${d.status==='cho'?'Đợi báo giá...':(d.status==='da'?'Giá: '+d.gia+'K':'Tài xế đang đến')}</p>
+                        <p class="text-slate-400 text-[9px] italic mt-1">${d.note ? '📝 ' + d.note : ''}</p>
                     </div>`; 
                 } else if (d.status === 'da_nhan') {
                      h+=`<div class="bg-[#242745] p-4 rounded-xl border border-green-700 mb-2"><p class="text-[10px]">📍 ${d.tu} → ${d.den}</p><p class="text-green-400 font-bold mt-1 text-[10px] italic">Tài xế đã nhận đơn!</p></div>`;
