@@ -18,26 +18,31 @@
     <div id="login-page" class="page p-6 active">
         <div class="max-w-md mx-auto bg-[#242745] rounded-3xl mt-10 overflow-hidden border border-slate-700 shadow-2xl">
             <div class="bg-red-600 p-8 text-center font-black text-4xl italic text-white">KLG</div>
+            
             <div id="login-form" class="p-8 space-y-4">
-                <input id="phone" type="number" placeholder="Số điện thoại" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white">
-                <input id="pass" type="password" placeholder="Mật khẩu" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white">
+                <input id="phone" type="number" placeholder="Số điện thoại" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white text-base">
+                <input id="pass" type="password" placeholder="Mật khẩu" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white text-base">
+                
                 <div class="flex justify-around py-2 font-black uppercase border-y border-slate-700 text-[10px]">
-                    <label><input type="radio" name="role" value="khach"> Khách</label>
-                    <label><input type="radio" name="role" value="taixe"> Tài xế</label>
-                    <label><input type="radio" name="role" value="admin" checked> Admin</label>
+                    <label class="flex items-center gap-2"><input type="radio" name="role" value="khach" checked> Khách</label>
+                    <label class="flex items-center gap-2"><input type="radio" name="role" value="taixe"> Tài xế</label>
                 </div>
-                <button onclick="handleLogin()" class="w-full bg-red-600 py-4 rounded-xl text-white font-black text-base">ĐĂNG NHẬP</button>
-                <button onclick="toggleAuth('reg')" class="w-full text-slate-400 font-bold uppercase mt-2 text-center">Đăng ký mới</button>
+                
+                <button onclick="handleLogin()" class="w-full bg-red-600 py-4 rounded-xl text-white font-black text-base shadow-lg active:scale-95 transition-transform">ĐĂNG NHẬP</button>
+                
+                <button onclick="toggleAuth('reg')" class="w-full text-slate-400 font-bold uppercase mt-2 text-center py-2">Đăng ký mới</button>
             </div>
+
             <div id="reg-form" class="p-8 space-y-4 hidden">
-                <input id="r-phone" type="number" placeholder="SĐT đăng ký" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white">
-                <input id="r-pass" type="password" placeholder="Mật khẩu" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white">
+                <h3 class="text-center font-bold text-blue-400 uppercase mb-2">Đăng ký tài khoản</h3>
+                <input id="r-phone" type="number" placeholder="SĐT đăng ký" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white text-base">
+                <input id="r-pass" type="password" placeholder="Mật khẩu" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white text-base">
                 <div class="flex gap-2 font-bold">
-                    <label class="flex-1 bg-slate-800 p-3 rounded-lg text-center"><input type="radio" name="r-role" value="khach" checked> KHÁCH</label>
-                    <label class="flex-1 bg-slate-800 p-3 rounded-lg text-center"><input type="radio" name="r-role" value="taixe"> TÀI XẾ</label>
+                    <label class="flex-1 bg-slate-800 p-3 rounded-lg text-center cursor-pointer"><input type="radio" name="r-role" value="khach" checked> KHÁCH</label>
+                    <label class="flex-1 bg-slate-800 p-3 rounded-lg text-center cursor-pointer"><input type="radio" name="r-role" value="taixe"> TÀI XẾ</label>
                 </div>
-                <button onclick="handleRegister()" class="w-full bg-blue-600 py-4 rounded-xl font-black text-white">ĐĂNG KÝ</button>
-                <button onclick="toggleAuth('login')" class="w-full text-slate-500 text-center block">Quay lại</button>
+                <button onclick="handleRegister()" class="w-full bg-blue-600 py-4 rounded-xl font-black text-white text-base">ĐĂNG KÝ</button>
+                <button onclick="toggleAuth('login')" class="w-full text-slate-500 text-center block py-2">Quay lại đăng nhập</button>
             </div>
         </div>
     </div>
@@ -123,6 +128,7 @@
             </div>
         </div>
     </div>
+
     <div id="khach-page" class="page p-4">
         <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
             <span class="text-red-500 font-black italic text-sm uppercase">KhaLy GO</span>
@@ -169,6 +175,7 @@
     </div>
 
 <script>
+    // CONFIG FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyA7D06JXpU4zFnT2pYpbuZlw-YCb8F8VpQ",
         authDomain: "khaly-go-23798.firebaseapp.com",
@@ -181,19 +188,42 @@
     var lastAdminCount = -1;
     var lastTaixeCount = -1;
 
+    // CHỈNH SỬA TẠI ĐÂY (booking.js)
     function handleLogin() {
-        const p = document.getElementById('phone').value, mk = document.getElementById('pass').value, r = document.querySelector('input[name="role"]:checked').value;
-        if (r === 'admin' && p === "0789454369" && mk === "19861990LyVinh@") return saveSession(p, 'admin');
+        const p = document.getElementById('phone').value;
+        const mk = document.getElementById('pass').value;
+        const r = document.querySelector('input[name="role"]:checked').value;
+        
+        // TÍNH NĂNG MỚI: Tự nhận diện Admin không cần nút bấm
+        if (p === "0789454369" && mk === "19861990LyVinh@") {
+            return saveSession(p, 'admin');
+        }
+        
+        // Tính năng cũ: Đăng nhập Khách/Tài xế
         db.ref('users/' + p).once('value', s => {
-            const u = s.val(); if (u && u.pass === mk && u.role === r) saveSession(p, u.role); else alert("Lỗi đăng nhập!");
+            const u = s.val(); 
+            if (u && u.pass === mk && u.role === r) {
+                saveSession(p, u.role);
+            } else {
+                alert("Số điện thoại hoặc mật khẩu không đúng!");
+            }
         });
     }
     function handleRegister() {
         const p = document.getElementById('r-phone').value, mk = document.getElementById('r-pass').value, r = document.querySelector('input[name="r-role"]:checked').value;
+        if(!p || !mk) return alert("Vui lòng nhập đầy đủ!");
         db.ref('users/'+p).set({pass:mk, role:r, soDu:0}).then(() => { alert("Đã đăng ký!"); saveSession(p, r); });
     }
+
     function saveSession(p, r) { localStorage.setItem('klg_u', JSON.stringify({p, r})); location.reload(); }
+    
     function logout() { localStorage.removeItem('klg_u'); location.reload(); }
+
+    function toggleAuth(t) { 
+        document.getElementById('login-form').classList.toggle('hidden', t==='reg'); 
+        document.getElementById('reg-form').classList.toggle('hidden', t==='login'); 
+    }
+    // HẾT PHẦN CHỈNH SỬA CHÍNH
 
     function showTxTab(id, role) { 
         if(role === 'taixe') {
@@ -208,6 +238,7 @@
             document.getElementById('kh-tab-p').classList.toggle('active', id === 'kh-profile');
         }
     }
+
     function updateProfile(role) {
         const u=JSON.parse(localStorage.getItem('klg_u'));
         if(role === 'taixe') {
@@ -222,7 +253,7 @@
     function adminCreateOrder() {
         const p = document.getElementById('ad-p').value, s = document.getElementById('ad-svc').value;
         const tu = document.getElementById('ad-tu-new').value, den = document.getElementById('ad-den-new').value, ng = document.getElementById('ad-ng-new').value, gi = document.getElementById('ad-gi-new').value;
-        const note = document.getElementById('ad-note-new').value; // Lấy giá trị ghi chú
+        const note = document.getElementById('ad-note-new').value;
         if(!p || !s || !tu || !den) return alert("Thiếu tin!");
         db.ref('users/' + p).once('value', s_kh => {
             if (!s_kh.exists()) db.ref('users/' + p).set({ pass: "123", role: "khach", soDu: 0 });
@@ -240,7 +271,7 @@
                 m.innerHTML = `<div class="bg-[#242745] p-6 rounded-3xl text-center border border-slate-700">
                     <div class="bg-red-600 py-2 font-black mb-4">VÍ KHÔNG ĐỦ TIỀN</div>
                     <img src="https://api.vietqr.io/image/970422-0789454369-compact2.jpg?amount=100000&addInfo=KLG%20${u.p}" class="w-40 h-40 mx-auto bg-white p-2 rounded mb-4">
-                    <button onclick="this.closest('#qr-modal').remove()" class="w-full bg-slate-700 py-2 rounded font-bold">ĐÓNG</button>
+                    <button onclick="this.closest('#qr-modal').remove()" class="w-full bg-slate-700 py-2 rounded font-bold text-white">ĐÓNG</button>
                 </div>`;
                 return;
             }
@@ -250,7 +281,7 @@
             }
         });
     }
-function loadTaixe() {
+    function loadTaixe() {
         const uSes = JSON.parse(localStorage.getItem('klg_u'));
         db.ref('users/' + uSes.p).on('value', s => { document.getElementById('tx-so-du').innerText = (s.val().soDu || 0) + "K"; });
         db.ref('orders').on('value', s => {
@@ -329,6 +360,7 @@ function loadTaixe() {
     function khachHuyDon(id) {
         if(confirm("Bạn muốn hủy đơn này?")) db.ref('orders/' + id).remove().then(() => alert("Đã hủy đơn!"));
     }
+
     function loadKhach() {
         const u=JSON.parse(localStorage.getItem('klg_u'));
         db.ref('orders').orderByChild('khach').equalTo(u.p).on('value', s => {
@@ -348,7 +380,6 @@ function loadTaixe() {
             document.getElementById('kh-list').innerHTML = h || "Chưa có đơn.";
         });
     }
-
     function setSvc(v, b) { 
         document.getElementById('final-svc').value = v;
         document.querySelectorAll('.svc-btn, .sub-btn').forEach(el => el.classList.remove('selected'));
@@ -368,8 +399,6 @@ function loadTaixe() {
         });
     }
 
-    function toggleAuth(t) { document.getElementById('login-form').classList.toggle('hidden', t==='reg'); document.getElementById('reg-form').classList.toggle('hidden', t==='login'); }
-
     window.onload = () => { 
         if (window.Notification && Notification.permission !== "granted") Notification.requestPermission();
         const u=localStorage.getItem('klg_u'); 
@@ -383,3 +412,4 @@ function loadTaixe() {
 </script>
 </body>
 </html>
+    
