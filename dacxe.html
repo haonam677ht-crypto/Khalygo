@@ -3,61 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XP-GO - ĐẶT XE XÀ PHIÊN</title>
+    <title>XP-GO - KHÁCH HÀNG</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        .page { display: none; } .active { display: block; }
+        /* Tách biệt hoàn toàn các trang */
+        .page { display: none; min-height: 100vh; } 
+        .active { display: flex; flex-direction: column; }
+        #main-page.active { display: block; } /* Trang chính hiển thị kiểu block bình thường */
         .selected { background-color: #ef4444 !important; color: white !important; border-color: #ef4444 !important; }
-        #xe-bao-options { transition: all 0.3s ease; }
     </style>
 </head>
 <body class="bg-[#1a1c2e] text-slate-200 font-sans text-[10px]">
 
-    <div id="main-page" class="page active p-4">
+    <div id="login-page" class="page active p-6 justify-center">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-black italic text-red-600 tracking-tighter">XP-GO</h1>
+            <p class="text-slate-400 uppercase font-bold text-[8px] mt-2 italic">Dịch vụ đặt xe chuyên nghiệp</p>
+        </div>
+        
+        <div class="bg-[#242745] p-6 rounded-[30px] border border-slate-700 shadow-2xl w-full max-w-sm mx-auto">
+            <h2 class="text-center font-bold mb-6 text-lg uppercase tracking-widest text-white">Đăng nhập</h2>
+            
+            <div class="space-y-4">
+                <input id="auth-sdt" type="number" placeholder="Số điện thoại của sếp" class="w-full bg-[#1a1c2e] p-4 rounded-2xl border border-slate-600 outline-none focus:border-red-500 text-white text-center text-sm font-bold">
+                <input id="auth-pass" type="password" placeholder="Mật khẩu" class="w-full bg-[#1a1c2e] p-4 rounded-2xl border border-slate-600 outline-none focus:border-red-500 text-white text-center text-sm font-bold">
+                
+                <button onclick="handleAuth('login')" class="w-full bg-red-600 py-4 rounded-2xl text-white font-black uppercase shadow-lg active:scale-95 transition-all">Đăng nhập</button>
+                <button onclick="handleAuth('register')" class="w-full bg-slate-700 py-4 rounded-2xl text-white font-black uppercase border border-slate-600 active:scale-95 transition-all">Đăng ký mới</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-page" class="page p-4">
+        <div class="flex justify-between items-center mb-4 bg-[#242745] p-3 rounded-2xl border border-slate-700">
+            <span id="user-info" class="text-blue-400 font-bold italic text-[9px]"></span>
+            <button onclick="dangXuat()" class="bg-red-900/30 px-4 py-1.5 rounded-full border border-red-500/50 text-[8px] font-bold text-red-400 uppercase">🚪 Thoát</button>
+        </div>
+
         <div class="bg-[#242745] p-5 rounded-[30px] shadow-2xl border border-slate-700 mb-6">
             <div class="grid grid-cols-2 gap-2 mb-2">
                 <button onclick="setSvc('Xe ôm', this)" class="svc-btn bg-slate-800 py-3 rounded-xl border border-slate-600 font-bold">🏍️ Xe ôm</button>
-                
                 <button id="btn-xe-bao-main" onclick="toggleXeBao(this)" class="svc-btn bg-slate-800 py-3 rounded-xl border border-slate-600 font-bold">🚗 Xe bao</button>
-                
                 <button onclick="setSvc('Tiện chuyến', this)" class="svc-btn bg-slate-800 py-3 rounded-xl border border-slate-600 font-bold">🤝 Tiện chuyến</button>
                 <button onclick="setSvc('1 chiều', this)" class="svc-btn bg-slate-800 py-3 rounded-xl border border-slate-600 font-bold">➡️ 1 chiều</button>
             </div>
 
             <div id="xe-bao-options" class="hidden grid grid-cols-3 gap-2 mb-4 p-2 bg-slate-900/50 rounded-xl border border-slate-700">
-                <button onclick="setSvc('4 chỗ', this)" class="svc-btn bg-slate-700 py-2 rounded-lg border border-slate-500 text-[8px] font-bold">4 chỗ</button>
-                <button onclick="setSvc('7 chỗ', this)" class="svc-btn bg-slate-700 py-2 rounded-lg border border-slate-500 text-[8px] font-bold">7 chỗ</button>
-                <button onclick="setSvc('16 chỗ', this)" class="svc-btn bg-slate-700 py-2 rounded-lg border border-slate-500 text-[8px] font-bold">16 chỗ</button>
+                <button onclick="setSvc('4 chỗ', this)" class="svc-btn bg-slate-700 py-2 rounded-lg border border-slate-500 text-[8px] font-bold italic">4 chỗ</button>
+                <button onclick="setSvc('7 chỗ', this)" class="svc-btn bg-slate-700 py-2 rounded-lg border border-slate-500 text-[8px] font-bold italic">7 chỗ</button>
+                <button onclick="setSvc('16 chỗ', this)" class="svc-btn bg-slate-700 py-2 rounded-lg border border-slate-500 text-[8px] font-bold italic">16 chỗ</button>
             </div>
 
             <div class="space-y-3">
-                <input id="tu" type="text" placeholder="📍 Điểm đón khách" class="w-full bg-[#1a1c2e] p-4 rounded-2xl border border-slate-600 outline-none focus:border-red-500 text-white">
-                <input id="den" type="text" placeholder="🏁 Điểm đến" class="w-full bg-[#1a1c2e] p-4 rounded-2xl border border-slate-600 outline-none focus:border-red-500 text-white">
-                
+                <input id="tu" type="text" placeholder="📍 Điểm đón khách" class="w-full bg-[#1a1c2e] p-4 rounded-2xl border border-slate-600 outline-none text-white font-bold">
+                <input id="den" type="text" placeholder="🏁 Điểm đến" class="w-full bg-[#1a1c2e] p-4 rounded-2xl border border-slate-600 outline-none text-white font-bold">
                 <div class="grid grid-cols-2 gap-2">
-                    <input id="ngay" type="date" class="bg-[#1a1c2e] p-4 rounded-2xl border border-slate-600 outline-none text-white">
-                    <input id="gio" type="time" class="bg-[#1a1c2e] p-4 rounded-2xl border border-slate-600 outline-none text-white">
+                    <input id="ngay" type="date" class="bg-[#1a1c2e] p-4 rounded-2xl border border-slate-600 outline-none text-white font-bold">
+                    <input id="gio" type="time" class="bg-[#1a1c2e] p-4 rounded-2xl border border-slate-600 outline-none text-white font-bold">
                 </div>
-
-                <textarea id="ghiChu" placeholder="📝 Ghi chú thêm (Số khách, hành lý...)" class="w-full bg-[#1a1c2e] p-4 rounded-2xl border border-slate-600 outline-none text-white h-16"></textarea>
-
-                <button onclick="guiDon()" class="w-full bg-red-600 hover:bg-red-700 py-5 rounded-[20px] text-white font-black text-lg uppercase shadow-lg active:scale-95 transition-all">
-                    GỬI ĐƠN ĐẶT XE
-                </button>
+                <textarea id="ghiChu" placeholder="📝 Ghi chú (Ví dụ: 2 người, có trẻ em...)" class="w-full bg-[#1a1c2e] p-4 rounded-2xl border border-slate-600 outline-none text-white h-16 font-bold"></textarea>
+                <button onclick="guiDon()" class="w-full bg-red-600 py-5 rounded-[20px] text-white font-black text-lg uppercase shadow-lg active:scale-95 transition-all">GỬI ĐƠN ĐẶT XE</button>
             </div>
         </div>
 
         <div class="flex justify-between items-center mb-3 px-2">
-            <h3 class="font-black uppercase italic text-slate-400 text-[9px]">Lịch sử đặt xe của sếp</h3>
-            <button onclick="xoaLichSu()" class="text-[8px] bg-slate-700 px-3 py-1 rounded-full text-slate-300 uppercase font-bold">🗑️ Xóa tất cả</button>
+            <h3 class="font-black uppercase italic text-slate-400 text-[9px] tracking-widest">Lịch sử đơn hàng</h3>
+            <button onclick="xoaLichSu()" class="text-[8px] bg-slate-800 px-3 py-1 rounded-full border border-slate-700 text-slate-400 uppercase font-bold">🗑️ Xóa hết</button>
         </div>
-        
         <div id="list-don" class="space-y-3 pb-20"></div>
     </div>
 
 <script>
+    // FIREBASE CỦA SẾP
     const firebaseConfig = {
         apiKey: "AIzaSyA7D06JXpU4zFnT2pYpbuZlw-YCb8F8VpQ",
         authDomain: "khaly-go-23798.firebaseapp.com",
@@ -70,98 +89,114 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let selectedSvc = "";
+    let mySdt = localStorage.getItem('logged_sdt');
 
-    // Hàm ẩn/hiện menu con của xe bao
-    function toggleXeBao(btn) {
-        const options = document.getElementById('xe-bao-options');
-        options.classList.toggle('hidden');
-        
-        // Bôi đỏ nút xe bao chính để báo hiệu đang chọn
-        document.querySelectorAll('.svc-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        selectedSvc = ""; // Đợi khách chọn số chỗ cụ thể
+    // KIỂM TRA ĐĂNG NHẬP KHI MỞ APP
+    if(mySdt) {
+        showMain();
     }
 
-    function setSvc(val, btn) {
-        selectedSvc = val;
-        // Xóa màu đỏ ở tất cả các nút
-        document.querySelectorAll('.svc-btn').forEach(b => b.classList.remove('selected'));
-        // Bôi đỏ nút vừa chọn
-        btn.classList.add('selected');
-        
-        // Nếu chọn loại xe khác thì ẩn menu con của xe bao đi
-        if (val !== '4 chỗ' && val !== '7 chỗ' && val !== '16 chỗ') {
-            document.getElementById('xe-bao-options').classList.add('hidden');
+    function handleAuth(type) {
+        const sdt = document.getElementById('auth-sdt').value;
+        const pass = document.getElementById('auth-pass').value;
+
+        if(sdt.length < 10 || !pass) return alert("Sếp nhập đủ SĐT và mật khẩu giúp em!");
+
+        if(type === 'register') {
+            db.ref('users/' + sdt).set({ pass: pass }).then(() => {
+                alert("Đăng ký thành công!");
+                loginSuccess(sdt);
+            });
         } else {
-            // Nếu chọn trong menu con thì giữ cho nút Xe Bao chính vẫn sáng màu
-            document.getElementById('btn-xe-bao-main').classList.add('selected');
+            db.ref('users/' + sdt).once('value', s => {
+                if(s.exists() && s.val().pass === pass) {
+                    loginSuccess(sdt);
+                } else {
+                    alert("SĐT hoặc mật khẩu không đúng!");
+                }
+            });
         }
     }
 
-    if(!localStorage.getItem('khach_sdt')) {
-        localStorage.setItem('khach_sdt', 'K' + Math.floor(Math.random() * 900000 + 100000));
+    function loginSuccess(sdt) {
+        localStorage.setItem('logged_sdt', sdt);
+        mySdt = sdt;
+        showMain();
     }
-    const mySdt = localStorage.getItem('khach_sdt');
 
+    function showMain() {
+        // Ẩn trang login, hiện trang chính
+        document.getElementById('login-page').classList.remove('active');
+        document.getElementById('main-page').classList.add('active');
+        document.getElementById('user-info').innerText = "📱 KHÁCH: " + mySdt;
+        loadHistory();
+    }
+
+    function dangXuat() {
+        if(confirm("Sếp chắc chắn muốn thoát?")) {
+            localStorage.removeItem('logged_sdt');
+            location.reload(); // Tải lại để về trang login sạch sẽ
+        }
+    }
+
+    // --- CÁC HÀM XỬ LÝ ĐẶT XE (GIỮ NGUYÊN) ---
+    let selectedSvc = "";
+    function toggleXeBao(btn) {
+        document.getElementById('xe-bao-options').classList.toggle('hidden');
+        document.querySelectorAll('.svc-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedSvc = ""; 
+    }
+    function setSvc(val, btn) {
+        selectedSvc = val;
+        document.querySelectorAll('.svc-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        if (!['4 chỗ','7 chỗ','16 chỗ'].includes(val)) {
+            document.getElementById('xe-bao-options').classList.add('hidden');
+        } else {
+            document.getElementById('btn-xe-bao-main').classList.add('selected');
+        }
+    }
     function guiDon() {
         const tu = document.getElementById('tu').value;
         const den = document.getElementById('den').value;
-        const gio = document.getElementById('gio').value;
-        const ngay = document.getElementById('ngay').value;
-        const ghiChu = document.getElementById('ghiChu').value;
-
-        if(!selectedSvc) return alert("Sếp vui lòng chọn loại xe ạ!");
-        if(!tu || !den) return alert("Sếp nhập điểm đón và điểm đến nhé!");
-
+        if(!selectedSvc || !tu || !den) return alert("Sếp điền đủ thông tin xe và điểm đi/đến ạ!");
         db.ref('orders').push({
-            khach: mySdt,
-            svc: selectedSvc,
-            tu: tu,
-            den: den,
-            gio: gio,
-            ngay: ngay,
-            note: ghiChu,
-            status: 'cho',
-            time: Date.now()
+            khach: mySdt, svc: selectedSvc, tu: tu, den: den,
+            ngay: document.getElementById('ngay').value,
+            gio: document.getElementById('gio').value,
+            note: document.getElementById('ghiChu').value,
+            status: 'cho', time: Date.now()
         }).then(() => {
-            alert("Đã gửi đơn thành công!");
+            alert("Đã gửi đơn! Tài xế sẽ báo giá ngay ạ.");
             document.getElementById('tu').value = "";
             document.getElementById('den').value = "";
             document.getElementById('ghiChu').value = "";
         });
     }
-
     function loadHistory() {
         db.ref('orders').on('value', s => {
             let h = "";
             s.forEach(o => {
                 const d = o.val();
                 if(d.khach === mySdt) {
-                    let sttText = (d.status === 'cho') ? "Đợi báo giá..." : 
-                                 (d.status === 'da') ? "Giá: " + d.gia + "K" : 
-                                 (d.status === 'da_nhan') ? "TÀI XẾ ĐANG ĐẾN" : "✅ HOÀN THÀNH";
-                    h += `
-                    <div class="bg-[#242745] p-4 rounded-2xl border border-slate-700 mb-3 relative">
-                        <div class="flex justify-between mb-1">
-                            <span class="bg-red-600 text-[8px] px-2 py-0.5 rounded font-black italic uppercase">${d.svc}</span>
-                            <button onclick="xoaDonLe('${o.key}')" class="text-slate-500">✕</button>
+                    let stt = (d.status === 'cho') ? "⏳ Đang đợi báo giá..." : (d.status === 'da') ? "💰 Giá: " + d.gia + "K" : (d.status === 'da_nhan') ? "🚕 TÀI XẾ ĐANG ĐẾN" : "✅ HOÀN THÀNH";
+                    h += `<div class="bg-[#242745] p-4 rounded-2xl border border-slate-700 mb-3 shadow-lg">
+                        <div class="flex justify-between mb-2">
+                            <span class="bg-red-600 text-[8px] px-2 py-0.5 rounded text-white font-black uppercase italic">${d.svc}</span>
+                            <button onclick="xoaDonLe('${o.key}')" class="text-slate-500 font-bold">✕</button>
                         </div>
-                        <p class="text-white font-bold">📍 ${d.tu} → ${d.den}</p>
-                        <p class="text-slate-400 text-[8px]">⏰ ${d.ngay || ''} ${d.gio || ''}</p>
-                        <p class="text-green-400 font-bold uppercase mt-1 italic">${sttText}</p>
+                        <p class="text-white font-bold text-[11px]">📍 ${d.tu}</p>
+                        <p class="text-white font-bold text-[11px] mb-2">🏁 ${d.den}</p>
+                        <p class="text-green-400 font-black uppercase italic text-[9px] border-t border-slate-800 pt-2">${stt}</p>
                     </div>`;
                 }
             });
-            document.getElementById('list-don').innerHTML = h || "<p class='text-center py-5 opacity-50 italic'>Chưa có lịch sử.</p>";
+            document.getElementById('list-don').innerHTML = h || "<p class='text-center py-10 opacity-30 italic uppercase'>Sếp chưa có đơn hàng nào.</p>";
         });
     }
-
     function xoaDonLe(id) { if(confirm("Xóa đơn này?")) db.ref('orders/' + id).remove(); }
-    function xoaLichSu() { if(confirm("Xóa sạch lịch sử?")) { db.ref('orders').once('value', s => { s.forEach(o => { if(o.val().khach === mySdt) db.ref('orders/' + o.key).remove(); }); }); } }
-
-    window.onload = loadHistory;
+    function xoaLichSu() { if(confirm("Xóa sạch lịch sử đơn hàng?")) { db.ref('orders').once('value', s => { s.forEach(o => { if(o.val().khach === mySdt) db.ref('orders/' + o.key).remove(); }); }); } }
 </script>
 </body>
 </html>
-
