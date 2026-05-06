@@ -16,11 +16,11 @@
 
     <div id="login-page" class="page p-6 active">
         <div class="max-w-md mx-auto bg-[#242745] rounded-3xl mt-10 overflow-hidden border border-slate-700 shadow-2xl text-center">
-            <div class="bg-red-600 p-8 font-black text-4xl italic text-white">KLG</div>
+            <div class="bg-red-600 p-8 font-black text-4xl italic text-white shadow-inner">KLG ADMIN</div>
             <div class="p-8 space-y-4">
                 <input id="phone" type="number" placeholder="Số điện thoại" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white text-base text-center">
                 <input id="pass" type="password" placeholder="Mật khẩu" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white text-base text-center">
-                <button onclick="handleLogin()" class="w-full bg-red-600 py-4 rounded-xl text-white font-black text-base uppercase">Đăng nhập</button>
+                <button onclick="handleLogin()" class="w-full bg-red-600 py-4 rounded-xl text-white font-black text-base uppercase shadow-lg active:scale-95 transition-transform">Đăng nhập</button>
                 <button onclick="showPage('register-page')" class="text-slate-400 uppercase font-bold text-[10px] mt-2 block w-full">Đăng ký tài xế mới</button>
             </div>
         </div>
@@ -28,11 +28,10 @@
 
     <div id="register-page" class="page p-6">
         <div class="max-w-md mx-auto bg-[#242745] rounded-3xl mt-10 overflow-hidden border border-slate-700 shadow-2xl text-center">
-            <div class="bg-red-600 p-6 font-black text-2xl italic text-white">KLG</div>
-            <p class="text-blue-400 font-bold uppercase py-2">Đăng ký tài xế mới</p>
+            <div class="bg-blue-600 p-6 font-black text-2xl italic text-white">ĐĂNG KÝ TÀI XẾ</div>
             <div class="p-8 space-y-4">
                 <input id="reg-phone" type="number" placeholder="SĐT đăng ký" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white text-base text-center">
-                <input id="reg-pass" type="password" placeholder="Mật khẩu" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white text-base text-center">
+                <input id="reg-pass" type="password" placeholder="Mật khẩu tự chọn" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white text-base text-center">
                 <button onclick="handleRegister()" class="w-full bg-blue-600 py-4 rounded-xl text-white font-black text-base uppercase">Gửi yêu cầu</button>
                 <button onclick="showPage('login-page')" class="text-slate-400 text-[10px] block w-full">Quay lại đăng nhập</button>
             </div>
@@ -42,7 +41,7 @@
     <div id="admin-page" class="page p-4">
         <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
             <span class="text-yellow-400 font-black uppercase text-sm italic">HỆ THỐNG QUẢN TRỊ</span>
-            <button onclick="logout()" class="text-red-400 border border-red-400 px-3 py-1 rounded font-bold uppercase">Thoát</button>
+            <button onclick="logout()" class="text-red-400 border border-red-400 px-3 py-1 rounded font-bold uppercase text-[9px]">Thoát</button>
         </div>
 
         <section class="bg-orange-900/10 rounded-xl border border-orange-500/50 overflow-hidden mb-4">
@@ -81,7 +80,7 @@
 
         <section class="bg-[#242745] rounded-xl border border-slate-700 overflow-hidden mb-4 shadow-xl">
             <button onclick="toggleDiv('ad-tx-list')" class="w-full p-3 flex justify-between items-center font-black text-yellow-400 uppercase text-[10px] italic">
-                <span>📂 DANH SÁCH TÀI XẾ (CÓ MẬT KHẨU)</span>
+                <span>📂 TÀI XẾ (CÓ MK)</span>
                 <span>▼</span>
             </button>
             <div id="ad-tx-list" class="p-2 space-y-1"></div>
@@ -89,7 +88,7 @@
 
         <section class="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
             <button onclick="toggleDiv('ad-cus-list')" class="w-full p-3 flex justify-between items-center font-black text-blue-400 uppercase text-[10px] italic">
-                <span>👤 DANH SÁCH KHÁCH HÀNG (CÓ MẬT KHẨU)</span>
+                <span>👤 KHÁCH HÀNG (CÓ MK)</span>
                 <span>▼</span>
             </button>
             <div id="ad-cus-list" class="p-2 space-y-1"></div>
@@ -107,7 +106,7 @@
         </div>
         <div class="flex border-b border-slate-700 mb-4 bg-[#242745] rounded-t-xl overflow-hidden">
             <button id="tab-btn-don" onclick="showTxTab('tx-don')" class="flex-1 py-3 font-black text-red-500 border-b-2 border-red-500">ĐƠN HÀNG</button>
-            <button id="tab-btn-hoso" onclick="showTxTab('tx-hoso')" class="flex-1 py-3 font-black text-slate-400">HỒ SƠ CỦA TÔI</button>
+            <button id="tab-btn-hoso" onclick="showTxTab('tx-hoso')" class="flex-1 py-3 font-black text-slate-400">HỒ SƠ</button>
         </div>
         <div id="tx-don" class="tx-tab space-y-3">Đang quét đơn...</div>
         <div id="tx-hoso" class="tx-tab hidden space-y-3">
@@ -130,14 +129,30 @@
     firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
     function handleLogin() {
-        const p = document.getElementById('phone').value, mk = document.getElementById('pass').value;
-        if (p === "0789454369" && mk === "19861990LyVinh@") return saveSession(p, 'admin');
+        const p = document.getElementById('phone').value;
+        const mk = document.getElementById('pass').value;
+        
+        // KIỂM TRA ADMIN TRƯỚC TIÊN
+        if (p === "0789454369" && mk === "19861990LyVinh@") {
+            return saveSession(p, 'admin');
+        }
+        
+        // KIỂM TRA TÀI KHOẢN KHÁC TRONG DATABASE
         db.ref('users/' + p).once('value', s => {
             const u = s.val(); 
             if (u && u.pass === mk) {
-                if(u.status === 'pending') return alert("Tài khoản đang chờ duyệt!");
+                // Nếu SĐT này trùng với SĐT Admin nhưng mật khẩu lại là mật khẩu của "Khách" (123)
+                // Thì nó sẽ bị kẹt ở đây. Do đó ta chặn khách.
+                if(u.role === 'khach') {
+                    return alert("Tài khoản KHÁCH HÀNG không thể vào App này!");
+                }
+                if(u.status === 'pending') {
+                    return alert("Tài khoản đang chờ duyệt!");
+                }
                 saveSession(p, u.role);
-            } else alert("Sai thông tin!");
+            } else {
+                alert("Sai số điện thoại hoặc mật khẩu!");
+            }
         });
     }
 
@@ -145,14 +160,13 @@
         const p = document.getElementById('reg-phone').value, mk = document.getElementById('reg-pass').value;
         if(!p || !mk) return alert("Nhập đủ thông tin!");
         db.ref('users/' + p).once('value', s => {
-            if(s.exists()) return alert("Số điện thoại này đã được sử dụng!");
+            if(s.exists()) return alert("SĐT này đã có trên hệ thống!");
             db.ref('users/' + p).set({ pass: mk, role: 'taixe', status: 'pending', soDu: 0 })
-            .then(() => { alert("Đăng ký thành công! Đợi admin duyệt."); showPage('login-page'); });
+            .then(() => { alert("Đăng ký thành công! Đợi Sếp duyệt."); showPage('login-page'); });
         });
     }
 
     function loadAdmin() {
-        // Duyệt tài xế
         db.ref('users').orderByChild('status').equalTo('pending').on('value', s => {
             let h = "", count = 0;
             s.forEach(u => { count++; const ud = u.val();
@@ -160,18 +174,17 @@
                     <div class="flex justify-between items-center">
                         <span class="font-bold">${u.key}</span>
                         <div class="flex gap-1">
-                            <button onclick="viewInfo('${u.key}')" class="bg-blue-600 px-2 py-1 rounded text-[9px]">XEM HS</button>
+                            <button onclick="viewInfo('${u.key}')" class="bg-blue-600 px-2 py-1 rounded text-[9px]">HỒ SƠ</button>
                             <button onclick="db.ref('users/${u.key}').update({status:'active'})" class="bg-green-600 px-2 py-1 rounded text-[9px]">DUYỆT</button>
                         </div>
                     </div>
-                    <p class="text-[9px] text-slate-400 italic">Mật khẩu: <b class="text-white">${ud.pass}</b></p>
+                    <p class="text-[9px] text-slate-400 italic">MK: ${ud.pass}</p>
                 </div>`;
             });
             document.getElementById('ad-pending-list').innerHTML = h || "Trống";
             document.getElementById('count-pending').innerText = count;
         });
 
-        // Đơn hàng admin - Có Ngày Giờ
         db.ref('orders').on('value', s => {
             let h = "";
             s.forEach(o => {
@@ -185,14 +198,13 @@
                     <input id="note-${o.key}" type="text" value="${d.ghiChuAdmin || ''}" placeholder="Ghi chú" class="w-full bg-slate-900 p-2 mt-2 rounded border border-slate-700 text-white text-[10px]">
                     <div class="flex gap-2 mt-2">
                         <input id="price-${o.key}" type="number" value="${d.gia || ''}" placeholder="Giá" class="w-20 bg-slate-900 p-2 rounded text-green-400 font-bold border border-slate-700">
-                        <button onclick="pushPrice('${o.key}')" class="flex-1 bg-green-600 font-black py-2 rounded text-white italic uppercase">Đẩy giá</button>
+                        <button onclick="pushPrice('${o.key}')" class="flex-1 bg-green-600 font-black py-2 rounded text-white italic uppercase shadow-md">Đẩy giá</button>
                     </div>
                 </div>`;
             });
             document.getElementById('ad-ord-list').innerHTML = h || "Chưa có đơn";
         });
 
-        // HIỂN THỊ DANH SÁCH TÀI XẾ & KHÁCH + HIỆN MẬT KHẨU
         db.ref('users').on('value', s => {
             let hTx = "", hC = "";
             s.forEach(u => {
@@ -203,8 +215,8 @@
                         <span onclick="viewInfo('${u.key}')" class="text-slate-300 cursor-pointer font-bold underline italic">${ud.ten || u.key}</span>
                         <div class="flex gap-3 items-center">
                             <span class="text-yellow-500 font-bold">${ud.soDu || 0}K</span>
-                            <a href="tel:${u.key}" class="text-blue-400 font-bold">GỌI</a>
-                            <button onclick="deleteUser('${u.key}')" class="text-red-500">×</button>
+                            <a href="tel:${u.key}" class="text-blue-400 font-bold uppercase">Gọi</a>
+                            <button onclick="deleteUser('${u.key}')" class="text-red-500 font-bold">×</button>
                         </div>
                     </div>
                     <div class="flex justify-between text-[9px] opacity-60 italic">
@@ -222,11 +234,10 @@
     function loadTaixe(phone) {
         db.ref('users/'+phone).on('value', s => {
             const u = s.val();
-            document.getElementById('tx-balance').innerText = (u.soDu || 0) + "K";
-            document.getElementById('tx-ten').value = u.ten || "";
-            document.getElementById('tx-bl').value = u.bl || "";
-            document.getElementById('tx-ax').value = u.ax || "";
-            document.getElementById('tx-cv').value = u.cv || "";
+            if(u) {
+                document.getElementById('tx-balance').innerText = (u.soDu || 0) + "K";
+                document.getElementById('tx-ten').value = u.ten || "";
+            }
         });
 
         db.ref('orders').on('value', s => {
@@ -234,7 +245,7 @@
             s.forEach(o => {
                 const d = o.val();
                 if(d.status === 'da') {
-                    h += `<div class="bg-[#242745] p-4 rounded-xl border-l-4 border-green-500 shadow-md">
+                    h += `<div class="bg-[#242745] p-4 rounded-xl border-l-4 border-green-500 shadow-xl mb-3">
                         <div class="flex justify-between items-center mb-1">
                             <span class="text-red-500 font-black uppercase text-[10px] italic">🚗 ${d.svc}</span>
                             <span class="text-yellow-400 font-black text-xl">${d.gia}K</span>
@@ -243,7 +254,7 @@
                         <p class="text-slate-300"><span class="text-green-500 font-bold">Đi:</span> ${d.tu}</p>
                         <p class="text-slate-300 mb-2"><span class="text-red-500 font-bold">Đến:</span> ${d.den}</p>
                         <p class="text-slate-500 text-[10px] bg-slate-900 p-2 rounded italic">Ghi chú: ${d.ghiChuAdmin || 'Không'}</p>
-                        <a href="tel:${d.khach}" class="block w-full bg-blue-600 text-center py-3 rounded-xl mt-3 font-black text-white shadow-lg uppercase italic">Gọi khách ngay</a>
+                        <a href="tel:${d.khach}" class="block w-full bg-blue-600 text-center py-3 rounded-xl mt-3 font-black text-white shadow-lg uppercase italic active:scale-95 transition-transform">📞 Gọi khách</a>
                     </div>`;
                 }
             });
@@ -273,21 +284,21 @@
         const p = document.getElementById('ad-p').value, s = document.getElementById('ad-svc').value;
         const tu = document.getElementById('ad-tu-new').value, den = document.getElementById('ad-den-new').value;
         const dt = document.getElementById('ad-date').value, tm = document.getElementById('ad-time').value;
-        if(!p || !s || !tu || !den || !dt || !tm) return alert("Nhập đủ thông tin Ngày/Giờ!");
+        if(!p || !s || !tu || !den || !dt || !tm) return alert("Nhập đủ Ngày/Giờ!");
         db.ref('orders').push({ khach: p, svc: s, tu: tu, den: den, date: dt, time: tm, ghiChuAdmin: document.getElementById('ad-note-new').value, status: 'cho' });
-        alert("Đã tạo đơn thành công!");
+        alert("Đã tạo đơn!");
     }
 
     function pushPrice(id) {
         const p = document.getElementById('price-'+id).value, n = document.getElementById('note-'+id).value;
-        if(!p) return alert("Vui lòng nhập giá!");
+        if(!p) return alert("Nhập giá!");
         db.ref('orders/'+id).update({ gia: p, ghiChuAdmin: n, status: 'da' }).then(()=>alert("Đã đẩy giá!"));
     }
 
     function viewInfo(phone) {
         db.ref('users/'+phone).once('value', s => {
             const u = s.val(); if(!u) return;
-            alert(`HỒ SƠ: ${phone}\nMật khẩu: ${u.pass}\n- Tên: ${u.ten || 'Chưa có'}\n- Bằng lái: ${u.bl || 'Trống'}\n- Ảnh xe: ${u.ax || 'Trống'}\n- Cà vẹt: ${u.cv || 'Trống'}`);
+            alert(`HỒ SƠ: ${phone}\nMK: ${u.pass}\nTên: ${u.ten || 'Trống'}`);
         });
     }
 
@@ -296,7 +307,6 @@
         const v = prompt("Số tiền nạp (K):");
         if(p && v) db.ref('users/'+p).once('value', s => {
             if(s.exists()) db.ref('users/'+p).update({ soDu: (s.val().soDu || 0) + parseInt(v) }).then(()=>alert("Đã nạp!"));
-            else alert("Không tìm thấy SĐT này!");
         });
     }
 
