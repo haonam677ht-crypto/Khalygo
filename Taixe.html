@@ -4,82 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XP-DRIVER - TÀI XẾ XÀ PHIÊN</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* MÃ LỆNH ƯU TIÊN HIỂN THỊ - CHỐNG ĐEN MÀN HÌNH */
+        body { background-color: #1a1c2e !important; color: white !important; margin: 0; font-family: sans-serif; }
+        .page { display: none; padding: 20px; box-sizing: border-box; min-height: 100vh; }
+        .active { display: block !important; }
+        .khung-chinh { background: #242745; border-radius: 20px; border: 1px solid #334155; padding: 25px; margin-top: 40px; text-align: center; }
+        .logo-app { background: #16a34a; padding: 15px; border-radius: 10px; font-weight: 900; font-size: 24px; font-style: italic; margin-bottom: 20px; color: white; }
+        .input-xinh { width: 100%; background: #1a1c2e; border: 1px solid #475569; padding: 12px; border-radius: 10px; color: white; margin-bottom: 15px; box-sizing: border-box; outline: none; }
+        .nut-bam { background: #16a34a; color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; text-transform: uppercase; cursor: pointer; }
+        .the-don { background: #242745; border: 1px solid #334155; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
+        .tab-cai-dat { display: flex; border-bottom: 1px solid #334155; margin-bottom: 15px; }
+        .tab-nut { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: bold; cursor: pointer; color: #64748b; }
+        .tab-nut.active { color: #22c55e; border-bottom: 2px solid #22c55e; }
+    </style>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <style>
-        .page { display: none; } .active { display: block; }
-        .tab-btn.active { border-bottom: 2px solid #22c55e; color: #22c55e; }
-    </style>
 </head>
-<body class="bg-[#1a1c2e] text-slate-200 font-sans text-[10px]">
+<body>
 
-    <div id="login-page" class="page p-6 active">
-        <div class="max-w-md mx-auto bg-[#242745] rounded-3xl mt-10 overflow-hidden border border-slate-700 shadow-2xl">
-            <div class="bg-green-600 p-8 text-center font-black text-4xl italic text-white">XP-DRIVER</div>
-            <div id="login-form" class="p-8 space-y-4">
-                <input id="phone" type="number" placeholder="Số điện thoại" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white text-base">
-                <input id="pass" type="password" placeholder="Mật khẩu" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white text-base">
-                <button onclick="handleLogin()" class="w-full bg-green-600 py-4 rounded-xl text-white font-black text-base uppercase shadow-lg">Đăng Nhập</button>
-                <button onclick="toggleAuth('reg')" class="w-full text-slate-400 font-bold uppercase mt-2 text-center text-[10px]">Đăng ký tài xế mới</button>
+    <div id="login-page" class="page active">
+        <div class="khung-chinh">
+            <div class="logo-app">XP-DRIVER</div>
+            <div id="login-form">
+                <input id="phone" type="number" class="input-xinh" placeholder="Số điện thoại">
+                <input id="pass" type="password" class="input-xinh" placeholder="Mật khẩu">
+                <button onclick="handleLogin()" class="nut-bam">ĐĂNG NHẬP</button>
+                <p onclick="toggleAuth('reg')" style="color:#94a3b8; font-size:12px; margin-top:15px; cursor:pointer; font-weight:bold;">ĐĂNG KÝ TÀI XẾ MỚI</p>
             </div>
-            <div id="reg-form" class="p-8 space-y-4 hidden">
-                <h3 class="text-center font-black text-green-400 uppercase italic">Đăng ký đối tác XP</h3>
-                <input id="r-phone" type="number" placeholder="SĐT đăng ký" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white text-base">
-                <input id="r-pass" type="password" placeholder="Mật khẩu" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white text-base">
-                <button onclick="handleRegister()" class="w-full bg-green-600 py-4 rounded-xl font-black uppercase text-base">Xác nhận đăng ký</button>
-                <button onclick="toggleAuth('login')" class="w-full text-slate-500 text-center block uppercase">Quay lại</button>
+            <div id="reg-form" style="display: none;">
+                <h3 style="color:#4ade80;">ĐĂNG KÝ ĐỐI TÁC</h3>
+                <input id="r-phone" type="number" class="input-xinh" placeholder="SĐT đăng ký">
+                <input id="r-pass" type="password" class="input-xinh" placeholder="Mật khẩu">
+                <button onclick="handleRegister()" class="nut-bam">XÁC NHẬN ĐĂNG KÝ</button>
+                <p onclick="toggleAuth('login')" style="color:#94a3b8; margin-top:15px; cursor:pointer;">QUAY LẠI</p>
             </div>
         </div>
     </div>
 
-    <div id="admin-page" class="page p-4">
-        <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
-            <span class="text-yellow-400 font-black uppercase text-sm italic font-black">QUẢN TRỊ VIÊN</span>
-            <button onclick="logout()" class="text-red-400 border border-red-400 px-3 py-1 rounded font-bold uppercase">Thoát</button>
+    <div id="admin-page" class="page">
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #334155; padding-bottom: 10px;">
+            <span style="color:#facc15; font-weight: bold;">QUẢN TRỊ VIÊN</span>
+            <button onclick="logout()" style="color:#f87171; background:none; border:1px solid #f87171; border-radius:5px; padding:2px 10px;">Thoát</button>
         </div>
-        <div class="grid grid-cols-1 gap-4 mb-4">
-            <div class="bg-blue-900/20 p-4 rounded-xl border border-blue-500/30 space-y-2 text-center">
-                <h3 class="text-blue-400 font-black uppercase mb-2 text-left text-[10px]">💰 NẠP TIỀN CHO TÀI XẾ</h3>
-                <button onclick="napTienTX()" class="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-xs shadow-lg">BẤM VÀO ĐỂ NẠP TIỀN</button>
-            </div>
+        <div class="khung-chinh" style="margin-top:20px; padding:15px;">
+            <h4 style="color:#60a5fa; font-size:10px; text-align:left;">💰 NẠP TIỀN CHO TÀI XẾ</h4>
+            <button onclick="napTienTX()" style="background:#2563eb; color:white; border:none; width:100%; padding:12px; border-radius:10px; font-weight:bold;">BẤM VÀO ĐỂ NẠP TIỀN</button>
         </div>
-        <div class="space-y-4">
-            <section><h3 class="text-green-400 font-black mb-2 uppercase italic text-[10px]">📂 Danh sách Tài xế</h3><div id="ad-tx-list"></div></section>
-            <section><h3 class="text-orange-400 font-black mb-2 uppercase italic text-[10px]">🔔 Đơn đang chờ báo giá</h3><div id="ad-ord-list"></div></section>
-        </div>
+        <div id="ad-tx-list" style="margin-top:20px;"></div>
+        <div id="ad-ord-list" style="margin-top:20px;"></div>
     </div>
 
-    <div id="taixe-page" class="page p-4">
-        <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
-            <span class="text-green-500 font-black uppercase text-sm italic font-black">BÁC TÀI XÀ PHIÊN</span>
-            <button onclick="logout()" class="text-red-400 border border-red-400 px-2 py-1 rounded font-bold uppercase text-[8px]">Thoát</button>
+    <div id="taixe-page" class="page">
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #334155; padding-bottom: 10px;">
+            <span style="color:#22c55e; font-weight: bold;">BÁC TÀI XÀ PHIÊN</span>
+            <button onclick="logout()" style="color:#f87171; background:none; border:1px solid #f87171; padding:2px 8px; font-size:10px; border-radius:4px;">Thoát</button>
         </div>
-        
-        <div class="bg-slate-800 p-4 rounded-2xl mb-4 text-center border border-slate-600 shadow-xl">
-            <span class="text-[10px] text-slate-400 uppercase">Ví của tôi hiện tại:</span> 
-            <div id="tx-so-du" class="text-yellow-400 font-black text-2xl">0K</div>
+        <div style="background:#1e293b; padding:15px; border-radius:20px; text-align:center; border:1px solid #475569; margin: 15px 0;">
+            <div style="font-size:10px; color:#94a3b8;">VÍ HIỆN TẠI</div>
+            <div id="tx-so-du" style="color:#facc15; font-size:28px; font-weight:bold;">0K</div>
         </div>
-
-        <div class="flex border-b border-slate-700 mb-4 text-center font-bold">
-            <button onclick="showTxTab('tx-orders')" id="tab-o" class="flex-1 py-2 tab-btn active uppercase">Đơn Hàng</button>
-            <button onclick="showTxTab('tx-profile')" id="tab-p" class="flex-1 py-2 tab-btn uppercase">Hồ Sơ Của Tôi</button>
+        <div class="tab-cai-dat">
+            <div onclick="showTxTab('tx-orders')" id="tab-o" class="tab-nut active">ĐƠN HÀNG</div>
+            <div onclick="showTxTab('tx-profile')" id="tab-p" class="tab-nut">HỒ SƠ</div>
         </div>
-
-        <div id="tx-orders" class="space-y-3"><div id="tx-list"></div></div>
-
-        <div id="tx-profile" class="hidden space-y-4">
-            <div class="bg-[#242745] p-4 rounded-xl border border-slate-700 space-y-3">
-                <h4 class="text-yellow-500 font-bold uppercase italic text-[10px]">Thông tin của tôi</h4>
-                <input id="profile-name" type="text" placeholder="Họ tên sếp tài" class="w-full bg-[#1a1c2e] p-3 rounded-lg border border-slate-600 text-white outline-none">
-                <input id="profile-license" type="text" placeholder="Link ảnh bằng lái" class="w-full bg-[#1a1c2e] p-3 rounded-lg border border-slate-600 text-white outline-none">
-                <button onclick="updateProfile()" class="w-full bg-green-600 py-3 rounded-xl font-black uppercase">LƯU HỒ SƠ</button>
+        <div id="tx-orders"><div id="tx-list"></div></div>
+        <div id="tx-profile" style="display:none;">
+            <div class="khung-chinh" style="margin-top:0;">
+                <input id="profile-name" type="text" class="input-xinh" placeholder="Họ tên sếp">
+                <button onclick="updateProfile()" class="nut-bam">LƯU HỒ SƠ</button>
             </div>
         </div>
     </div>
 
 <script>
-    // PHẦN CẤU HÌNH FIREBASE CỦA SẾP
     const firebaseConfig = {
         apiKey: "AIzaSyA7D06JXpU4zFnT2pYpbuZlw-YCb8F8VpQ",
         authDomain: "khaly-go-23798.firebaseapp.com",
@@ -89,23 +89,56 @@
         messagingSenderId: "328254923276",
         appId: "1:328254923276:web:625f6be13a31b0a9264429"
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
 
-    // HÀM ĐĂNG NHẬP (Giữ nguyên tài khoản admin của sếp)
+    function startApp() {
+        if (typeof firebase !== 'undefined') {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            window.db = firebase.database();
+            
+            const u = localStorage.getItem('klg_u');
+            if(u) {
+                const j = JSON.parse(u);
+                chuyenTrang(j.r + '-page');
+                if(j.r === 'admin') loadAdmin();
+                if(j.r === 'taixe') loadTaixe();
+            }
+        }
+    }
+
+    function chuyenTrang(id) {
+        const p = document.getElementsByClassName('page');
+        for(let i=0; i<p.length; i++) p[i].classList.remove('active');
+        document.getElementById(id).classList.add('active');
+    }
+
     function handleLogin() {
-        const p = document.getElementById('phone').value, mk = document.getElementById('pass').value;
+        if (!window.db) return alert("Đang kết nối hệ thống...");
+        
+        let p = document.getElementById('phone').value.trim();
+        let mk = document.getElementById('pass').value.trim();
+        
+        if(!p || !mk) return alert("Sếp nhập đủ SĐT và Mật khẩu nhé!");
+
+        // ADMIN ĐẶC BIỆT
         if (p === "0789454369" && mk === "19861990LyVinh@") return saveSession(p, 'admin');
+        
+        // KIỂM TRA TẤT CẢ TÀI KHOẢN TRÊN FIREBASE
         db.ref('users/' + p).once('value', s => {
             const u = s.val();
-            if (u && u.pass === mk && u.role === 'taixe') saveSession(p, 'taixe');
-            else alert("Sai số điện thoại hoặc mật khẩu!");
+            // So sánh mật khẩu (chuyển cả 2 về chuỗi để chắc chắn)
+            if (u && String(u.pass) === String(mk)) {
+                saveSession(p, u.role || 'taixe');
+            } else {
+                alert("SĐT hoặc Mật khẩu không đúng sếp ơi!");
+            }
+        }, err => {
+            alert("Lỗi kết nối mạng rồi sếp!");
         });
     }
 
     function handleRegister() {
-        const p = document.getElementById('r-phone').value, mk = document.getElementById('r-pass').value;
-        if(p.length < 10) return alert("SĐT không hợp lệ!");
+        const p = document.getElementById('r-phone').value.trim(), mk = document.getElementById('r-pass').value.trim();
+        if(!p || !mk) return alert("Nhập đủ tin sếp ơi!");
         db.ref('users/'+p).set({pass:mk, role:'taixe', soDu:0}).then(() => { 
             alert("Đăng ký thành công!"); saveSession(p, 'taixe');
         });
@@ -114,47 +147,28 @@
     function saveSession(p, r) { localStorage.setItem('klg_u', JSON.stringify({p, r})); location.reload(); }
     function logout() { localStorage.removeItem('klg_u'); location.reload(); }
 
-    // TÀI XẾ: LOAD ĐƠN VÀ THÊM TÍNH NĂNG MỚI
     function loadTaixe() {
         const uSes = JSON.parse(localStorage.getItem('klg_u'));
         db.ref('users/' + uSes.p).on('value', s => { 
-            document.getElementById('tx-so-du').innerText = (s.val().soDu || 0) + "K"; 
+            if(s.exists()) document.getElementById('tx-so-du').innerText = (s.val().soDu || 0) + "K"; 
         });
-
         db.ref('orders').on('value', s => {
             let h = ""; s.forEach(o => { 
                 const d = o.val(); 
                 if(d.status === 'da' || (d.status === 'da_nhan' && d.taiXe === uSes.p)) {
                     const isMine = (d.status === 'da_nhan');
-                    h += `<div class="bg-[#242745] p-4 rounded-xl border border-slate-700 mb-3 shadow-lg">
-                        <div class="flex justify-between items-center mb-2 text-white">
-                            <span class="bg-red-600 px-2 py-0.5 rounded text-[8px] font-black italic uppercase">${d.svc}</span>
-                            <span>⏰ ${d.gio || '---'}</span>
-                        </div>
-                        <div class="my-2 p-2 bg-slate-900/50 rounded-lg">
-                            <p>📍 Đón: <span class="font-bold text-white">${d.tu}</span></p>
-                            <p>🏁 Đến: <span class="font-bold text-white">${d.den}</span></p>
-                        </div>
-                        <p class="text-green-400 font-black text-sm italic">Giá: ${d.gia}K</p>
-
-                        ${!isMine ? 
-                            `<button onclick="txNhanDon('${o.key}', ${d.gia})" class="w-full bg-blue-600 mt-3 py-3 rounded-xl font-black uppercase text-[10px]">Bấm Để Nhận Đơn (Phí 12%)</button>` 
-                            : 
-                            `<div class="mt-3 space-y-2">
-                                <div class="bg-green-700/20 border border-green-500/50 p-2 rounded-lg text-center text-green-400">
-                                    <p class="font-bold uppercase italic">Bạn đã nhận đơn này</p>
-                                    <a href="tel:${d.khach}" class="text-blue-400 font-black text-sm underline block mt-1 italic">📞 Bấm Để Gọi Khách: ${d.khach}</a>
-                                </div>
-                                <button onclick="if(confirm('Chuyến đi đã hoàn thành?')) db.ref('orders/${o.key}').update({status: 'hoan_thanh'})" 
-                                        class="w-full bg-orange-600 py-3 rounded-xl font-black uppercase text-[10px] text-white shadow-lg">
-                                    ✅ HOÀN THÀNH CHUYẾN
-                                </button>
-                            </div>`
-                        }
+                    h += `<div class="the-don">
+                        <p style="font-size:12px; margin:5px 0;">📍 ${d.tu} <br> 🏁 ${d.den}</p>
+                        <p style="color:#4ade80; font-weight:bold;">Giá: ${d.gia}K</p>
+                        ${!isMine ? `<button onclick="txNhanDon('${o.key}', ${d.gia})" class="nut-bam" style="padding:10px; font-size:12px;">NHẬN ĐƠN</button>` : 
+                        `<div style="margin-top:10px;">
+                            <a href="tel:${d.khach}" style="display:block; text-align:center; padding:10px; border:1px solid #22c55e; color:#60a5fa; text-decoration:none; margin-bottom:8px; border-radius:10px;">📞 GỌI KHÁCH</a>
+                            <button onclick="if(confirm('Xong chuyến?')) db.ref('orders/${o.key}').update({status: 'hoan_thanh'})" class="nut-bam" style="background:#ea580c;">✅ HOÀN THÀNH</button>
+                        </div>`}
                     </div>`;
                 }
             });
-            document.getElementById('tx-list').innerHTML = h || "<p class='text-center py-10 opacity-50 italic uppercase'>Đang đợi đơn từ sếp...</p>";
+            document.getElementById('tx-list').innerHTML = h || "<p style='text-align:center; opacity:0.5;'>Đợi đơn mới...</p>";
         });
     }
 
@@ -162,77 +176,56 @@
         const u = JSON.parse(localStorage.getItem('klg_u')), phi = Math.round(gia * 0.12);
         db.ref('users/'+u.p).once('value', s => {
             const sd = s.val().soDu || 0;
-            if(sd < phi) return alert("Ví không đủ tiền để nhận đơn! Sếp hãy nạp thêm.");
-            if(confirm("Nhận đơn này sếp sẽ mất " + phi + "K phí?")) {
-                db.ref('users/'+u.p).update({soDu: sd - phi});
-                db.ref('orders/'+id).update({status: 'da_nhan', taiXe: u.p});
-            }
+            if(sd < phi) return alert("Ví không đủ tiền!");
+            db.ref('users/'+u.p).update({soDu: sd - phi});
+            db.ref('orders/'+id).update({status: 'da_nhan', taiXe: u.p});
         });
     }
 
-    // ADMIN: TÍNH NĂNG CŨ CỦA SẾP
     function loadAdmin() {
         db.ref('orders').on('value', s => {
             let h = ""; s.forEach(o => { 
-                const d = o.val(); 
-                if(d.status === 'cho' || d.status === 'da') {
-                    h += `<div class="bg-[#242745] p-3 rounded-lg border-l-4 border-yellow-500 mb-2">
-                        <p class="text-blue-400 font-bold uppercase">Khách: ${d.khach}</p>
-                        <p class="text-[9px] opacity-70">${d.tu} → ${d.den}</p>
-                        <div class="flex gap-2 mt-2">
-                            <input id="g-${o.key}" type="number" value="${d.gia||''}" class="w-20 text-black p-1 rounded font-bold" placeholder="Giá K">
-                            <button onclick="db.ref('orders/${o.key}').update({gia:document.getElementById('g-${o.key}').value, status:'da'})" class="bg-green-600 px-4 rounded font-bold uppercase">Báo Giá</button>
-                            <button onclick="if(confirm('Xóa đơn?')) db.ref('orders/${o.key}').remove()" class="text-red-500 ml-auto font-bold uppercase underline">Xóa</button>
-                        </div>
+                const d = o.val(); if(d.status === 'cho' || d.status === 'da') {
+                    h += `<div class="the-don" style="border-left: 4px solid #facc15; text-align:left;">
+                        <p style="font-size:11px;"><b>Khách:</b> ${d.khach}</p>
+                        <input id="g-${o.key}" type="number" value="${d.gia||''}" style="width:60px; color:black; padding:5px; border-radius:5px;" placeholder="K">
+                        <button onclick="db.ref('orders/${o.key}').update({gia:document.getElementById('g-${o.key}').value, status:'da'})" style="background:#16a34a; color:white; border:none; padding:5px 10px; border-radius:5px;">BÁO GIÁ</button>
                     </div>`;
                 }
             });
-            document.getElementById('ad-ord-list').innerHTML = h || "Chưa có đơn mới.";
+            document.getElementById('ad-ord-list').innerHTML = h;
         });
         db.ref('users').on('value', s => {
             let hTx=""; s.forEach(u => {
-                const ud=u.val(); 
-                if(ud.role==='taixe') hTx += `<div class="flex justify-between p-2 border-b border-slate-700"><span>${u.key} (Ví: <b class='text-yellow-400'>${ud.soDu}K</b>)</span><button onclick="if(confirm('Xóa tài xế này?')) db.ref('users/${u.key}').remove()" class="text-red-500 font-bold">XÓA</button></div>`;
+                const ud=u.val(); if(ud.role==='taixe') hTx += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #334155; font-size:11px;"><span>${u.key} (Ví: <b>${ud.soDu}K</b>)</span><button onclick="if(confirm('Xóa?')) db.ref('users/${u.key}').remove()" style="color:#ef4444; background:none; border:none;">XÓA</button></div>`;
             });    
-            document.getElementById('ad-tx-list').innerHTML = hTx || "Chưa có tài xế.";
+            document.getElementById('ad-tx-list').innerHTML = hTx;
         });
     }
 
     function napTienTX() {
-        const p = prompt("Nhập số điện thoại tài xế:"), v = prompt("Nhập số tiền cần nạp (K):");
+        const p = prompt("SĐT tài xế:"), v = prompt("Tiền nạp (K):");
         if(p && v) { 
             db.ref('users/'+p).once('value', s => { 
-                if(s.exists()) {
-                    db.ref('users/'+p).update({soDu: (s.val().soDu || 0) + parseInt(v)}); 
-                    alert("Đã nạp thành công " + v + "K cho sếp tài!"); 
-                } else alert("SĐT này chưa đăng ký tài xế!");
+                if(s.exists()) { db.ref('users/'+p).update({soDu: (s.val().soDu || 0) + parseInt(v)}); alert("Đã nạp!"); }
             }); 
         }
     }
 
-    function toggleAuth(t) { document.getElementById('login-form').classList.toggle('hidden', t==='reg'); document.getElementById('reg-form').classList.toggle('hidden', t==='login'); }
     function showTxTab(id) {
-        document.getElementById('tx-orders').classList.toggle('hidden', id==='tx-profile');
-        document.getElementById('tx-profile').classList.toggle('hidden', id==='tx-orders');
+        document.getElementById('tx-orders').style.display = (id==='tx-profile' ? 'none' : 'block');
+        document.getElementById('tx-profile').style.display = (id==='tx-orders' ? 'none' : 'block');
         document.getElementById('tab-o').classList.toggle('active', id==='tx-orders');
         document.getElementById('tab-p').classList.toggle('active', id==='tx-profile');
     }
-    function updateProfile() {
-        const u=JSON.parse(localStorage.getItem('klg_u')), n=document.getElementById('profile-name').value, l=document.getElementById('profile-license').value;
-        db.ref('users/'+u.p).update({ten:n, banglai:l}).then(()=>alert("Đã lưu thông tin!"));
+    
+    function toggleAuth(t) { 
+        document.getElementById('login-form').style.display = (t==='reg' ? 'none' : 'block'); 
+        document.getElementById('reg-form').style.display = (t==='reg' ? 'block' : 'none'); 
     }
 
-    window.onload = () => { 
-        const u=localStorage.getItem('klg_u'); 
-        if(u){ 
-            const j=JSON.parse(u); 
-            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); 
-            const pg = document.getElementById(j.r+'-page');
-            if(pg) pg.classList.add('active'); 
-            if(j.r==='admin') loadAdmin(); if(j.r==='taixe') loadTaixe();
-        } 
-    };
+    window.onload = startApp;
+    setTimeout(startApp, 1500);
 </script>
 </body>
 </html>
-
