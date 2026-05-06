@@ -45,9 +45,10 @@
             </div>
         </div>
         <div class="flex border-b border-slate-700 mb-4 text-center font-bold">
-            <button onclick="showTxTab('kh-booking','khach')" id="kh-tab-o" class="flex-1 py-2 tab-btn active uppercase text-[10px]">Đặt xe</button>
-            <button onclick="showTxTab('kh-profile','khach')" id="kh-tab-p" class="flex-1 py-2 tab-btn uppercase text-[10px]">Hồ sơ</button>
+            <button onclick="showTxTab('kh-booking')" id="kh-tab-o" class="flex-1 py-2 tab-btn active uppercase text-[10px]">Đặt xe</button>
+            <button onclick="showTxTab('kh-profile')" id="kh-tab-p" class="flex-1 py-2 tab-btn uppercase text-[10px]">Hồ sơ</button>
         </div>
+        
         <div id="kh-booking" class="space-y-4">
             <div class="bg-[#242745] p-5 rounded-2xl border border-slate-700 space-y-4 shadow-2xl">
                 <div class="grid grid-cols-2 gap-2 font-black uppercase">
@@ -65,23 +66,24 @@
                 <input id="tu" type="text" placeholder="Điểm đón" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white">
                 <input id="den" type="text" placeholder="Điểm đến" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white">
                 <div class="flex gap-2">
-                    <input id="ng" type="date" class="flex-1 bg-[#1a1c2e] p-4 rounded-xl text-white outline-none">
-                    <input id="gi" type="time" class="flex-1 bg-[#1a1c2e] p-4 rounded-xl border-slate-600 text-white">
+                    <input id="ng" type="date" class="flex-1 bg-[#1a1c2e] p-4 rounded-xl text-white outline-none font-bold">
+                    <input id="gi" type="time" class="flex-1 bg-[#1a1c2e] p-4 rounded-xl border-slate-600 text-white font-bold">
                 </div>
-                <button onclick="createOrder()" class="w-full bg-red-600 py-4 rounded-xl font-black text-base uppercase text-white shadow-xl">Gửi đơn</button>
+                <button onclick="createOrder()" class="w-full bg-red-600 py-4 rounded-xl font-black text-base uppercase text-white shadow-xl italic">Gửi yêu cầu đặt xe</button>
             </div>
             <div id="kh-list" class="mt-6 space-y-2"></div>
         </div>
+
         <div id="kh-profile" class="hidden space-y-4">
-            <div class="bg-[#242745] p-4 rounded-xl border border-slate-700 space-y-3">
-                <input id="kh-name" type="text" placeholder="Họ và Tên chú" class="w-full bg-[#1a1c2e] p-3 rounded-lg border border-slate-600 text-white outline-none">
-                <button onclick="updateProfile('khach')" class="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-white shadow-lg">Lưu thông tin</button>
+            <div class="bg-[#242745] p-4 rounded-xl border border-slate-700 space-y-3 text-center">
+                <p class="text-yellow-500 font-bold">SĐT: <span id="display-phone"></span></p>
+                <input id="kh-name" type="text" placeholder="Họ và Tên của bạn" class="w-full bg-[#1a1c2e] p-3 rounded-lg border border-slate-600 text-white outline-none">
+                <button onclick="updateProfile()" class="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-white shadow-lg">Lưu thông tin</button>
             </div>
         </div>
     </div>
 
 <script>
-    // GIỮ NGUYÊN FIREBASE CONFIG CỦA BẠN
     const firebaseConfig = {
         apiKey: "AIzaSyA7D06JXpU4zFnT2pYpbuZlw-YCb8F8VpQ",
         authDomain: "khaly-go-23798.firebaseapp.com",
@@ -97,8 +99,6 @@
             const u = s.val(); 
             if (u && u.pass === mk && u.role === 'khach') {
                 saveSession(p, 'khach');
-            } else if (u && u.role !== 'khach') {
-                alert("Số điện thoại này thuộc về Tài xế/Admin. Hãy dùng App tương ứng!");
             } else {
                 alert("Số điện thoại hoặc mật khẩu không đúng!");
             }
@@ -108,67 +108,93 @@
     function handleRegister() {
         const p = document.getElementById('r-phone').value, mk = document.getElementById('r-pass').value;
         if(!p || !mk) return alert("Vui lòng nhập đầy đủ!");
-        
-        db.ref('users/'+p).once('value', s => {
-            if(s.exists() && s.val().role === 'taixe') {
-                alert("SĐT này đã đăng ký Tài xế, không thể đăng ký Khách!");
-            } else {
-                db.ref('users/'+p).set({pass:mk, role:'khach', soDu:0}).then(() => { alert("Đã đăng ký Khách!"); saveSession(p, 'khach'); });
-            }
+        db.ref('users/'+p).set({pass:mk, role:'khach', soDu:0}).then(() => { 
+            alert("Đăng ký thành công!"); 
+            saveSession(p, 'khach'); 
         });
     }
 
-    // Các hàm logic đặt xe cũ (setSvc, createOrder, loadKhach, showTxTab, updateProfile, saveSession, logout...) giữ nguyên như code tổng của bạn.
+    function setSvc(v, b) { 
+        document.getElementById('final-svc').value = v;
+        document.querySelectorAll('.svc-btn, .sub-btn').forEach(el => el.classList.remove('selected'));
+        if(b) b.classList.add('selected');
+    }
+
+    function createOrder() {
+        const u = JSON.parse(localStorage.getItem('klg_u'));
+        const s = document.getElementById('final-svc').value;
+        const t = document.getElementById('tu').value;
+        const d = document.getElementById('den').value;
+        const dt = document.getElementById('ng').value; // Ngày
+        const tm = document.getElementById('gi').value; // Giờ
+        
+        if(!s || !t || !dt || !tm) return alert("Vui lòng nhập đủ Điểm đón, Ngày và Giờ!");
+        
+        // GỬI LÊN VỚI BIẾN 'date' VÀ 'time' ĐỂ KHỚP VỚI ADMIN/TÀI XẾ
+        db.ref('orders').push({
+            khach: u.p, 
+            svc: s, 
+            tu: t, 
+            den: d, 
+            date: dt, 
+            time: tm, 
+            status: 'cho'
+        }).then(() => {
+            alert("Đã gửi đơn! Vui lòng đợi Admin báo giá.");
+            document.getElementById('tu').value = "";
+            document.getElementById('den').value = "";
+        });
+    }
+
+    function loadKhach() {
+        const u = JSON.parse(localStorage.getItem('klg_u'));
+        document.getElementById('display-phone').innerText = u.p;
+        db.ref('orders').orderByChild('khach').equalTo(u.p).on('value', s => {
+            let h = ""; 
+            s.forEach(o => { 
+                const d = o.val(); 
+                if(d.status !== 'hoan_thanh') {
+                    h += `<div class="bg-[#242745] p-4 rounded-xl border border-slate-700 mb-2 relative shadow-lg">
+                        <p class="text-red-500 font-bold uppercase text-[9px] mb-1">🚗 ${d.svc}</p>
+                        <p class="text-white font-bold italic text-[10px]">📅 ${d.date} | ⏰ ${d.time}</p>
+                        <p class="text-slate-300">📍 ${d.tu} → ${d.den}</p>
+                        <p class="text-yellow-500 font-black mt-1 text-[11px] italic">
+                            ${d.status === 'cho' ? '⌛ Đang đợi báo giá...' : (d.status === 'da' ? '💰 GIÁ: ' + d.gia + 'K' : '✅ Tài xế đang đến')}
+                        </p>
+                        ${d.status === 'cho' ? `<button onclick="db.ref('orders/${o.key}').remove()" class="absolute right-3 top-3 text-red-500 font-bold text-[10px]">HỦY</button>` : ''}
+                    </div>`; 
+                }
+            });
+            document.getElementById('kh-list').innerHTML = h || "<p class='text-center opacity-50'>Bạn chưa có đơn hàng nào.</p>";
+        });
+    }
+
+    function showTxTab(id) { 
+        document.getElementById('kh-booking').classList.toggle('hidden', id !== 'kh-booking');
+        document.getElementById('kh-profile').classList.toggle('hidden', id !== 'kh-profile');
+        document.getElementById('kh-tab-o').classList.toggle('active', id === 'kh-booking');
+        document.getElementById('kh-tab-p').classList.toggle('active', id === 'kh-profile');
+    }
+
+    function updateProfile() {
+        const u = JSON.parse(localStorage.getItem('klg_u'));
+        const n = document.getElementById('kh-name').value;
+        db.ref('users/'+u.p).update({ten:n}).then(() => alert("Đã cập nhật tên!"));
+    }
+
     function saveSession(p, r) { localStorage.setItem('klg_u', JSON.stringify({p, r})); location.reload(); }
     function logout() { localStorage.removeItem('klg_u'); location.reload(); }
     function toggleAuth(t) { 
         document.getElementById('login-form').classList.toggle('hidden', t==='reg'); 
         document.getElementById('reg-form').classList.toggle('hidden', t==='login'); 
     }
-    function setSvc(v, b) { 
-        document.getElementById('final-svc').value = v;
-        document.querySelectorAll('.svc-btn, .sub-btn').forEach(el => el.classList.remove('selected'));
-        if(b) b.classList.add('selected');
-    }
-    function createOrder() {
-        const u=JSON.parse(localStorage.getItem('klg_u')), s=document.getElementById('final-svc').value, t=document.getElementById('tu').value, d=document.getElementById('den').value, ng=document.getElementById('ng').value, gi=document.getElementById('gi').value;
-        if(!s || !t) return alert("Thiếu tin!");
-        db.ref('orders').push({khach:u.p, svc:s, tu:t, den:d, ngay:ng, gio:gi, status:'cho'}).then(()=>alert("Đã gửi!"));
-    }
-    function loadKhach() {
-        const u=JSON.parse(localStorage.getItem('klg_u'));
-        db.ref('orders').orderByChild('khach').equalTo(u.p).on('value', s => {
-            let h=""; s.forEach(o => { 
-                const d=o.val(); 
-                if(d.status !== 'hoan_thanh' && d.status !== 'da_nhan') {
-                    h+=`<div class="bg-[#242745] p-4 rounded-xl border border-slate-700 mb-2 relative">
-                        <button onclick="khachHuyDon('${o.key}')" class="absolute right-3 top-3 bg-red-900/50 text-red-500 border border-red-500/30 px-2 py-1 rounded text-[8px] font-bold">HỦY ĐƠN</button>
-                        <p class="text-[10px]">📍 ${d.tu} → ${d.den}</p>
-                        <p class="text-yellow-500 font-bold mt-1 text-[10px] italic">${d.status==='cho'?'Đợi báo giá...':(d.status==='da'?'Giá: '+d.gia+'K':'Tài xế đang đến')}</p>
-                    </div>`; 
-                }
-            });
-            document.getElementById('kh-list').innerHTML = h || "Chưa có đơn.";
-        });
-    }
-    function showTxTab(id, role) { 
-        document.getElementById('kh-booking').classList.toggle('hidden', id !== 'kh-booking');
-        document.getElementById('kh-profile').classList.toggle('hidden', id !== 'kh-profile');
-        document.getElementById('kh-tab-o').classList.toggle('active', id === 'kh-booking');
-        document.getElementById('kh-tab-p').classList.toggle('active', id === 'kh-profile');
-    }
-    function updateProfile(role) {
-        const u=JSON.parse(localStorage.getItem('klg_u'));
-        const n=document.getElementById('kh-name').value;
-        db.ref('users/'+u.p).update({ten:n}).then(()=>alert("Đã lưu tên!"));
-    }
 
     window.onload = () => { 
-        const u=localStorage.getItem('klg_u'); 
+        const u = localStorage.getItem('klg_u'); 
         if(u){ 
-            const j=JSON.parse(u); 
+            const j = JSON.parse(u); 
             if(j.r === 'khach') {
-                document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); 
+                document.getElementById('login-page').classList.remove('active'); 
                 document.getElementById('khach-page').classList.add('active'); 
                 loadKhach();
             }
