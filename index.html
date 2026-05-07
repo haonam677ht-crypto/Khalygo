@@ -10,9 +10,31 @@
     <style>
         .page { display: none; } .active { display: block; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        /* CSS cho Modal thông báo mới */
+        #custom-alert-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
+        #custom-alert-modal.flex { display: flex; }
     </style>
 </head>
 <body class="bg-[#1a1c2e] text-slate-200 font-sans text-[11px]">
+
+    <div id="custom-alert-modal">
+        <div class="bg-[#242745] w-full max-w-sm rounded-3xl overflow-hidden border border-slate-700 shadow-2xl p-6 text-center">
+            <div class="text-red-500 text-5xl mb-4">⚠️</div>
+            <h3 class="text-white font-black text-lg uppercase mb-2">Số dư không đủ</h3>
+            <p id="alert-msg" class="text-slate-300 mb-6 text-sm"></p>
+            
+            <div class="bg-white p-2 rounded-xl inline-block mb-4">
+                <img id="admin-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=0789454369" alt="QR Nạp Tiền" class="w-40 h-40">
+            </div>
+            
+            <p class="text-yellow-400 font-bold mb-6 italic text-[10px]">Vui lòng quét mã nạp tiền hoặc liên hệ Admin để tiếp tục nhận đơn.</p>
+            
+            <div class="flex gap-2">
+                <a href="tel:0789454369" class="flex-1 bg-blue-600 py-3 rounded-xl font-black text-white uppercase italic">Gọi Admin</a>
+                <button onclick="closeAlert()" class="flex-1 bg-slate-700 py-3 rounded-xl font-black text-white uppercase italic">Đóng</button>
+            </div>
+        </div>
+    </div>
 
     <div id="login-page" class="page p-6 active">
         <div class="max-w-md mx-auto bg-[#242745] rounded-3xl mt-10 overflow-hidden border border-slate-700 shadow-2xl text-center">
@@ -133,6 +155,15 @@
     };
     firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
+    // HÀM HIỂN THỊ THÔNG BÁO TÙY CHỈNH (KHÔNG HIỂN THỊ URL)
+    function showAlert(msg) {
+        document.getElementById('alert-msg').innerText = msg;
+        document.getElementById('custom-alert-modal').classList.add('flex');
+    }
+    function closeAlert() {
+        document.getElementById('custom-alert-modal').classList.remove('flex');
+    }
+
     function handleLogin() {
         const p = document.getElementById('phone').value;
         const mk = document.getElementById('pass').value;
@@ -175,8 +206,7 @@
             document.getElementById('ad-pending-list').innerHTML = h || "Trống";
             document.getElementById('count-pending').innerText = count;
         });
-
-        db.ref('orders').on('value', s => {
+db.ref('orders').on('value', s => {
             let h = "", hAlerts = "";
             s.forEach(o => {
                 const d = o.val();
@@ -250,13 +280,15 @@
         });
     }
 
+    // CHỈNH SỬA TÍNH NĂNG NHẬN ĐƠN TẠI ĐÂY
     function handleCall(id, kh, gia) {
         const session = JSON.parse(localStorage.getItem('klg_u'));
         const phi = Math.round(gia * 0.12);
         db.ref('users/'+session.p).once('value', s => {
             const u = s.val();
             if((u.soDu || 0) < phi) {
-                alert(`Ví không đủ ${phi}K để nhận đơn!`);
+                // Thay alert mặc định bằng modal QR tùy chỉnh
+                showAlert(`Ví không đủ ${phi}K để nhận đơn!`);
             } else {
                 if(confirm(`Phí 12% là ${phi}K. Đồng ý trừ tiền để lấy đơn?`)) {
                     db.ref('users/'+session.p).update({ soDu: u.soDu - phi })
@@ -284,7 +316,6 @@
             const session = JSON.parse(localStorage.getItem('klg_u'));
             s.forEach(o => {
                 const d = o.val();
-                // SỬA TẠI ĐÂY: Chỉ hiển thị khi trạng thái là 'da' (đã đẩy giá)
                 if(d.status === 'da') {
                     h += `<div class="bg-[#242745] p-4 rounded-xl border-l-4 border-green-500 mb-3 shadow-lg">
                         <div class="flex justify-between mb-1"><span class="text-red-500 font-black italic">🚗 ${d.svc}</span><span class="text-yellow-400 font-black text-xl">${d.gia}K</span></div>
