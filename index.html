@@ -10,9 +10,8 @@
     <style>
         .page { display: none; } .active { display: block; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        /* CSS cho Modal thông báo mới */
-        #custom-alert-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
-        #custom-alert-modal.flex { display: flex; }
+        #custom-alert-modal, #custom-confirm-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
+        #custom-alert-modal.flex, #custom-confirm-modal.flex { display: flex; }
     </style>
 </head>
 <body class="bg-[#1a1c2e] text-slate-200 font-sans text-[11px]">
@@ -22,16 +21,23 @@
             <div class="text-red-500 text-5xl mb-4">⚠️</div>
             <h3 class="text-white font-black text-lg uppercase mb-2">Số dư không đủ</h3>
             <p id="alert-msg" class="text-slate-300 mb-6 text-sm"></p>
-            
             <div class="bg-white p-2 rounded-xl inline-block mb-4">
                 <img id="admin-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=0789454369" alt="QR Nạp Tiền" class="w-40 h-40">
             </div>
-            
             <p class="text-yellow-400 font-bold mb-6 italic text-[10px]">Vui lòng quét mã nạp tiền hoặc liên hệ Admin để tiếp tục nhận đơn.</p>
-            
             <div class="flex gap-2">
                 <a href="tel:0789454369" class="flex-1 bg-blue-600 py-3 rounded-xl font-black text-white uppercase italic">Gọi Admin</a>
                 <button onclick="closeAlert()" class="flex-1 bg-slate-700 py-3 rounded-xl font-black text-white uppercase italic">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-confirm-modal">
+        <div class="bg-[#242745] w-full max-w-xs rounded-3xl border border-slate-600 p-6 text-center shadow-2xl">
+            <p id="confirm-msg" class="text-white text-sm font-bold mb-6 leading-relaxed"></p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirmModal()" class="flex-1 py-3 rounded-xl bg-slate-700 text-slate-300 font-bold uppercase">Hủy</button>
+                <button id="confirm-ok-btn" class="flex-1 py-3 rounded-xl bg-red-600 text-white font-bold uppercase shadow-lg">OK</button>
             </div>
         </div>
     </div>
@@ -65,9 +71,7 @@
             <span class="text-yellow-400 font-black uppercase text-sm italic">HỆ THỐNG QUẢN TRỊ</span>
             <button onclick="logout()" class="text-red-400 border border-red-400 px-3 py-1 rounded font-bold uppercase text-[9px]">Thoát</button>
         </div>
-
         <div id="ad-urgent-alerts" class="space-y-2 mb-4"></div>
-
         <section class="bg-orange-900/10 rounded-xl border border-orange-500/50 overflow-hidden mb-4">
             <div class="p-2 bg-orange-600 text-white font-black uppercase italic flex justify-between items-center">
                 <span>🕒 TÀI XẾ CHỜ DUYỆT</span>
@@ -75,7 +79,6 @@
             </div>
             <div id="ad-pending-list" class="p-2 space-y-2"></div>
         </section>
-        
         <div class="bg-blue-900/20 p-4 rounded-xl border border-blue-500/30 mb-4 space-y-2">
             <h3 class="text-blue-400 font-black uppercase italic text-[10px]">➕ SẾP TỰ TẠO ĐƠN</h3>
             <input id="ad-p" type="number" placeholder="SĐT Khách" class="w-full bg-slate-800 p-2 rounded border border-slate-600 text-white">
@@ -91,17 +94,14 @@
             <input id="ad-note-new" type="text" placeholder="Ghi chú thêm" class="w-full bg-slate-800 p-2 rounded border border-slate-600 text-white">
             <button onclick="adminCreateOrder()" class="w-full bg-blue-600 py-3 rounded font-black mt-1 uppercase text-white shadow-lg">Tạo đơn</button>
         </div>
-
         <div class="bg-green-900/20 p-4 rounded-xl border border-green-500/30 mb-4 text-center">
             <h3 class="text-green-400 font-black uppercase italic text-[10px] mb-2">💰 VÍ TIỀN TÀI XẾ</h3>
             <button onclick="napTienTX()" class="w-full bg-green-600 py-3 rounded font-black uppercase text-white shadow-md">BẤM NẠP TIỀN</button>
         </div>
-
         <section class="mb-4">
             <h3 class="text-yellow-400 font-black mb-2 uppercase italic text-[10px]">🔔 ĐƠN HIỆN TẠI</h3>
             <div id="ad-ord-list" class="space-y-2"></div>
         </section>
-
         <section class="bg-[#242745] rounded-xl border border-slate-700 overflow-hidden mb-4 shadow-xl">
             <button onclick="toggleDiv('ad-tx-list')" class="w-full p-3 flex justify-between items-center font-black text-yellow-400 uppercase text-[10px] italic">
                 <span>📂 TÀI XẾ (CÓ MK)</span>
@@ -109,7 +109,6 @@
             </button>
             <div id="ad-tx-list" class="p-2 space-y-1"></div>
         </section>
-
         <section class="bg-slate-800/50 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
             <button onclick="toggleDiv('ad-cus-list')" class="w-full p-3 flex justify-between items-center font-black text-blue-400 uppercase text-[10px] italic">
                 <span>👤 KHÁCH HÀNG (CÓ MK)</span>
@@ -155,21 +154,18 @@
     };
     firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
-    // HÀM HIỂN THỊ THÔNG BÁO TÙY CHỈNH (KHÔNG HIỂN THỊ URL)
-    function showAlert(msg) {
-        document.getElementById('alert-msg').innerText = msg;
-        document.getElementById('custom-alert-modal').classList.add('flex');
+    function showAlert(msg) { document.getElementById('alert-msg').innerText = msg; document.getElementById('custom-alert-modal').classList.add('flex'); }
+    function closeAlert() { document.getElementById('custom-alert-modal').classList.remove('flex'); }
+    function showConfirmModal(msg, onConfirm) {
+        document.getElementById('confirm-msg').innerText = msg;
+        document.getElementById('custom-confirm-modal').classList.add('flex');
+        document.getElementById('confirm-ok-btn').onclick = function() { closeConfirmModal(); onConfirm(); };
     }
-    function closeAlert() {
-        document.getElementById('custom-alert-modal').classList.remove('flex');
-    }
+    function closeConfirmModal() { document.getElementById('custom-confirm-modal').classList.remove('flex'); }
 
     function handleLogin() {
-        const p = document.getElementById('phone').value;
-        const mk = document.getElementById('pass').value;
-        if (p === "0789454369" && mk === "19861990LyVinh@") {
-            return saveSession(p, 'admin');
-        }
+        const p = document.getElementById('phone').value, mk = document.getElementById('pass').value;
+        if (p === "0789454369" && mk === "19861990LyVinh@") return saveSession(p, 'admin');
         db.ref('users/' + p).once('value', s => {
             const u = s.val(); 
             if (u && u.pass === mk) {
@@ -184,7 +180,11 @@
         const p = document.getElementById('reg-phone').value, mk = document.getElementById('reg-pass').value;
         if(!p || !mk) return alert("Nhập đủ thông tin!");
         db.ref('users/' + p).once('value', s => {
-            if(s.exists()) return alert("SĐT này đã có trên hệ thống!");
+            if(s.exists()) {
+                const userData = s.val();
+                if(userData.role === 'taixe') return alert("SĐT này đã đăng ký Tài xế rồi!");
+                else return alert("SĐT này đã có tài khoản Khách. Không thể làm Tài xế!");
+            }
             db.ref('users/' + p).set({ pass: mk, role: 'taixe', status: 'pending', soDu: 0 })
             .then(() => { alert("Đăng ký thành công! Đợi Sếp duyệt."); showPage('login-page'); });
         });
@@ -193,20 +193,11 @@
     function loadAdmin() {
         db.ref('users').orderByChild('status').equalTo('pending').on('value', s => {
             let h = "", count = 0;
-            s.forEach(u => { count++; const ud = u.val();
-                h += `<div class="p-3 bg-slate-900 rounded-lg flex flex-col gap-1 border border-slate-700 mb-1">
-                    <div class="flex justify-between items-center"><span class="font-bold">${u.key}</span>
-                        <div class="flex gap-1">
-                            <a href="tel:${u.key}" class="bg-blue-500 px-3 py-1 rounded text-[10px]">📞 GỌI</a>
-                            <button onclick="viewInfo('${u.key}')" class="bg-blue-600 px-2 py-1 rounded text-[9px]">HỒ SƠ</button>
-                            <button onclick="db.ref('users/${u.key}').update({status:'active'})" class="bg-green-600 px-2 py-1 rounded text-[9px]">DUYỆT</button>
-                        </div>
-                    </div></div>`;
-            });
+            s.forEach(u => { count++; h += `<div class="p-3 bg-slate-900 rounded-lg flex flex-col gap-1 border border-slate-700 mb-1"><div class="flex justify-between items-center"><span class="font-bold">${u.key}</span><div class="flex gap-1"><a href="tel:${u.key}" class="bg-blue-500 px-3 py-1 rounded text-[10px]">📞 GỌI</a><button onclick="viewInfo('${u.key}')" class="bg-blue-600 px-2 py-1 rounded text-[9px]">HỒ SƠ</button><button onclick="db.ref('users/${u.key}').update({status:'active'})" class="bg-green-600 px-2 py-1 rounded text-[9px]">DUYỆT</button></div></div></div>`; });
             document.getElementById('ad-pending-list').innerHTML = h || "Trống";
             document.getElementById('count-pending').innerText = count;
         });
-db.ref('orders').on('value', s => {
+        db.ref('orders').on('value', s => {
             let h = "", hAlerts = "";
             s.forEach(o => {
                 const d = o.val();
@@ -276,44 +267,29 @@ db.ref('orders').on('value', s => {
             const currentBal = s.val().soDu || 0;
             db.ref('users/'+phone).update({ soDu: currentBal + phi });
             db.ref('orders/'+orderId).remove();
-            alert("Đã hoàn lại " + phi + "K vào ví tài xế!");
+            alert("Đã hoàn lại " + phi + "K!");
         });
     }
 
-    // CHỈNH SỬA TÍNH NĂNG NHẬN ĐƠN TẠI ĐÂY
     function handleCall(id, kh, gia) {
-        const session = JSON.parse(localStorage.getItem('klg_u'));
-        const phi = Math.round(gia * 0.12);
+        const session = JSON.parse(localStorage.getItem('klg_u')), phi = Math.round(gia * 0.12);
         db.ref('users/'+session.p).once('value', s => {
             const u = s.val();
-            if((u.soDu || 0) < phi) {
-                // Thay alert mặc định bằng modal QR tùy chỉnh
-                showAlert(`Ví không đủ ${phi}K để nhận đơn!`);
-            } else {
-                if(confirm(`Phí 12% là ${phi}K. Đồng ý trừ tiền để lấy đơn?`)) {
-                    db.ref('users/'+session.p).update({ soDu: u.soDu - phi })
-                    .then(() => { 
-                        db.ref('orders/'+id).update({ idTaiXe: session.p, status: 'dang_chay' });
-                        window.location.href = "tel:"+kh; 
-                    });
-                }
-            }
+            if((u.soDu || 0) < phi) showAlert(`Ví không đủ ${phi}K để nhận đơn!`);
+            else showConfirmModal(`Phí 12% là ${phi}K. Đồng ý trừ tiền để lấy đơn?`, function() {
+                db.ref('users/'+session.p).update({ soDu: u.soDu - phi }).then(() => { 
+                    db.ref('orders/'+id).update({ idTaiXe: session.p, status: 'dang_chay' }); window.location.href = "tel:"+kh; 
+                });
+            });
         });
     }
 
-    function finishOrder(id) {
-        if(confirm("Xác nhận đã thả khách xong?")) {
-            db.ref('orders/'+id).update({ status: 'hoan_thanh' }).then(() => alert("Báo cáo thành công!"));
-        }
-    }
+    function finishOrder(id) { if(confirm("Xác nhận đã thả khách xong?")) db.ref('orders/'+id).update({ status: 'hoan_thanh' }).then(() => alert("Báo cáo thành công!")); }
 
     function loadTaixe(phone) {
-        db.ref('users/'+phone).on('value', s => {
-            if(s.val()) document.getElementById('tx-balance').innerText = (s.val().soDu || 0) + "K";
-        });
+        db.ref('users/'+phone).on('value', s => { if(s.val()) document.getElementById('tx-balance').innerText = (s.val().soDu || 0) + "K"; });
         db.ref('orders').on('value', s => {
-            let h = "";
-            const session = JSON.parse(localStorage.getItem('klg_u'));
+            let h = ""; const session = JSON.parse(localStorage.getItem('klg_u'));
             s.forEach(o => {
                 const d = o.val();
                 if(d.status === 'da') {
@@ -342,31 +318,15 @@ db.ref('orders').on('value', s => {
         });
     }
 
-    function saveHoSo() {
-     const u = JSON.parse(localStorage.getItem('klg_u'));
-        db.ref('users/'+u.p).update({ ten: document.getElementById('tx-ten').value, bl: document.getElementById('tx-bl').value, ax: document.getElementById('tx-ax').value, cv: document.getElementById('tx-cv').value }).then(() => alert("Đã lưu!"));
-    }
-
+    function saveHoSo() { const u = JSON.parse(localStorage.getItem('klg_u')); db.ref('users/'+u.p).update({ ten: document.getElementById('tx-ten').value, bl: document.getElementById('tx-bl').value, ax: document.getElementById('tx-ax').value, cv: document.getElementById('tx-cv').value }).then(() => alert("Đã lưu!")); }
     function adminCreateOrder() {
         const p = document.getElementById('ad-p').value, s = document.getElementById('ad-svc').value, tu = document.getElementById('ad-tu-new').value, den = document.getElementById('ad-den-new').value, dt = document.getElementById('ad-date').value, tm = document.getElementById('ad-time').value;
         if(!p || !s || !tu || !den || !dt || !tm) return alert("Nhập đủ thông tin!");
         db.ref('orders').push({ khach: p, svc: s, tu: tu, den: den, date: dt, time: tm, ghiChuAdmin: document.getElementById('ad-note-new').value, status: 'cho' });
         alert("Đã tạo!");
     }
-
-    function pushPrice(id) {
-        const p = document.getElementById('price-'+id).value, n = document.getElementById('note-'+id).value;
-        if(!p) return alert("Nhập giá!");
-        db.ref('orders/'+id).update({ gia: p, ghiChuAdmin: n, status: 'da' }).then(()=>alert("Đã đẩy giá!"));
-    }
-
-    function napTienTX() {
-        const p = prompt("SĐT Tài xế:"), v = prompt("Số tiền nạp (K):");
-        if(p && v) db.ref('users/'+p).once('value', s => {
-            if(s.exists()) db.ref('users/'+p).update({ soDu: (s.val().soDu || 0) + parseInt(v) }).then(()=>alert("Đã nạp!"));
-        });
-    }
-
+    function pushPrice(id) { const p = document.getElementById('price-'+id).value, n = document.getElementById('note-'+id).value; if(!p) return alert("Nhập giá!"); db.ref('orders/'+id).update({ gia: p, ghiChuAdmin: n, status: 'da' }).then(()=>alert("Đã đẩy giá!")); }
+    function napTienTX() { const p = prompt("SĐT Tài xế:"), v = prompt("Số tiền nạp (K):"); if(p && v) db.ref('users/'+p).once('value', s => { if(s.exists()) db.ref('users/'+p).update({ soDu: (s.val().soDu || 0) + parseInt(v) }).then(()=>alert("Đã nạp!")); }); }
     function viewInfo(phone) { db.ref('users/'+phone).once('value', s => { alert(`HỒ SƠ: ${phone}\nTên: ${s.val().ten || 'Trống'}\nMK: ${s.val().pass}`); }); }
     function deleteUser(p) { if(confirm("Xóa tài khoản này?")) db.ref('users/'+p).remove(); }
     function toggleDiv(id) { document.getElementById(id).classList.toggle('hidden'); }
@@ -378,14 +338,7 @@ db.ref('orders').on('value', s => {
         document.getElementById('tab-btn-don').className = "flex-1 py-3 font-black " + (tab==='tx-don'?'text-red-500 border-b-2 border-red-500':'text-slate-400');
         document.getElementById('tab-btn-hoso').className = "flex-1 py-3 font-black " + (tab==='tx-hoso'?'text-red-500 border-b-2 border-red-500':'text-slate-400');
     }
-
-    window.onload = () => { 
-        const u=localStorage.getItem('klg_u'); 
-        if(u){ 
-            const j=JSON.parse(u); 
-            if(j.r==='admin') { showPage('admin-page'); loadAdmin(); } else { showPage('taixe-page'); loadTaixe(j.p); }
-        } 
-    };
+    window.onload = () => { const u=localStorage.getItem('klg_u'); if(u){ const j=JSON.parse(u); if(j.r==='admin') { showPage('admin-page'); loadAdmin(); } else { showPage('taixe-page'); loadTaixe(j.p); } } };
 </script>
 </body>
 </html>
