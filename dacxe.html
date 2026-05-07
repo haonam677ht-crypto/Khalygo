@@ -20,16 +20,16 @@
             <div class="bg-red-600 p-8 text-center font-black text-4xl italic text-white">KLG KHÁCH</div>
             
             <div id="login-form" class="p-8 space-y-4">
-                <input id="phone" type="number" placeholder="Số điện thoại" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white text-base">
-                <input id="pass" type="password" placeholder="Mật khẩu" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white text-base">
+                <input id="phone" type="number" placeholder="Số điện thoại" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white text-base text-center">
+                <input id="pass" type="password" placeholder="Mật khẩu" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 outline-none text-white text-base text-center">
                 <button onclick="handleLogin()" class="w-full bg-red-600 py-4 rounded-xl text-white font-black text-base shadow-lg active:scale-95 transition-transform">ĐĂNG NHẬP</button>
                 <button onclick="toggleAuth('reg')" class="w-full text-slate-400 font-bold uppercase mt-2 text-center py-2">Đăng ký khách mới</button>
             </div>
 
             <div id="reg-form" class="p-8 space-y-4 hidden">
                 <h3 class="text-center font-bold text-blue-400 uppercase mb-2">Đăng ký Khách</h3>
-                <input id="r-phone" type="number" placeholder="SĐT đăng ký" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white text-base">
-                <input id="r-pass" type="password" placeholder="Mật khẩu" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white text-base">
+                <input id="r-phone" type="number" placeholder="SĐT đăng ký" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white text-base text-center">
+                <input id="r-pass" type="password" placeholder="Mật khẩu" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white text-base text-center">
                 <button onclick="handleRegister()" class="w-full bg-blue-600 py-4 rounded-xl font-black text-white text-base">ĐĂNG KÝ NGAY</button>
                 <button onclick="toggleAuth('login')" class="w-full text-slate-500 text-center block py-2">Quay lại đăng nhập</button>
             </div>
@@ -44,6 +44,9 @@
                 <button onclick="logout()" class="text-red-400 border border-red-400 px-2 py-1 rounded font-bold uppercase text-[8px]">Thoát</button>
             </div>
         </div>
+        
+        <div id="welcome-msg" class="text-center text-yellow-400 font-bold italic mb-4 text-[13px] animate-bounce"></div>
+
         <div class="flex border-b border-slate-700 mb-4 text-center font-bold">
             <button onclick="showTxTab('kh-booking')" id="kh-tab-o" class="flex-1 py-2 tab-btn active uppercase text-[10px]">Đặt xe</button>
             <button onclick="showTxTab('kh-profile')" id="kh-tab-p" class="flex-1 py-2 tab-btn uppercase text-[10px]">Hồ sơ</button>
@@ -77,7 +80,7 @@
         <div id="kh-profile" class="hidden space-y-4">
             <div class="bg-[#242745] p-4 rounded-xl border border-slate-700 space-y-3 text-center">
                 <p class="text-yellow-500 font-bold">SĐT: <span id="display-phone"></span></p>
-                <input id="kh-name" type="text" placeholder="Họ và Tên của bạn" class="w-full bg-[#1a1c2e] p-3 rounded-lg border border-slate-600 text-white outline-none">
+                <input id="kh-name" type="text" placeholder="Họ và Tên của bạn" class="w-full bg-[#1a1c2e] p-3 rounded-lg border border-slate-600 text-white outline-none text-center">
                 <button onclick="updateProfile()" class="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-white shadow-lg">Lưu thông tin</button>
             </div>
         </div>
@@ -92,6 +95,17 @@
         messagingSenderId: "328254923276", appId: "1:328254923276:web:625f6be13a31b0a9264429"
     };
     firebase.initializeApp(firebaseConfig); const db = firebase.database();
+
+    function showWelcome() {
+        const msgs = [
+            "Chào ngày mới tốt lành nha sếp! ✨",
+            "Hôm nay mình đi đâu đây bạn ơi? 🚗",
+            "Chúc bạn một chuyến đi vui vẻ & an toàn! ❤️",
+            "Cảm ơn bạn đã tin tưởng KhaLy GO! 🤝",
+            "Ngày mới tràn đầy năng lượng nhé! 🌈"
+        ];
+        document.getElementById('welcome-msg').innerText = msgs[Math.floor(Math.random() * msgs.length)];
+    }
 
     function handleLogin() {
         const p = document.getElementById('phone').value, mk = document.getElementById('pass').value;
@@ -125,12 +139,11 @@
         const s = document.getElementById('final-svc').value;
         const t = document.getElementById('tu').value;
         const d = document.getElementById('den').value;
-        const dt = document.getElementById('ng').value; // Ngày
-        const tm = document.getElementById('gi').value; // Giờ
+        const dt = document.getElementById('ng').value; 
+        const tm = document.getElementById('gi').value; 
         
         if(!s || !t || !dt || !tm) return alert("Vui lòng nhập đủ Điểm đón, Ngày và Giờ!");
         
-        // GỬI LÊN VỚI BIẾN 'date' VÀ 'time' ĐỂ KHỚP VỚI ADMIN/TÀI XẾ
         db.ref('orders').push({
             khach: u.p, 
             svc: s, 
@@ -148,24 +161,34 @@
 
     function loadKhach() {
         const u = JSON.parse(localStorage.getItem('klg_u'));
+        if(!u) return;
         document.getElementById('display-phone').innerText = u.p;
-        db.ref('orders').orderByChild('khach').equalTo(u.p).on('value', s => {
+        showWelcome();
+        
+        // SỬA TẠI ĐÂY: Lọc dữ liệu chặt chẽ bằng cả Firebase và code JS
+        db.ref('orders').on('value', s => {
             let h = ""; 
+            let list = [];
             s.forEach(o => { 
-                const d = o.val(); 
-                if(d.status !== 'hoan_thanh') {
-                    h += `<div class="bg-[#242745] p-4 rounded-xl border border-slate-700 mb-2 relative shadow-lg">
-                        <p class="text-red-500 font-bold uppercase text-[9px] mb-1">🚗 ${d.svc}</p>
-                        <p class="text-white font-bold italic text-[10px]">📅 ${d.date} | ⏰ ${d.time}</p>
-                        <p class="text-slate-300">📍 ${d.tu} → ${d.den}</p>
-                        <p class="text-yellow-500 font-black mt-1 text-[11px] italic">
-                            ${d.status === 'cho' ? '⌛ Đang đợi báo giá...' : (d.status === 'da' ? '💰 GIÁ: ' + d.gia + 'K' : '✅ Tài xế đang đến')}
-                        </p>
-                        ${d.status === 'cho' ? `<button onclick="db.ref('orders/${o.key}').remove()" class="absolute right-3 top-3 text-red-500 font-bold text-[10px]">HỦY</button>` : ''}
-                    </div>`; 
+                const d = o.val();
+                // CHỈ LẤY ĐƠN CÓ SỐ ĐIỆN THOẠI TRÙNG VỚI NGƯỜI ĐANG ĐĂNG NHẬP
+                if (d.khach === u.p && d.status !== 'hoan_thanh') {
+                    list.unshift({key: o.key, ...d});
                 }
             });
-            document.getElementById('kh-list').innerHTML = h || "<p class='text-center opacity-50'>Bạn chưa có đơn hàng nào.</p>";
+
+            list.forEach(d => {
+                h += `<div class="bg-[#242745] p-4 rounded-xl border border-slate-700 mb-2 relative shadow-lg">
+                    <p class="text-red-500 font-bold uppercase text-[9px] mb-1">🚗 ${d.svc}</p>
+                    <p class="text-white font-bold italic text-[10px]">📅 ${d.date} | ⏰ ${d.time}</p>
+                    <p class="text-slate-300">📍 ${d.tu} → ${d.den}</p>
+                    <p class="text-yellow-500 font-black mt-1 text-[11px] italic">
+                        ${d.status === 'cho' ? '⌛ Đang đợi báo giá...' : (d.status === 'da' ? '💰 GIÁ: ' + d.gia + 'K' : '✅ Tài xế đang đến')}
+                    </p>
+                    ${d.status === 'cho' ? `<button onclick="db.ref('orders/${d.key}').remove()" class="absolute right-3 top-3 text-red-500 font-bold text-[10px]">HỦY</button>` : ''}
+                </div>`; 
+            });
+            document.getElementById('kh-list').innerHTML = h || "<p class='text-center opacity-50 py-10 italic'>Bạn chưa có đơn hàng nào.</p>";
         });
     }
 
@@ -203,4 +226,3 @@
 </script>
 </body>
 </html>
-
