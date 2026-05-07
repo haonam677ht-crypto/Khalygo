@@ -165,26 +165,40 @@
         document.getElementById('display-phone').innerText = u.p;
         showWelcome();
         
-        // SỬA TẠI ĐÂY: Lọc dữ liệu chặt chẽ bằng cả Firebase và code JS
         db.ref('orders').on('value', s => {
             let h = ""; 
             let list = [];
             s.forEach(o => { 
                 const d = o.val();
-                // CHỈ LẤY ĐƠN CÓ SỐ ĐIỆN THOẠI TRÙNG VỚI NGƯỜI ĐANG ĐĂNG NHẬP
                 if (d.khach === u.p && d.status !== 'hoan_thanh') {
                     list.unshift({key: o.key, ...d});
                 }
             });
 
             list.forEach(d => {
+                // TÌM THÔNG TIN TÀI XẾ NẾU CÓ idTaiXe
+                let driverSection = "";
+                if (d.idTaiXe && (d.status === 'nhan' || d.status === 'dang_chay')) {
+                    driverSection = `
+                    <div class="mt-3 p-3 bg-slate-900 rounded-xl border border-green-500/50 flex justify-between items-center">
+                        <div>
+                            <p class="text-green-400 font-bold text-[10px]">🚖 TÀI XẾ ĐANG ĐẾN</p>
+                            <p class="text-white font-black text-sm">SĐT: ${d.idTaiXe}</p>
+                        </div>
+                        <a href="tel:${d.idTaiXe}" class="bg-green-600 p-3 rounded-full shadow-lg active:scale-90 transition-transform">
+                            <span class="text-base">📞</span>
+                        </a>
+                    </div>`;
+                }
+
                 h += `<div class="bg-[#242745] p-4 rounded-xl border border-slate-700 mb-2 relative shadow-lg">
                     <p class="text-red-500 font-bold uppercase text-[9px] mb-1">🚗 ${d.svc}</p>
                     <p class="text-white font-bold italic text-[10px]">📅 ${d.date} | ⏰ ${d.time}</p>
                     <p class="text-slate-300">📍 ${d.tu} → ${d.den}</p>
                     <p class="text-yellow-500 font-black mt-1 text-[11px] italic">
-                        ${d.status === 'cho' ? '⌛ Đang đợi báo giá...' : (d.status === 'da' ? '💰 GIÁ: ' + d.gia + 'K' : '✅ Tài xế đang đến')}
+                        ${d.status === 'cho' ? '⌛ Đang đợi báo giá...' : (d.status === 'da' ? '💰 GIÁ: ' + d.gia + 'K' : (d.status === 'khach_huy' ? '❌ Bạn đã hủy đơn' : '✅ Tài xế đã nhận đơn'))}
                     </p>
+                    ${driverSection}
                     ${d.status === 'cho' ? `<button onclick="db.ref('orders/${d.key}').remove()" class="absolute right-3 top-3 text-red-500 font-bold text-[10px]">HỦY</button>` : ''}
                 </div>`; 
             });
