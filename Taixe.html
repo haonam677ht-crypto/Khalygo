@@ -212,9 +212,15 @@
                         <button onclick="confirmRefund('${o.key}', '${d.idTaiXe}', ${d.gia})" class="w-full bg-white text-red-600 py-2 rounded font-black mt-2 uppercase italic shadow-md">Bấm để hoàn tiền ví</button>
                     </div>`;
                 } else if(d.status === 'hoan_thanh') {
+                    // PHẦN CẬP NHẬT: Thêm thông tin Ngày, Giờ và Số khách để đối soát
                     hAlerts += `<div class="bg-green-600 p-3 rounded-xl border border-white mb-2 shadow-md">
-                        <p class="font-black text-white uppercase italic">✅ ĐƠN ĐÃ XONG (TX: ${d.idTaiXe})</p>
-                        <p class="text-white italic text-[9px]">Lộ trình: ${d.tu} - ${d.den}</p>
+                        <p class="font-black text-white uppercase italic">✅ ĐƠN ĐÃ XONG</p>
+                        <div class="text-white text-[10px] mt-1 space-y-1">
+                            <p>📅 <b>Thời gian:</b> ${d.date} | ${d.time}</p>
+                            <p>👤 <b>Khách:</b> ${d.khach}</p>
+                            <p>👷 <b>Tài xế:</b> ${d.idTaiXe}</p>
+                            <p>📍 <b>Lộ trình:</b> ${d.tu} - ${d.den}</p>
+                        </div>
                         <button onclick="db.ref('orders/${o.key}').remove()" class="w-full bg-slate-800 text-white py-1 rounded font-bold mt-2 uppercase text-[9px]">Dọn dẹp & Xóa đơn</button>
                     </div>`;
                 } else {
