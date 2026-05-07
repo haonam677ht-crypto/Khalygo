@@ -186,17 +186,21 @@
             let h = "";
             s.forEach(o => {
                 const d = o.val();
-                h += `<div class="bg-slate-800 p-3 rounded border-l-4 ${d.status==='da'?'border-green-500':'border-yellow-500'} mb-2 relative shadow-md">
+                // Admin thấy đơn chờ, đơn đã đẩy giá, và đơn hoàn thành (để xóa)
+                h += `<div class="bg-slate-800 p-3 rounded border-l-4 ${d.status==='hoan_thanh'?'border-slate-500':(d.status==='da'?'border-green-500':'border-yellow-500')} mb-2 relative shadow-md">
                     <button onclick="db.ref('orders/${o.key}').remove()" class="absolute top-1 right-2 text-red-500">×</button>
-                    <p class="text-red-500 font-bold uppercase text-[9px]">🚗 ${d.svc}</p>
+                    <p class="${d.status==='hoan_thanh'?'text-slate-500':'text-red-500'} font-bold uppercase text-[9px]">🚗 ${d.svc} ${d.status==='hoan_thanh'?'(ĐÃ XONG)':''}</p>
                     <p class="text-white font-black">📅 Đón: ${d.date} | ⏰ ${d.time}</p>
                     <p class="text-blue-400">📞 Khách: ${d.khach}</p>
                     <p class="text-slate-300">📍 ${d.tu} → ${d.den}</p>
+                    ${d.status !== 'hoan_thanh' ? `
                     <input id="note-${o.key}" type="text" value="${d.ghiChuAdmin || ''}" placeholder="Ghi chú" class="w-full bg-slate-900 p-2 mt-2 rounded border border-slate-700 text-white text-[10px]">
                     <div class="flex gap-2 mt-2">
                         <input id="price-${o.key}" type="number" value="${d.gia || ''}" placeholder="Giá" class="w-20 bg-slate-900 p-2 rounded text-green-400 font-bold border border-slate-700">
                         <button onclick="pushPrice('${o.key}')" class="flex-1 bg-green-600 font-black py-2 rounded text-white italic uppercase shadow-md">Đẩy giá</button>
-                    </div>
+                    </div>` : `
+                    <button onclick="db.ref('orders/${o.key}').remove()" class="w-full bg-slate-700 py-2 rounded mt-2 text-red-400 font-black uppercase text-[9px]">Dọn dẹp (Xóa đơn này)</button>
+                    `}
                 </div>`;
             });
             document.getElementById('ad-ord-list').innerHTML = h || "Chưa có đơn";
@@ -216,7 +220,7 @@
                             <button onclick="deleteUser('${u.key}')" class="text-red-500 font-bold">×</button>
                         </div>
                     </div>
-                    <div class="flex justify-between text-[9px] opacity-60 italic">
+<div class="flex justify-between text-[9px] opacity-60 italic">
                         <span>SĐT: ${u.key}</span>
                         <span>Mật khẩu: <b class="text-green-400">${ud.pass || 'N/A'}</b></span>
                     </div>
@@ -227,7 +231,8 @@
             document.getElementById('ad-cus-list').innerHTML = hC || "Chưa có khách";
         });
     }
-function handleCall(id, kh, gia) {
+
+    function handleCall(id, kh, gia) {
         const session = JSON.parse(localStorage.getItem('klg_u'));
         const phi = Math.round(gia * 0.12);
         db.ref('users/'+session.p).once('value', s => {
@@ -246,10 +251,21 @@ function handleCall(id, kh, gia) {
             } else {
                 if(confirm(`Phí chiết khấu 12% là ${phi}K. Đồng ý trừ tiền để lấy đơn?`)) {
                     db.ref('users/'+session.p).update({ soDu: u.soDu - phi })
-                    .then(() => { window.location.href = "tel:"+kh; });
+                    .then(() => { 
+                        // Đánh dấu tài xế đang thực hiện đơn này bằng cách lưu vào đơn (tùy chọn)
+                        window.location.href = "tel:"+kh; 
+                    });
                 }
             }
         });
+    }
+
+    // TÍNH NĂNG MỚI: HOÀN THÀNH ĐƠN
+    function finishOrder(id) {
+        if(confirm("Xác nhận đã thả khách xong?")) {
+            db.ref('orders/'+id).update({ status: 'hoan_thanh' })
+            .then(() => alert("Tuyệt vời! Đơn đã được báo cáo hoàn thành."));
+        }
     }
 
     function loadTaixe(phone) {
@@ -260,11 +276,11 @@ function handleCall(id, kh, gia) {
                 document.getElementById('tx-ten').value = u.ten || "";
             }
         });
-
         db.ref('orders').on('value', s => {
             let h = "";
             s.forEach(o => {
                 const d = o.val();
+                // Chỉ hiện đơn Đã đẩy giá (da) và chưa hoàn thành
                 if(d.status === 'da') {
                     h += `<div class="bg-[#242745] p-4 rounded-xl border-l-4 border-green-500 shadow-xl mb-3">
                         <div class="flex justify-between items-center mb-1">
@@ -275,7 +291,11 @@ function handleCall(id, kh, gia) {
                         <p class="text-slate-300"><span class="text-green-500 font-bold">Đi:</span> ${d.tu}</p>
                         <p class="text-slate-300 mb-2"><span class="text-red-500 font-bold">Đến:</span> ${d.den}</p>
                         <p class="text-slate-500 text-[10px] bg-slate-900 p-2 rounded italic">Ghi chú: ${d.ghiChuAdmin || 'Không'}</p>
-                        <button onclick="handleCall('${o.key}', '${d.khach}', ${d.gia || 0})" class="block w-full bg-blue-600 text-center py-3 rounded-xl mt-3 font-black text-white shadow-lg uppercase italic active:scale-95 transition-transform">📞 Gọi khách</button>
+                        
+                        <div class="grid grid-cols-2 gap-2 mt-3">
+                            <button onclick="handleCall('${o.key}', '${d.khach}', ${d.gia || 0})" class="bg-blue-600 text-center py-3 rounded-xl font-black text-white shadow-lg uppercase italic text-[10px]">📞 Gọi khách</button>
+                            <button onclick="finishOrder('${o.key}')" class="bg-green-600 text-center py-3 rounded-xl font-black text-white shadow-lg uppercase italic text-[10px]">✅ Xong - Thả khách</button>
+                        </div>
                     </div>`;
                 }
             });
