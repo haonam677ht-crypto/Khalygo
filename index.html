@@ -220,7 +220,6 @@
             document.getElementById('ad-urgent-alerts').innerHTML = hAlerts;
             document.getElementById('ad-ord-list').innerHTML = h || "Chưa có đơn mới";
         });
-
         db.ref('users').on('value', s => {
             let hTx = "", hC = "";
             s.forEach(u => {
@@ -285,6 +284,7 @@
             const session = JSON.parse(localStorage.getItem('klg_u'));
             s.forEach(o => {
                 const d = o.val();
+                // SỬA TẠI ĐÂY: Chỉ hiển thị khi trạng thái là 'da' (đã đẩy giá)
                 if(d.status === 'da') {
                     h += `<div class="bg-[#242745] p-4 rounded-xl border-l-4 border-green-500 mb-3 shadow-lg">
                         <div class="flex justify-between mb-1"><span class="text-red-500 font-black italic">🚗 ${d.svc}</span><span class="text-yellow-400 font-black text-xl">${d.gia}K</span></div>
