@@ -54,25 +54,49 @@
         
         <div id="kh-booking" class="space-y-4">
             <div class="bg-[#242745] p-5 rounded-2xl border border-slate-700 space-y-4 shadow-2xl">
+                <!-- THÊM MỤC LÁI HỘ VÀO GRID -->
                 <div class="grid grid-cols-2 gap-2 font-black uppercase">
-                    <button onclick="setSvc('Xe ôm',this)" class="svc-btn bg-slate-800 p-3 rounded-xl border border-slate-600">🏍️ Xe ôm</button>
-                    <button onclick="setSvc('Xe bao',this); document.getElementById('xb-opt').classList.remove('hidden')" class="svc-btn bg-slate-800 p-3 rounded-xl border border-slate-600">🚗 Xe bao</button>
-                    <button onclick="setSvc('Tiện chuyến',this)" class="svc-btn bg-slate-800 p-3 rounded-xl border border-slate-600">🤝 Tiện chuyến</button>
-                    <button onclick="setSvc('1 chiều',this)" class="svc-btn bg-slate-800 p-3 rounded-xl border border-slate-600">➡️ 1 chiều</button>
+                    <button onclick="setSvc('Xe ôm',this); hideExtra()" class="svc-btn bg-slate-800 p-3 rounded-xl border border-slate-600">🏍️ Xe ôm</button>
+                    <button onclick="setSvc('Xe bao',this); showExtra('xb-opt')" class="svc-btn bg-slate-800 p-3 rounded-xl border border-slate-600">🚗 Xe bao</button>
+                    <button onclick="setSvc('Tiện chuyến',this); hideExtra()" class="svc-btn bg-slate-800 p-3 rounded-xl border border-slate-600">🤝 Tiện chuyến</button>
+                    <button onclick="setSvc('1 chiều',this); hideExtra()" class="svc-btn bg-slate-800 p-3 rounded-xl border border-slate-600">➡️ 1 chiều</button>
+                    <!-- NÚT LÁI HỘ MỚI -->
+                    <button onclick="setSvc('Lái hộ',this); showExtra('lh-opt')" class="svc-btn bg-slate-800 p-3 rounded-xl border border-slate-600 col-span-2 text-yellow-400 border-yellow-500/50">🧑‍✈️ DỊCH VỤ LÁI HỘ</button>
                 </div>
+
+                <!-- TÙY CHỌN XE BAO (CŨ) -->
                 <div id="xb-opt" class="hidden grid grid-cols-3 gap-2 py-2 border-t border-slate-700">
                     <button onclick="setSvc('Xe bao 4c',this)" class="sub-btn bg-slate-700 p-2 rounded text-[9px] font-bold">4 CHỖ</button>
                     <button onclick="setSvc('Xe bao 7c',this)" class="sub-btn bg-slate-700 p-2 rounded text-[9px] font-bold">7 CHỖ</button>
                     <button onclick="setSvc('Xe bao 16c',this)" class="sub-btn bg-slate-700 p-2 rounded text-[9px] font-bold">16 CHỖ</button>
                 </div>
-                <input id="final-svc" type="hidden">
-                <input id="tu" type="text" placeholder="Điểm đón" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white">
-                <input id="den" type="text" placeholder="Điểm đến" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white">
-                <div class="flex gap-2">
-                    <input id="ng" type="date" class="flex-1 bg-[#1a1c2e] p-4 rounded-xl text-white outline-none font-bold">
-                    <input id="gi" type="time" class="flex-1 bg-[#1a1c2e] p-4 rounded-xl border-slate-600 text-white font-bold">
+
+                <!-- TÙY CHỌN LÁI HỘ (MỚI) -->
+                <div id="lh-opt" class="hidden space-y-3 py-2 border-t border-yellow-500/30">
+                    <p class="text-yellow-500 font-bold text-center italic text-[10px]">Vui lòng chọn loại xe của bạn</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="setSvc('Lái hộ 4c',this)" class="sub-btn bg-slate-700 p-2 rounded text-[9px] font-bold italic">XE 4 CHỖ</button>
+                        <button onclick="setSvc('Lái hộ 7c',this)" class="sub-btn bg-slate-700 p-2 rounded text-[9px] font-bold italic">XE 7 CHỖ</button>
+                    </div>
+                    <input id="ten-xe" type="text" placeholder="Nhập tên xe (VD: Innova, Mazda 3...)" class="w-full bg-[#1a1c2e] p-3 rounded-xl border border-slate-600 text-white italic">
                 </div>
-                <input id="note" type="text" placeholder="Ghi chú thêm (Ví dụ: Mang theo đồ cồng kềnh...)" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white">
+
+                <input id="final-svc" type="hidden">
+                <input id="tu" type="text" placeholder="Điểm đón khách" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white">
+                <input id="den" type="text" placeholder="Điểm đến (nếu có)" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white">
+                
+                <div class="flex gap-2">
+                    <div class="flex-1">
+                        <label class="text-[9px] text-slate-400 ml-2">Ngày đón</label>
+                        <input id="ng" type="date" class="w-full bg-[#1a1c2e] p-4 rounded-xl text-white outline-none font-bold border border-slate-700 mt-1">
+                    </div>
+                    <div class="flex-1">
+                        <label class="text-[9px] text-slate-400 ml-2">Giờ đón</label>
+                        <input id="gi" type="time" class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-700 text-white font-bold mt-1">
+                    </div>
+                </div>
+
+                <input id="note" type="text" placeholder="Ghi chú cho tài xế & Admin..." class="w-full bg-[#1a1c2e] p-4 rounded-xl border border-slate-600 text-white">
                 
                 <button id="submit-btn" onclick="createOrder()" class="w-full bg-red-600 py-4 rounded-xl font-black text-base uppercase text-white shadow-xl italic">Gửi yêu cầu đặt xe</button>
                 <button id="cancel-edit-btn" onclick="cancelEdit()" class="w-full bg-slate-600 py-2 rounded-xl font-bold uppercase text-white hidden">Hủy chỉnh sửa</button>
@@ -85,7 +109,7 @@
             <div class="bg-[#242745] p-4 rounded-xl border border-slate-700 space-y-3 text-center">
                 <p class="text-yellow-500 font-bold">SĐT: <span id="display-phone"></span></p>
                 <input id="kh-name" type="text" placeholder="Họ và Tên của bạn" class="w-full bg-[#1a1c2e] p-3 rounded-lg border border-slate-600 text-white outline-none text-center">
-                <button onclick="updateProfile()" class="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-white shadow-lg">Lưu thông tin</button>
+                <button updateProfile()" class="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-white shadow-lg">Lưu thông tin</button>
             </div>
         </div>
     </div>
@@ -99,6 +123,16 @@
         messagingSenderId: "328254923276", appId: "1:328254923276:web:625f6be13a31b0a9264429"
     };
     firebase.initializeApp(firebaseConfig); const db = firebase.database();
+
+    // HÀM HIỂN THỊ TÙY CHỌN THÊM
+    function showExtra(id) {
+        hideExtra();
+        document.getElementById(id).classList.remove('hidden');
+    }
+    function hideExtra() {
+        document.getElementById('xb-opt').classList.add('hidden');
+        document.getElementById('lh-opt').classList.add('hidden');
+    }
 
     function showWelcome() {
         const msgs = [
@@ -115,7 +149,6 @@
         const p = document.getElementById('phone').value, mk = document.getElementById('pass').value;
         db.ref('users/' + p).once('value', s => {
             const u = s.val(); 
-            // CẬP NHẬT: Chặn nếu là tài xế
             if (u && u.pass === mk) {
                 if (u.role === 'taixe') return alert("Tài khoản này là TÀI XẾ. Vui lòng dùng App Tài Xế!");
                 if (u.role === 'khach') saveSession(p, 'khach');
@@ -128,7 +161,6 @@
     function handleRegister() {
         const p = document.getElementById('r-phone').value, mk = document.getElementById('r-pass').value;
         if(!p || !mk) return alert("Vui lòng nhập đầy đủ!");
-        // CẬP NHẬT: Kiểm tra xem SĐT này đã là Tài xế chưa trước khi cho đăng ký khách
         db.ref('users/' + p).once('value', s => {
             if (s.exists() && s.val().role === 'taixe') {
                 alert("Số điện thoại này đã đăng ký TÀI XẾ, không thể đăng ký Khách!");
@@ -151,13 +183,14 @@
         const u = JSON.parse(localStorage.getItem('klg_u'));
         const s = document.getElementById('final-svc').value;
         const t = document.getElementById('tu').value;
-        const d = document.getElementById('den').value;
+        const d = document.getElementById('den').value || "Chưa rõ";
         const dt = document.getElementById('ng').value; 
         const tm = document.getElementById('gi').value; 
         const note = document.getElementById('note').value;
+        const tenXe = document.getElementById('ten-xe').value; // MỚI
         const editKey = document.getElementById('editing-key').value;
         
-        if(!s || !t || !dt || !tm) return alert("Vui lòng nhập đủ Điểm đón, Ngày và Giờ!");
+        if(!s || !t || !dt || !tm) return alert("Vui lòng nhập đủ Dịch vụ, Điểm đón, Ngày và Giờ!");
         
         const orderData = {
             khach: u.p, 
@@ -167,11 +200,11 @@
             date: dt, 
             time: tm, 
             ghiChu: note,
+            tenXeKhach: tenXe || "", // GỬI THÊM TÊN XE NẾU LÀ LÁI HỘ
             status: 'cho'
         };
 
         if(editKey) {
-            // CẬP NHẬT: Xử lý Sửa đơn
             db.ref('orders/' + editKey).update(orderData).then(() => {
                 alert("Đã cập nhật đơn hàng!");
                 cancelEdit();
@@ -184,13 +217,14 @@
         }
     }
 
-    function editOrder(key, svc, tu, den, date, time, note) {
+    function editOrder(key, svc, tu, den, date, time, note, tenXe) {
         document.getElementById('editing-key').value = key;
         document.getElementById('tu').value = tu;
         document.getElementById('den').value = den;
         document.getElementById('ng').value = date;
         document.getElementById('gi').value = time;
         document.getElementById('note').value = note || "";
+        document.getElementById('ten-xe').value = tenXe || "";
         document.getElementById('final-svc').value = svc;
         document.getElementById('submit-btn').innerText = "CẬP NHẬT ĐƠN HÀNG";
         document.getElementById('cancel-edit-btn').classList.remove('hidden');
@@ -208,7 +242,9 @@
         document.getElementById('tu').value = "";
         document.getElementById('den').value = "";
         document.getElementById('note').value = "";
+        document.getElementById('ten-xe').value = "";
         document.querySelectorAll('.svc-btn, .sub-btn').forEach(el => el.classList.remove('selected'));
+        hideExtra();
     }
 
     function loadKhach() {
@@ -229,21 +265,25 @@
 
             list.forEach(d => {
                 let driverSection = "";
+                // NẾU TÀI XẾ ĐÃ NHẬN ĐƠN -> HIỆN SĐT
                 if (d.idTaiXe && (d.status === 'nhan' || d.status === 'dang_chay')) {
                     driverSection = `
-                    <div class="mt-3 p-3 bg-slate-900 rounded-xl border border-green-500/50 flex justify-between items-center">
+                    <div class="mt-3 p-3 bg-slate-900 rounded-xl border border-green-500/50 flex justify-between items-center animate-pulse">
                         <div>
-                            <p class="text-green-400 font-bold text-[10px]">🚖 TÀI XẾ ĐANG ĐẾN</p>
+                            <p class="text-green-400 font-bold text-[10px]">🚖 TÀI XẾ ĐÃ NHẬN ĐƠN</p>
                             <p class="text-white font-black text-sm">SĐT: ${d.idTaiXe}</p>
                         </div>
-                        <a href="tel:${d.idTaiXe}" class="bg-green-600 p-3 rounded-full shadow-lg active:scale-90 transition-transform">
+                        <a href="tel:${d.idTaiXe}" class="bg-green-600 p-3 rounded-full shadow-lg">
                             <span class="text-base">📞</span>
                         </a>
                     </div>`;
                 }
 
                 h += `<div class="bg-[#242745] p-4 rounded-xl border border-slate-700 mb-2 relative shadow-lg">
-                    <p class="text-red-500 font-bold uppercase text-[9px] mb-1">🚗 ${d.svc}</p>
+                    <div class="flex justify-between">
+                        <p class="text-red-500 font-bold uppercase text-[9px] mb-1">🚗 ${d.svc}</p>
+                        ${d.tenXeKhach ? `<span class="text-yellow-400 text-[8px] font-bold italic">Xe: ${d.tenXeKhach}</span>` : ''}
+                    </div>
                     <p class="text-white font-bold italic text-[10px]">📅 ${d.date} | ⏰ ${d.time}</p>
                     <p class="text-slate-300">📍 ${d.tu} → ${d.den}</p>
                     ${d.ghiChu ? `<p class="text-blue-300 text-[9px] italic">📝 ${d.ghiChu}</p>` : ''}
@@ -253,7 +293,7 @@
                     ${driverSection}
                     ${(!d.idTaiXe && d.status !== 'khach_huy') ? `
                         <div class="flex gap-2 mt-2">
-                            <button onclick="editOrder('${d.key}', '${d.svc}', '${d.tu}', '${d.den}', '${d.date}', '${d.time}', '${d.ghiChu || ''}')" class="flex-1 bg-slate-700 py-1 rounded text-white font-bold text-[9px]">SỬA</button>
+                            <button onclick="editOrder('${d.key}', '${d.svc}', '${d.tu}', '${d.den}', '${d.date}', '${d.time}', '${d.ghiChu || ''}', '${d.tenXeKhach || ''}')" class="flex-1 bg-slate-700 py-1 rounded text-white font-bold text-[9px]">SỬA</button>
                             <button onclick="if(confirm('Xác nhận hủy đơn này?')) db.ref('orders/${d.key}').remove()" class="flex-1 bg-red-900/50 py-1 rounded text-red-400 font-bold text-[9px]">HỦY ĐƠN</button>
                         </div>` : ''}
                 </div>`; 
