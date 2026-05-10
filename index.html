@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KhaLy GO - Admin & Driver</title>
+    <title>KhaLy GO - Admin & Driver (Phân Quyền)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -154,6 +154,7 @@
     };
     firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
+    // HÀM HELPER (GIỮ NGUYÊN)
     function showAlert(msg) { document.getElementById('alert-msg').innerText = msg; document.getElementById('custom-alert-modal').classList.add('flex'); }
     function closeAlert() { document.getElementById('custom-alert-modal').classList.remove('flex'); }
     function showConfirmModal(msg, onConfirm) {
@@ -163,33 +164,37 @@
     }
     function closeConfirmModal() { document.getElementById('custom-confirm-modal').classList.remove('flex'); }
 
+    // LOGIC ĐĂNG NHẬP (ĐÃ CHẶN KHÁCH VÀO APP TÀI XẾ)
     function handleLogin() {
         const p = document.getElementById('phone').value, mk = document.getElementById('pass').value;
         if (p === "0789454369" && mk === "19861990LyVinh@") return saveSession(p, 'admin');
         db.ref('users/' + p).once('value', s => {
             const u = s.val(); 
             if (u && u.pass === mk) {
-                if(u.role === 'khach') return alert("Tài khoản KHÁCH không thể vào App này!");
+                if(u.role === 'khach') return alert("LỖI: Tài khoản của bạn là KHÁCH. Vui lòng dùng App dành cho khách!");
                 if(u.status === 'pending') return alert("Tài khoản đang chờ duyệt!");
                 saveSession(p, u.role);
             } else alert("Sai số điện thoại hoặc mật khẩu!");
         });
     }
 
+    // LOGIC ĐĂNG KÝ (CHỈNH SỬA: CHẶN 1 SỐ 2 VAI TRÒ)
     function handleRegister() {
         const p = document.getElementById('reg-phone').value, mk = document.getElementById('reg-pass').value;
         if(!p || !mk) return alert("Nhập đủ thông tin!");
         db.ref('users/' + p).once('value', s => {
             if(s.exists()) {
                 const userData = s.val();
+                if(userData.role === 'khach') return alert("SĐT này đã là KHÁCH HÀNG trên hệ thống. Không thể đăng ký làm Tài xế!");
                 if(userData.role === 'taixe') return alert("SĐT này đã đăng ký Tài xế rồi!");
-                else return alert("SĐT này đã có tài khoản Khách. Không thể làm Tài xế!");
+                return alert("SĐT đã tồn tại!");
             }
             db.ref('users/' + p).set({ pass: mk, role: 'taixe', status: 'pending', soDu: 0 })
-            .then(() => { alert("Đăng ký thành công! Đợi Sếp duyệt."); showPage('login-page'); });
+            .then(() => { alert("Gửi yêu cầu thành công! Đợi sếp duyệt."); showPage('login-page'); });
         });
     }
 
+    // CÁC HÀM ADMIN (GIỮ NGUYÊN LOGIC ĐỐI SOÁT VÀ HOÀN TIỀN)
     function loadAdmin() {
         db.ref('users').orderByChild('status').equalTo('pending').on('value', s => {
             let h = "", count = 0;
@@ -205,21 +210,16 @@
                     hAlerts += `<div class="bg-red-600 p-3 rounded-xl border-2 border-white shadow-lg animate-pulse mb-2">
                         <p class="font-black text-white uppercase italic">⚠️ KHÁCH HỦY - CẦN HOÀN PHÍ!</p>
                         <p class="text-white">TX: ${d.idTaiXe} | Phí: ${Math.round(d.gia*0.12)}K</p>
-                        <div class="flex gap-2 mt-2">
-                            <a href="tel:${d.idTaiXe}" class="flex-1 bg-yellow-500 text-black py-2 rounded font-black text-center uppercase italic text-[9px]">Gọi Tài Xế</a>
-                            <a href="tel:${d.khach}" class="flex-1 bg-blue-500 text-white py-2 rounded font-black text-center uppercase italic text-[9px]">Gọi Khách</a>
-                        </div>
                         <button onclick="confirmRefund('${o.key}', '${d.idTaiXe}', ${d.gia})" class="w-full bg-white text-red-600 py-2 rounded font-black mt-2 uppercase italic shadow-md">Bấm để hoàn tiền ví</button>
                     </div>`;
                 } else if(d.status === 'hoan_thanh') {
-                    // PHẦN CẬP NHẬT: Thêm thông tin Ngày, Giờ và Số khách để đối soát
                     hAlerts += `<div class="bg-green-600 p-3 rounded-xl border border-white mb-2 shadow-md">
-                        <p class="font-black text-white uppercase italic">✅ ĐƠN ĐÃ XONG</p>
+                        <p class="font-black text-white uppercase italic">✅ ĐƠN ĐÃ XONG (ĐỐI SOÁT)</p>
                         <div class="text-white text-[10px] mt-1 space-y-1">
-                            <p>📅 <b>Thời gian:</b> ${d.date} | ${d.time}</p>
-                            <p>👤 <b>Khách:</b> ${d.khach}</p>
-                            <p>👷 <b>Tài xế:</b> ${d.idTaiXe}</p>
-                            <p>📍 <b>Lộ trình:</b> ${d.tu} - ${d.den}</p>
+                            <p>📅 <b>Ngày:</b> ${d.date} | ⏰ ${d.time}</p>
+                            <p>👤 <b>SĐT Khách:</b> ${d.khach}</p>
+                            <p>👷 <b>SĐT Tài xế:</b> ${d.idTaiXe}</p>
+                            <p>📍 <b>Điểm đi/đến:</b> ${d.tu} - ${d.den}</p>
                         </div>
                         <button onclick="db.ref('orders/${o.key}').remove()" class="w-full bg-slate-800 text-white py-1 rounded font-bold mt-2 uppercase text-[9px]">Dọn dẹp & Xóa đơn</button>
                     </div>`;
@@ -267,13 +267,14 @@
         });
     }
 
+    // CÁC HÀM XỬ LÝ VÍ TIỀN (GIỮ NGUYÊN)
     function confirmRefund(orderId, phone, gia) {
         const phi = Math.round(gia * 0.12);
         db.ref('users/'+phone).once('value', s => {
             const currentBal = s.val().soDu || 0;
             db.ref('users/'+phone).update({ soDu: currentBal + phi });
             db.ref('orders/'+orderId).remove();
-            alert("Đã hoàn lại " + phi + "K!");
+            alert("Đã hoàn lại " + phi + "K phí cho tài xế!");
         });
     }
 
@@ -292,6 +293,7 @@
 
     function finishOrder(id) { if(confirm("Xác nhận đã thả khách xong?")) db.ref('orders/'+id).update({ status: 'hoan_thanh' }).then(() => alert("Báo cáo thành công!")); }
 
+    // CÁC HÀM TÀI XẾ VÀ HỒ SƠ (GIỮ NGUYÊN)
     function loadTaixe(phone) {
         db.ref('users/'+phone).on('value', s => { if(s.val()) document.getElementById('tx-balance').innerText = (s.val().soDu || 0) + "K"; });
         db.ref('orders').on('value', s => {
@@ -324,17 +326,17 @@
         });
     }
 
-    function saveHoSo() { const u = JSON.parse(localStorage.getItem('klg_u')); db.ref('users/'+u.p).update({ ten: document.getElementById('tx-ten').value, bl: document.getElementById('tx-bl').value, ax: document.getElementById('tx-ax').value, cv: document.getElementById('tx-cv').value }).then(() => alert("Đã lưu!")); }
+    function saveHoSo() { const u = JSON.parse(localStorage.getItem('klg_u')); db.ref('users/'+u.p).update({ ten: document.getElementById('tx-ten').value, bl: document.getElementById('tx-bl').value, ax: document.getElementById('tx-ax').value, cv: document.getElementById('tx-cv').value }).then(() => alert("Đã lưu hồ sơ!")); }
     function adminCreateOrder() {
         const p = document.getElementById('ad-p').value, s = document.getElementById('ad-svc').value, tu = document.getElementById('ad-tu-new').value, den = document.getElementById('ad-den-new').value, dt = document.getElementById('ad-date').value, tm = document.getElementById('ad-time').value;
         if(!p || !s || !tu || !den || !dt || !tm) return alert("Nhập đủ thông tin!");
         db.ref('orders').push({ khach: p, svc: s, tu: tu, den: den, date: dt, time: tm, ghiChuAdmin: document.getElementById('ad-note-new').value, status: 'cho' });
-        alert("Đã tạo!");
+        alert("Đã tạo đơn thành công!");
     }
     function pushPrice(id) { const p = document.getElementById('price-'+id).value, n = document.getElementById('note-'+id).value; if(!p) return alert("Nhập giá!"); db.ref('orders/'+id).update({ gia: p, ghiChuAdmin: n, status: 'da' }).then(()=>alert("Đã đẩy giá!")); }
-    function napTienTX() { const p = prompt("SĐT Tài xế:"), v = prompt("Số tiền nạp (K):"); if(p && v) db.ref('users/'+p).once('value', s => { if(s.exists()) db.ref('users/'+p).update({ soDu: (s.val().soDu || 0) + parseInt(v) }).then(()=>alert("Đã nạp!")); }); }
-    function viewInfo(phone) { db.ref('users/'+phone).once('value', s => { alert(`HỒ SƠ: ${phone}\nTên: ${s.val().ten || 'Trống'}\nMK: ${s.val().pass}`); }); }
-    function deleteUser(p) { if(confirm("Xóa tài khoản này?")) db.ref('users/'+p).remove(); }
+    function napTienTX() { const p = prompt("SĐT Tài xế:"), v = prompt("Số tiền nạp (K):"); if(p && v) db.ref('users/'+p).once('value', s => { if(s.exists()) db.ref('users/'+p).update({ soDu: (s.val().soDu || 0) + parseInt(v) }).then(()=>alert("Đã nạp tiền thành công!")); }); }
+    function viewInfo(phone) { db.ref('users/'+phone).once('value', s => { alert(`HỒ SƠ: ${phone}\nTên: ${s.val().ten || 'Chưa cập nhật'}\nMK: ${s.val().pass}\nBL: ${s.val().bl || 'N/A'}`); }); }
+    function deleteUser(p) { if(confirm("Xác nhận xóa vĩnh viễn tài khoản này?")) db.ref('users/'+p).remove(); }
     function toggleDiv(id) { document.getElementById(id).classList.toggle('hidden'); }
     function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
     function saveSession(p, r) { localStorage.setItem('klg_u', JSON.stringify({p, r})); location.reload(); }
@@ -348,3 +350,4 @@
 </script>
 </body>
 </html>
+  
