@@ -54,24 +54,20 @@
         
         <div id="kh-booking" class="space-y-4">
             <div class="bg-[#242745] p-5 rounded-2xl border border-slate-700 space-y-4 shadow-2xl">
-                <!-- THÊM MỤC LÁI HỘ VÀO GRID -->
                 <div class="grid grid-cols-2 gap-2 font-black uppercase">
                     <button onclick="setSvc('Xe ôm',this); hideExtra()" class="svc-btn bg-slate-800 p-3 rounded-xl border border-slate-600">🏍️ Xe ôm</button>
                     <button onclick="setSvc('Xe bao',this); showExtra('xb-opt')" class="svc-btn bg-slate-800 p-3 rounded-xl border border-slate-600">🚗 Xe bao</button>
                     <button onclick="setSvc('Tiện chuyến',this); hideExtra()" class="svc-btn bg-slate-800 p-3 rounded-xl border border-slate-600">🤝 Tiện chuyến</button>
                     <button onclick="setSvc('1 chiều',this); hideExtra()" class="svc-btn bg-slate-800 p-3 rounded-xl border border-slate-600">➡️ 1 chiều</button>
-                    <!-- NÚT LÁI HỘ MỚI -->
                     <button onclick="setSvc('Lái hộ',this); showExtra('lh-opt')" class="svc-btn bg-slate-800 p-3 rounded-xl border border-slate-600 col-span-2 text-yellow-400 border-yellow-500/50">🧑‍✈️ DỊCH VỤ LÁI HỘ</button>
                 </div>
 
-                <!-- TÙY CHỌN XE BAO (CŨ) -->
                 <div id="xb-opt" class="hidden grid grid-cols-3 gap-2 py-2 border-t border-slate-700">
                     <button onclick="setSvc('Xe bao 4c',this)" class="sub-btn bg-slate-700 p-2 rounded text-[9px] font-bold">4 CHỖ</button>
                     <button onclick="setSvc('Xe bao 7c',this)" class="sub-btn bg-slate-700 p-2 rounded text-[9px] font-bold">7 CHỖ</button>
                     <button onclick="setSvc('Xe bao 16c',this)" class="sub-btn bg-slate-700 p-2 rounded text-[9px] font-bold">16 CHỖ</button>
                 </div>
 
-                <!-- TÙY CHỌN LÁI HỘ (MỚI) -->
                 <div id="lh-opt" class="hidden space-y-3 py-2 border-t border-yellow-500/30">
                     <p class="text-yellow-500 font-bold text-center italic text-[10px]">Vui lòng chọn loại xe của bạn</p>
                     <div class="grid grid-cols-2 gap-2">
@@ -109,7 +105,7 @@
             <div class="bg-[#242745] p-4 rounded-xl border border-slate-700 space-y-3 text-center">
                 <p class="text-yellow-500 font-bold">SĐT: <span id="display-phone"></span></p>
                 <input id="kh-name" type="text" placeholder="Họ và Tên của bạn" class="w-full bg-[#1a1c2e] p-3 rounded-lg border border-slate-600 text-white outline-none text-center">
-                <button updateProfile()" class="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-white shadow-lg">Lưu thông tin</button>
+                <button onclick="updateProfile()" class="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-white shadow-lg">Lưu thông tin</button>
             </div>
         </div>
     </div>
@@ -124,24 +120,38 @@
     };
     firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
-    // HÀM HIỂN THỊ TÙY CHỌN THÊM
-    function showExtra(id) {
-        hideExtra();
-        document.getElementById(id).classList.remove('hidden');
-    }
-    function hideExtra() {
-        document.getElementById('xb-opt').classList.add('hidden');
-        document.getElementById('lh-opt').classList.add('hidden');
+    // HÀM GPS TỐI ƯU: KẾT HỢP VỆ TINH VÀ DỰ PHÒNG QUA MẠNG
+    async function getSafeLocation() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) return reject("Không hỗ trợ GPS");
+            
+            navigator.geolocation.getCurrentPosition(
+                (pos) => resolve({lat: pos.coords.latitude, lng: pos.coords.longitude}),
+                async (err) => {
+                    // DỰ PHÒNG: Nếu GPS vệ tinh bị chặn hoặc lỗi, lấy tọa độ xấp xỉ qua mạng
+                    try {
+                        const response = await fetch('https://ipapi.co/json/');
+                        const data = await response.json();
+                        if (data.latitude) resolve({lat: data.latitude, lng: data.longitude});
+                        else reject("Lỗi định vị");
+                    } catch(e) {
+                        reject("Lỗi định vị");
+                    }
+                },
+                { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
+            );
+        });
     }
 
+    function requestGPS() {
+        getSafeLocation().then(p => console.log("GPS OK")).catch(e => console.log(e));
+    }
+
+    function showExtra(id) { hideExtra(); document.getElementById(id).classList.remove('hidden'); }
+    function hideExtra() { document.getElementById('xb-opt').classList.add('hidden'); document.getElementById('lh-opt').classList.add('hidden'); }
+
     function showWelcome() {
-        const msgs = [
-            "Chào ngày mới tốt lành nha sếp! ✨",
-            "Hôm nay mình đi đâu đây bạn ơi? 🚗",
-            "Chúc bạn một chuyến đi vui vẻ & an toàn! ❤️",
-            "Cảm ơn bạn đã tin tưởng KhaLy GO! 🤝",
-            "Ngày mới tràn đầy năng lượng nhé! 🌈"
-        ];
+        const msgs = ["Chào ngày mới tốt lành nha sếp! ✨", "Hôm nay mình đi đâu đây bạn ơi? 🚗", "Chúc bạn một chuyến đi vui vẻ & an toàn! ❤️", "Cảm ơn bạn đã tin tưởng KhaLy GO! 🤝", "Ngày mới tràn đầy năng lượng nhé! 🌈"];
         document.getElementById('welcome-msg').innerText = msgs[Math.floor(Math.random() * msgs.length)];
     }
 
@@ -152,9 +162,7 @@
             if (u && u.pass === mk) {
                 if (u.role === 'taixe') return alert("Tài khoản này là TÀI XẾ. Vui lòng dùng App Tài Xế!");
                 if (u.role === 'khach') saveSession(p, 'khach');
-            } else {
-                alert("Số điện thoại hoặc mật khẩu không đúng!");
-            }
+            } else { alert("Số điện thoại hoặc mật khẩu không đúng!"); }
         });
     }
 
@@ -166,8 +174,7 @@
                 alert("Số điện thoại này đã đăng ký TÀI XẾ, không thể đăng ký Khách!");
             } else {
                 db.ref('users/'+p).set({pass:mk, role:'khach', soDu:0}).then(() => { 
-                    alert("Đăng ký thành công!"); 
-                    saveSession(p, 'khach'); 
+                    alert("Đăng ký thành công!"); saveSession(p, 'khach'); 
                 });
             }
         });
@@ -179,7 +186,8 @@
         if(b) b.classList.add('selected');
     }
 
-    function createOrder() {
+    // CHỈNH SỬA HÀM TẠO ĐƠN ĐỂ SỬ DỤNG GPS TỐI ƯU
+    async function createOrder() {
         const u = JSON.parse(localStorage.getItem('klg_u'));
         const s = document.getElementById('final-svc').value;
         const t = document.getElementById('tu').value;
@@ -187,33 +195,35 @@
         const dt = document.getElementById('ng').value; 
         const tm = document.getElementById('gi').value; 
         const note = document.getElementById('note').value;
-        const tenXe = document.getElementById('ten-xe').value; // MỚI
+        const tenXe = document.getElementById('ten-xe').value;
         const editKey = document.getElementById('editing-key').value;
         
         if(!s || !t || !dt || !tm) return alert("Vui lòng nhập đủ Dịch vụ, Điểm đón, Ngày và Giờ!");
-        
-        const orderData = {
-            khach: u.p, 
-            svc: s, 
-            tu: t, 
-            den: d, 
-            date: dt, 
-            time: tm, 
-            ghiChu: note,
-            tenXeKhach: tenXe || "", // GỬI THÊM TÊN XE NẾU LÀ LÁI HỘ
-            status: 'cho'
-        };
 
-        if(editKey) {
-            db.ref('orders/' + editKey).update(orderData).then(() => {
-                alert("Đã cập nhật đơn hàng!");
-                cancelEdit();
-            });
-        } else {
-            db.ref('orders').push(orderData).then(() => {
-                alert("Đã gửi đơn! Vui lòng đợi Admin báo giá.");
-                resetForm();
-            });
+        const btn = document.getElementById('submit-btn');
+        const originalText = btn.innerText;
+        btn.innerText = "ĐANG XÁC ĐỊNH VỊ TRÍ...";
+        btn.disabled = true;
+
+        try {
+            const pos = await getSafeLocation();
+            btn.innerText = originalText;
+            btn.disabled = false;
+            
+            const orderData = {
+                khach: u.p, svc: s, tu: t, den: d, date: dt, time: tm, ghiChu: note,
+                tenXeKhach: tenXe || "", lat: pos.lat, lng: pos.lng, status: 'cho'
+            };
+
+            if(editKey) {
+                db.ref('orders/' + editKey).update(orderData).then(() => { alert("Đã cập nhật đơn hàng!"); cancelEdit(); });
+            } else {
+                db.ref('orders').push(orderData).then(() => { alert("Đã gửi đơn! Vui lòng đợi Admin báo giá."); resetForm(); });
+            }
+        } catch (err) {
+            btn.innerText = originalText;
+            btn.disabled = false;
+            alert("LỖI: Không lấy được vị trí GPS. Hãy kiểm tra lại kết nối mạng hoặc cấp quyền vị trí cho trình duyệt!");
         }
     }
 
@@ -232,17 +242,14 @@
     }
 
     function cancelEdit() {
-        document.getElementById('editing-key').value = "";
-        resetForm();
+        document.getElementById('editing-key').value = ""; resetForm();
         document.getElementById('submit-btn').innerText = "Gửi yêu cầu đặt xe";
         document.getElementById('cancel-edit-btn').classList.add('hidden');
     }
 
     function resetForm() {
-        document.getElementById('tu').value = "";
-        document.getElementById('den').value = "";
-        document.getElementById('note').value = "";
-        document.getElementById('ten-xe').value = "";
+        document.getElementById('tu').value = ""; document.getElementById('den').value = "";
+        document.getElementById('note').value = ""; document.getElementById('ten-xe').value = "";
         document.querySelectorAll('.svc-btn, .sub-btn').forEach(el => el.classList.remove('selected'));
         hideExtra();
     }
@@ -252,51 +259,22 @@
         if(!u) return;
         document.getElementById('display-phone').innerText = u.p;
         showWelcome();
+        requestGPS();
         
         db.ref('orders').on('value', s => {
-            let h = ""; 
-            let list = [];
+            let h = ""; let list = [];
             s.forEach(o => { 
                 const d = o.val();
-                if (d.khach === u.p && d.status !== 'hoan_thanh') {
-                    list.unshift({key: o.key, ...d});
-                }
+                if (d.khach === u.p && d.status !== 'hoan_thanh') list.unshift({key: o.key, ...d});
             });
 
             list.forEach(d => {
                 let driverSection = "";
-                // NẾU TÀI XẾ ĐÃ NHẬN ĐƠN -> HIỆN SĐT
                 if (d.idTaiXe && (d.status === 'nhan' || d.status === 'dang_chay')) {
-                    driverSection = `
-                    <div class="mt-3 p-3 bg-slate-900 rounded-xl border border-green-500/50 flex justify-between items-center animate-pulse">
-                        <div>
-                            <p class="text-green-400 font-bold text-[10px]">🚖 TÀI XẾ ĐÃ NHẬN ĐƠN</p>
-                            <p class="text-white font-black text-sm">SĐT: ${d.idTaiXe}</p>
-                        </div>
-                        <a href="tel:${d.idTaiXe}" class="bg-green-600 p-3 rounded-full shadow-lg">
-                            <span class="text-base">📞</span>
-                        </a>
-                    </div>`;
+                    driverSection = `<div class="mt-3 p-3 bg-slate-900 rounded-xl border border-green-500/50 flex justify-between items-center animate-pulse"><div><p class="text-green-400 font-bold text-[10px]">🚖 TÀI XẾ ĐÃ NHẬN ĐƠN</p><p class="text-white font-black text-sm">SĐT: ${d.idTaiXe}</p></div><a href="tel:${d.idTaiXe}" class="bg-green-600 p-3 rounded-full shadow-lg"><span class="text-base">📞</span></a></div>`;
                 }
 
-                h += `<div class="bg-[#242745] p-4 rounded-xl border border-slate-700 mb-2 relative shadow-lg">
-                    <div class="flex justify-between">
-                        <p class="text-red-500 font-bold uppercase text-[9px] mb-1">🚗 ${d.svc}</p>
-                        ${d.tenXeKhach ? `<span class="text-yellow-400 text-[8px] font-bold italic">Xe: ${d.tenXeKhach}</span>` : ''}
-                    </div>
-                    <p class="text-white font-bold italic text-[10px]">📅 ${d.date} | ⏰ ${d.time}</p>
-                    <p class="text-slate-300">📍 ${d.tu} → ${d.den}</p>
-                    ${d.ghiChu ? `<p class="text-blue-300 text-[9px] italic">📝 ${d.ghiChu}</p>` : ''}
-                    <p class="text-yellow-500 font-black mt-1 text-[11px] italic">
-                        ${d.status === 'cho' ? '⌛ Đang đợi báo giá...' : (d.status === 'da' ? '💰 GIÁ: ' + d.gia + 'K' : (d.status === 'khach_huy' ? '❌ Bạn đã hủy đơn' : '✅ Tài xế đã nhận đơn'))}
-                    </p>
-                    ${driverSection}
-                    ${(!d.idTaiXe && d.status !== 'khach_huy') ? `
-                        <div class="flex gap-2 mt-2">
-                            <button onclick="editOrder('${d.key}', '${d.svc}', '${d.tu}', '${d.den}', '${d.date}', '${d.time}', '${d.ghiChu || ''}', '${d.tenXeKhach || ''}')" class="flex-1 bg-slate-700 py-1 rounded text-white font-bold text-[9px]">SỬA</button>
-                            <button onclick="if(confirm('Xác nhận hủy đơn này?')) db.ref('orders/${d.key}').remove()" class="flex-1 bg-red-900/50 py-1 rounded text-red-400 font-bold text-[9px]">HỦY ĐƠN</button>
-                        </div>` : ''}
-                </div>`; 
+                h += `<div class="bg-[#242745] p-4 rounded-xl border border-slate-700 mb-2 relative shadow-lg"><div class="flex justify-between"><p class="text-red-500 font-bold uppercase text-[9px] mb-1">🚗 ${d.svc}</p>${d.tenXeKhach ? `<span class="text-yellow-400 text-[8px] font-bold italic">Xe: ${d.tenXeKhach}</span>` : ''}</div><p class="text-white font-bold italic text-[10px]">📅 ${d.date} | ⏰ ${d.time}</p><p class="text-slate-300">📍 ${d.tu} → ${d.den}</p>${d.ghiChu ? `<p class="text-blue-300 text-[9px] italic">📝 ${d.ghiChu}</p>` : ''}<p class="text-yellow-500 font-black mt-1 text-[11px] italic">${d.status === 'cho' ? '⌛ Đang đợi báo giá...' : (d.status === 'da' ? '💰 GIÁ: ' + d.gia + 'K' : (d.status === 'khach_huy' ? '❌ Bạn đã hủy đơn' : '✅ Tài xế đã nhận đơn'))}</p>${driverSection}${(!d.idTaiXe && d.status !== 'khach_huy') ? `<div class="flex gap-2 mt-2"><button onclick="editOrder('${d.key}', '${d.svc}', '${d.tu}', '${d.den}', '${d.date}', '${d.time}', '${d.ghiChu || ''}', '${d.tenXeKhach || ''}')" class="flex-1 bg-slate-700 py-1 rounded text-white font-bold text-[9px]">SỬA</button><button onclick="if(confirm('Xác nhận hủy đơn này?')) db.ref('orders/${d.key}').remove()" class="flex-1 bg-red-900/50 py-1 rounded text-red-400 font-bold text-[9px]">HỦY ĐƠN</button></div>` : ''}</div>`; 
             });
             document.getElementById('kh-list').innerHTML = h || "<p class='text-center opacity-50 py-10 italic'>Bạn chưa có đơn hàng nào.</p>";
         });
@@ -317,10 +295,7 @@
 
     function saveSession(p, r) { localStorage.setItem('klg_u', JSON.stringify({p, r})); location.reload(); }
     function logout() { localStorage.removeItem('klg_u'); location.reload(); }
-    function toggleAuth(t) { 
-        document.getElementById('login-form').classList.toggle('hidden', t==='reg'); 
-        document.getElementById('reg-form').classList.toggle('hidden', t==='login'); 
-    }
+    function toggleAuth(t) { document.getElementById('login-form').classList.toggle('hidden', t==='reg'); document.getElementById('reg-form').classList.toggle('hidden', t==='login'); }
 
     window.onload = () => { 
         const u = localStorage.getItem('klg_u'); 
@@ -336,3 +311,4 @@
 </script>
 </body>
 </html>
+
